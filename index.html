@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8">
@@ -301,25 +301,34 @@
 
           <!-- Yearly & Media Type Summary Matrix Table (กำหนดความแตกต่างแบบแยกปี) -->
           <div class="mt-5 pt-4 border-t border-slate-800/80">
-            <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
               <div>
                 <span class="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
-                  <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                  <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                   ตารางสรุปสถิติจำนวนป้ายแยกรายปี & Media Type (Yearly Summary Matrix)
                 </span>
-                <p class="text-[11px] text-slate-400">สรุปความแตกต่างแยกตามรอบปี (Before 2024, 2024, 2025, 2026) พร้อมสัดส่วนประเภทสื่อและมูลค่าผลกระทบ</p>
+                <p class="text-[11px] text-slate-400">สรุปความแตกต่างแยกตามรอบปี (Before 2024, 2024, 2025, 2026) พร้อมสัดส่วนประเภทสื่อและมูลค่าผลกระทบ (คลิกที่ตัวเลขในตารางเพื่อเจาะลึกรายการ)</p>
               </div>
-              <span class="text-[10px] bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-2.5 py-1 rounded-full font-medium">กำหนดความแตกต่างแบบแยกปี</span>
+              <div class="flex flex-wrap items-center gap-2">
+                <button type="button" onclick="openMatrixFullViewModal()" class="px-3 py-1.5 rounded-lg bg-indigo-600/90 hover:bg-indigo-500 text-white text-xs font-medium flex items-center gap-1.5 transition-all shadow-sm shadow-indigo-600/30" title="ขยายดูตารางภาพรวมทั้งหมดแบบเต็มจอ พร้อมเจาะลึกข้อมูล">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+                  ขยายเต็มจอ (Full View)
+                </button>
+                <button type="button" onclick="openMatrixPopupWindow()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-300 border border-sky-500/30 text-xs font-medium flex items-center gap-1.5 transition-all" title="เด้งออกเป็นหน้าต่างแยก (Pop-up Window) สำหรับวางอีกหน้าจอ">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                  Pop-up จอแยก
+                </button>
+              </div>
             </div>
-            <div class="overflow-x-auto max-h-56 overflow-y-auto rounded-xl border border-slate-800">
+            <div class="overflow-x-auto rounded-xl border border-slate-800 shadow-inner">
               <table class="w-full text-left text-xs text-slate-300">
-                <thead id="summaryMatrixHead" class="bg-slate-950 text-slate-400 sticky top-0 z-10 border-b border-slate-800">
+                <thead id="summaryMatrixHead" class="bg-slate-950 text-slate-400 border-b border-slate-800">
                   <!-- Dynamic headers generated in JS -->
                 </thead>
                 <tbody id="summaryMatrixBody" class="divide-y divide-slate-800/60 bg-slate-900/60 font-normal">
                   <!-- Dynamic rows per year generated in JS -->
                 </tbody>
-                <tfoot id="summaryMatrixFoot" class="bg-slate-950 font-semibold text-white border-t border-slate-700 sticky bottom-0">
+                <tfoot id="summaryMatrixFoot" class="bg-slate-950 font-semibold text-white border-t-2 border-slate-700">
                   <!-- Grand totals generated in JS -->
                 </tfoot>
               </table>
@@ -694,8 +703,18 @@
             </h3>
             <p class="text-xs text-slate-400">แสดงความเชื่อมโยงจุดติดตั้งเดิม จุดติดตั้งใหม่ ค่าใช้จ่าย และสาเหตุ</p>
           </div>
-          <div class="text-xs text-slate-400">
-            แสดงข้อมูล <span id="filteredCount" class="font-bold text-white">0</span> จาก <span id="totalDataCount" class="font-bold text-white">0</span> รายการ
+          <div class="flex flex-wrap items-center gap-3">
+            <div class="text-xs text-slate-400">
+              แสดงข้อมูล <span id="filteredCount" class="font-bold text-white">0</span> จาก <span id="totalDataCount" class="font-bold text-white">0</span> รายการ
+            </div>
+            <button type="button" onclick="openMatrixFullViewModal('ALL', 'ALL', 'log')" class="px-3 py-1.5 rounded-lg bg-indigo-600/80 hover:bg-indigo-500 text-white text-xs font-medium flex items-center gap-1.5 transition-all">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+              Full View ทั้งตาราง
+            </button>
+            <button type="button" onclick="openMatrixPopupWindow('log')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-300 border border-sky-500/30 text-xs font-medium flex items-center gap-1.5 transition-all">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+              Pop-up จอแยก
+            </button>
           </div>
         </div>
 
@@ -1215,6 +1234,126 @@
         <button type="button" onclick="closeReferenceManagerModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-xl transition">
           ปิดหน้าต่าง
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: FULL VIEW MATRIX & DRILL-DOWN EXPLORER -->
+  <!-- ========================================== -->
+  <div id="matrixFullViewModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-2 sm:p-5">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-[1650px] w-full h-[94vh] flex flex-col shadow-2xl overflow-hidden">
+      <!-- Top Header Bar -->
+      <div class="px-6 py-4 bg-slate-950/90 border-b border-slate-800 flex flex-wrap items-center justify-between gap-4 shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          </div>
+          <div>
+            <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+              ตารางภาพรวมสถิติแยกตามปี & ประเภทสื่อ (Full Matrix & Drill-down Explorer)
+              <span class="px-2.5 py-0.5 text-[11px] font-semibold bg-indigo-500/20 text-indigo-300 rounded-full border border-indigo-500/30">Interactive Full View</span>
+            </h2>
+            <p class="text-xs text-slate-400">คลิกที่ช่องตัวเลขในตาราง Matrix เพื่อกรองดูรายการป้ายด้านล่างได้ทันที หรือกดปุ่ม Pop-up เพื่อเด้งแยกเป็นอีกหน้าต่าง</p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2.5">
+          <!-- Metric Selector for Matrix -->
+          <div class="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs">
+            <span class="text-slate-400 px-2 font-medium hidden md:inline">มุมมองข้อมูล:</span>
+            <button type="button" onclick="setFullMatrixMetric('count')" id="btnFullMetric-count" class="full-metric-btn px-2.5 py-1 rounded-lg font-medium bg-indigo-600 text-white transition">จำนวนป้าย & %</button>
+            <button type="button" onclick="setFullMatrixMetric('impact')" id="btnFullMetric-impact" class="full-metric-btn px-2.5 py-1 rounded-lg font-medium text-slate-400 hover:text-white transition">ผลกระทบรวม (฿)</button>
+            <button type="button" onclick="setFullMatrixMetric('direct')" id="btnFullMetric-direct" class="full-metric-btn px-2.5 py-1 rounded-lg font-medium text-slate-400 hover:text-white transition">Direct Cost (฿)</button>
+            <button type="button" onclick="setFullMatrixMetric('downtime')" id="btnFullMetric-downtime" class="full-metric-btn px-2.5 py-1 rounded-lg font-medium text-slate-400 hover:text-white transition">Downtime เฉลี่ย</button>
+          </div>
+
+          <!-- Detach Pop-up Window Button -->
+          <button type="button" onclick="openMatrixPopupWindow()" class="px-3.5 py-2 rounded-xl bg-sky-600/90 hover:bg-sky-500 text-white text-xs font-semibold flex items-center gap-1.5 transition shadow-md shadow-sky-600/20">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            เด้งเป็นหน้าต่างแยก (Pop-up Window)
+          </button>
+
+          <!-- Close Button -->
+          <button type="button" onclick="closeMatrixFullViewModal()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-rose-600/80 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            ปิด (ESC)
+          </button>
+        </div>
+      </div>
+
+      <!-- Scrollable Body Content -->
+      <div class="flex-1 overflow-y-auto p-6 space-y-6">
+        <!-- Part 1: Full Yearly Summary Matrix Table -->
+        <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 shadow-sm">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+              <h3 class="text-sm font-bold text-white">1. ตารางสรุปสถิติจำนวนป้ายแยกรายปี & Media Type (ครบทุกปีงบประมาณ)</h3>
+            </div>
+            <div class="flex items-center gap-2">
+              <span id="fullMatrixActiveFilterBadge" class="text-xs px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-medium">
+                กำลังแสดง: ทุกปีงบประมาณ • ทุกประเภทสื่อ
+              </span>
+              <button type="button" onclick="selectFullMatrixDrilldown('ALL', 'ALL')" class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
+                รีเซ็ตตัวกรองตาราง
+              </button>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto rounded-xl border border-slate-800">
+            <table class="w-full text-left text-xs sm:text-sm text-slate-200">
+              <thead id="fullMatrixHead" class="bg-slate-950 text-slate-300 border-b border-slate-800"></thead>
+              <tbody id="fullMatrixBody" class="divide-y divide-slate-800/70 bg-slate-900/70"></tbody>
+              <tfoot id="fullMatrixFoot" class="bg-slate-950 font-bold text-white border-t-2 border-indigo-500/40"></tfoot>
+            </table>
+          </div>
+        </div>
+
+        <!-- Part 2: Drill-down Records List -->
+        <div id="fullViewDrilldownSection" class="bg-slate-950/60 border border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+          <div class="p-4 bg-slate-900/90 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                <span id="fullDrilldownTitle">2. รายการป้ายทั้งหมดในตาราง (Drill-down Records)</span>
+              </h3>
+              <p class="text-xs text-slate-400" id="fullDrilldownSub">แสดงรายละเอียดทุกคอลัมน์แบบเต็มความกว้าง</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="relative w-64">
+                <input type="text" id="fullViewSearchInput" oninput="renderFullMatrixAndDrilldown()" placeholder="ค้นหารหัสป้าย, สถานที่, เขต..." class="w-full bg-slate-950 border border-slate-800 text-xs text-white rounded-xl pl-8 pr-3 py-1.5 focus:outline-none focus:border-indigo-500">
+                <svg class="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              </div>
+              <span class="text-xs bg-slate-800 px-3 py-1.5 rounded-xl text-slate-300 font-medium">
+                จำนวน <strong id="fullDrilldownCount" class="text-emerald-400">0</strong> รายการ
+              </span>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto max-h-[48vh]">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-slate-950 text-slate-400 border-b border-slate-800 sticky top-0 z-10">
+                <tr>
+                  <th class="py-3 px-3 font-semibold">#</th>
+                  <th class="py-3 px-3 font-semibold">ปีงบ</th>
+                  <th class="py-3 px-3 font-semibold">Media ID / ประเภทสื่อ</th>
+                  <th class="py-3 px-3 font-semibold">บริษัทผู้ดูแล</th>
+                  <th class="py-3 px-3 font-semibold">จุดติดตั้งเดิม (Origin)</th>
+                  <th class="py-3 px-3 font-semibold">จุดติดตั้งใหม่ (Destination)</th>
+                  <th class="py-3 px-3 font-semibold">วันที่รื้อ - ติดตั้ง</th>
+                  <th class="py-3 px-3 font-semibold text-center">Downtime</th>
+                  <th class="py-3 px-3 font-semibold">สาเหตุการย้าย</th>
+                  <th class="py-3 px-3 font-semibold text-right">Direct Cost</th>
+                  <th class="py-3 px-3 font-semibold text-right">ค่าเสียโอกาส</th>
+                  <th class="py-3 px-3 font-semibold text-right">ผลกระทบรวม</th>
+                  <th class="py-3 px-3 font-semibold text-center">สถานะ</th>
+                </tr>
+              </thead>
+              <tbody id="fullDrilldownBody" class="divide-y divide-slate-800/60"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -4079,21 +4218,25 @@
         const cells = displayMediaTypes.map(mt => {
           const val = counts[mt]?.[cat] || 0;
           mediaTotals[mt] += val;
-          return `<td class="py-2 px-2.5 text-center font-medium ${val > 0 ? 'text-white' : 'text-slate-600'}">${val > 0 ? val : '-'}</td>`;
+          const safeMt = mt.replace(/'/g, "\\'");
+          if (val > 0) {
+            return `<td onclick="openMatrixFullViewModal('${cat}', '${safeMt}')" class="py-2.5 px-2.5 text-center font-semibold text-white hover:text-indigo-300 hover:bg-indigo-500/20 cursor-pointer transition rounded" title="คลิกเพื่อดูรายละเอียด ${mt} ปี ${cat} (${val} ป้าย)">${val}</td>`;
+          }
+          return `<td class="py-2.5 px-2.5 text-center font-medium text-slate-600">-</td>`;
         }).join('');
 
         return `
-          <tr class="hover:bg-slate-800/40 transition-colors ${isCurrentFilteredYear ? 'bg-indigo-950/40 ring-1 ring-inset ring-indigo-500/30' : ''}">
-            <td class="py-2 px-3 font-semibold text-slate-200 flex items-center gap-1.5">
+          <tr class="hover:bg-slate-800/50 transition-colors ${isCurrentFilteredYear ? 'bg-indigo-950/40 ring-1 ring-inset ring-indigo-500/30' : ''}">
+            <td onclick="openMatrixFullViewModal('${cat}', 'ALL')" class="py-2.5 px-3 font-semibold text-slate-200 flex items-center gap-1.5 cursor-pointer hover:text-indigo-300" title="คลิกเพื่อดูรายการป้ายทั้งหมดในปี ${cat}">
               <span class="w-2 h-2 rounded-full ${cat === 'Before 2024' ? 'bg-indigo-400' : 'bg-emerald-400'}"></span>
               ${cat}
               ${isCurrentFilteredYear ? '<span class="ml-1 px-1.5 py-0.2 text-[9px] bg-indigo-500/30 text-indigo-300 rounded font-normal">ปีที่เลือก</span>' : ''}
             </td>
             ${cells}
-            <td class="py-2 px-3 text-right font-bold text-indigo-300">${catSigns} ป้าย</td>
-            <td class="py-2 px-3 text-right text-slate-300">฿${catDirect.toLocaleString()}</td>
-            <td class="py-2 px-3 text-right text-amber-300">฿${catLoss.toLocaleString()}</td>
-            <td class="py-2 px-3 text-right font-bold text-purple-300">฿${catImpact.toLocaleString()}</td>
+            <td onclick="openMatrixFullViewModal('${cat}', 'ALL')" class="py-2.5 px-3 text-right font-bold text-indigo-300 cursor-pointer hover:underline">${catSigns} ป้าย</td>
+            <td class="py-2.5 px-3 text-right text-slate-300 font-mono">฿${Math.round(catDirect).toLocaleString()}</td>
+            <td class="py-2.5 px-3 text-right text-amber-300 font-mono">฿${Math.round(catLoss).toLocaleString()}</td>
+            <td class="py-2.5 px-3 text-right font-bold text-purple-300 font-mono">฿${Math.round(catImpact).toLocaleString()}</td>
           </tr>
         `;
       }).join('');
@@ -4101,14 +4244,523 @@
       // Build Footer (Grand Totals)
       tfoot.innerHTML = `
         <tr>
-          <td class="py-2.5 px-3 text-white font-bold">รวมทั้งหมด</td>
-          ${displayMediaTypes.map(mt => `<td class="py-2.5 px-2.5 text-center font-bold text-slate-200">${mediaTotals[mt]}</td>`).join('')}
-          <td class="py-2.5 px-3 text-right font-bold text-indigo-300">${grandTotalSigns} ป้าย</td>
-          <td class="py-2.5 px-3 text-right font-bold text-rose-300">฿${grandDirect.toLocaleString()}</td>
-          <td class="py-2.5 px-3 text-right font-bold text-amber-300">฿${grandLoss.toLocaleString()}</td>
-          <td class="py-2.5 px-3 text-right font-bold text-purple-300">฿${grandImpact.toLocaleString()}</td>
+          <td onclick="openMatrixFullViewModal('ALL', 'ALL')" class="py-3 px-3 text-white font-bold cursor-pointer hover:text-indigo-300">รวมทั้งหมด</td>
+          ${displayMediaTypes.map(mt => {
+            const safeMt = mt.replace(/'/g, "\\'");
+            return `<td onclick="openMatrixFullViewModal('ALL', '${safeMt}')" class="py-3 px-2.5 text-center font-bold text-slate-200 cursor-pointer hover:text-indigo-300 hover:bg-indigo-500/20 transition" title="คลิกเพื่อดู ${mt} ทุกปีรวมกัน">${mediaTotals[mt]}</td>`;
+          }).join('')}
+          <td onclick="openMatrixFullViewModal('ALL', 'ALL')" class="py-3 px-3 text-right font-bold text-indigo-300 cursor-pointer hover:underline">${grandTotalSigns} ป้าย</td>
+          <td class="py-3 px-3 text-right font-bold text-rose-300 font-mono">฿${Math.round(grandDirect).toLocaleString()}</td>
+          <td class="py-3 px-3 text-right font-bold text-amber-300 font-mono">฿${Math.round(grandLoss).toLocaleString()}</td>
+          <td class="py-3 px-3 text-right font-bold text-purple-300 font-mono">฿${Math.round(grandImpact).toLocaleString()}</td>
         </tr>
       `;
+    }
+
+    // ----------------------------------------------------
+    // FULL VIEW MATRIX MODAL & DETACHED POP-UP WINDOW
+    // ----------------------------------------------------
+    let fullMatrixMetric = 'count'; // 'count' | 'impact' | 'direct' | 'downtime'
+    let fullMatrixSelectedYear = 'ALL';
+    let fullMatrixSelectedMedia = 'ALL';
+
+    function openMatrixFullViewModal(year = 'ALL', mediaType = 'ALL', scrollTarget = 'matrix') {
+      fullMatrixSelectedYear = year || 'ALL';
+      fullMatrixSelectedMedia = mediaType || 'ALL';
+      const modal = document.getElementById('matrixFullViewModal');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      renderFullMatrixAndDrilldown();
+
+      if (scrollTarget === 'log') {
+        setTimeout(() => {
+          document.getElementById('fullViewDrilldownSection')?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      }
+    }
+
+    function closeMatrixFullViewModal() {
+      const modal = document.getElementById('matrixFullViewModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    // Close Full View Modal on ESC key
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const modal = document.getElementById('matrixFullViewModal');
+        if (modal && !modal.classList.contains('hidden')) {
+          closeMatrixFullViewModal();
+        }
+      }
+    });
+
+    function setFullMatrixMetric(metric) {
+      fullMatrixMetric = metric;
+      document.querySelectorAll('.full-metric-btn').forEach(btn => {
+        btn.classList.remove('bg-indigo-600', 'text-white');
+        btn.classList.add('text-slate-400');
+      });
+      const activeBtn = document.getElementById(`btnFullMetric-${metric}`);
+      if (activeBtn) {
+        activeBtn.classList.remove('text-slate-400');
+        activeBtn.classList.add('bg-indigo-600', 'text-white');
+      }
+      renderFullMatrixAndDrilldown();
+    }
+
+    function selectFullMatrixDrilldown(year, mediaType) {
+      fullMatrixSelectedYear = year;
+      fullMatrixSelectedMedia = mediaType;
+      renderFullMatrixAndDrilldown();
+    }
+
+    function getMatrixCategoriesAndTypes(sourceData) {
+      const yearOrder = ['Before 2024', '2024', '2025', '2026', '2027'];
+      const rawYears = new Set();
+      sourceData.forEach(d => {
+        if (d.year < 2024) rawYears.add('Before 2024');
+        else rawYears.add(String(d.year));
+      });
+      let categories = Array.from(rawYears).sort((a, b) => {
+        const idxA = yearOrder.indexOf(a);
+        const idxB = yearOrder.indexOf(b);
+        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+        if (idxA !== -1) return -1;
+        if (idxB !== -1) return 1;
+        return a.localeCompare(b);
+      });
+      if (categories.length === 0) categories = ['2024', '2025', '2026'];
+
+      const mediaTypeSet = new Set();
+      sourceData.forEach(d => { if (d.mediaType) mediaTypeSet.add(d.mediaType); });
+      let mediaTypes = Array.from(mediaTypeSet);
+      if (mediaTypes.length === 0) mediaTypes = getReferenceMediaTypes();
+
+      return { categories, mediaTypes };
+    }
+
+    function renderFullMatrixAndDrilldown() {
+      const headEl = document.getElementById('fullMatrixHead');
+      const bodyEl = document.getElementById('fullMatrixBody');
+      const footEl = document.getElementById('fullMatrixFoot');
+      if (!headEl || !bodyEl || !footEl) return;
+
+      const { categories, mediaTypes } = getMatrixCategoriesAndTypes(masterData);
+
+      // Update Filter Badge
+      const badgeEl = document.getElementById('fullMatrixActiveFilterBadge');
+      if (badgeEl) {
+        const yrLabel = fullMatrixSelectedYear === 'ALL' ? 'ทุกปีงบประมาณ' : `ปี ${fullMatrixSelectedYear}`;
+        const mtLabel = fullMatrixSelectedMedia === 'ALL' ? 'ทุกประเภทสื่อ' : fullMatrixSelectedMedia;
+        badgeEl.innerText = `กำลังแสดง: ${yrLabel} • ${mtLabel}`;
+      }
+
+      // Build Headers
+      headEl.innerHTML = `
+        <tr>
+          <th class="py-3 px-4 font-bold text-slate-200">ปีงบ / รอบงาน</th>
+          ${mediaTypes.map(mt => {
+            const safeMt = mt.replace(/'/g, "\\'");
+            const isSelectedCol = fullMatrixSelectedMedia === mt;
+            return `<th onclick="selectFullMatrixDrilldown('ALL', '${safeMt}')" class="py-3 px-3 font-semibold text-center cursor-pointer transition ${isSelectedCol ? 'bg-indigo-600/30 text-indigo-200 underline' : 'text-slate-300 hover:text-white hover:bg-slate-900'}" title="คลิกเพื่อกรองเฉพาะ ${mt}">${mt}</th>`;
+          }).join('')}
+          <th class="py-3 px-4 font-bold text-right text-indigo-300">รวมป้าย (สัดส่วน)</th>
+          <th class="py-3 px-4 font-bold text-center text-sky-300">Downtime เฉลี่ย</th>
+          <th class="py-3 px-4 font-bold text-right text-rose-300">Direct Cost</th>
+          <th class="py-3 px-4 font-bold text-right text-amber-300">สูญเสียรายได้</th>
+          <th class="py-3 px-4 font-bold text-right text-purple-300">ผลกระทบรวม</th>
+        </tr>
+      `;
+
+      const grandTotalAll = masterData.length || 1;
+      let totalSignsAll = 0;
+      let totalDirectAll = 0;
+      let totalLossAll = 0;
+      let totalImpactAll = 0;
+      let totalDowntimeAll = 0;
+
+      const colTotals = {};
+      mediaTypes.forEach(mt => {
+        colTotals[mt] = { count: 0, direct: 0, impact: 0, downtimeSum: 0 };
+      });
+
+      bodyEl.innerHTML = categories.map(cat => {
+        const catItems = masterData.filter(d => (d.year < 2024 ? 'Before 2024' : String(d.year)) === cat);
+        const catSigns = catItems.length;
+        const catDirect = catItems.reduce((a, b) => a + (b.directCost || 0), 0);
+        const catLoss = catItems.reduce((a, b) => a + (b.opportunityLoss || 0), 0);
+        const catImpact = catItems.reduce((a, b) => a + (b.totalImpact || 0), 0);
+        const catDowntimeSum = catItems.reduce((a, b) => a + (b.downtimeDays || 0), 0);
+        const catAvgDowntime = catSigns > 0 ? (catDowntimeSum / catSigns).toFixed(1) : '0.0';
+        const catSharePct = ((catSigns / grandTotalAll) * 100).toFixed(1);
+
+        totalSignsAll += catSigns;
+        totalDirectAll += catDirect;
+        totalLossAll += catLoss;
+        totalImpactAll += catImpact;
+        totalDowntimeAll += catDowntimeSum;
+
+        const isRowSelected = fullMatrixSelectedYear === cat && fullMatrixSelectedMedia === 'ALL';
+
+        const cellsHtml = mediaTypes.map(mt => {
+          const cellItems = catItems.filter(d => (d.mediaType || 'Cookies') === mt);
+          const cnt = cellItems.length;
+          const cellDirect = cellItems.reduce((a, b) => a + (b.directCost || 0), 0);
+          const cellImpact = cellItems.reduce((a, b) => a + (b.totalImpact || 0), 0);
+          const cellDownSum = cellItems.reduce((a, b) => a + (b.downtimeDays || 0), 0);
+          const cellAvgDown = cnt > 0 ? (cellDownSum / cnt).toFixed(1) : 0;
+
+          colTotals[mt].count += cnt;
+          colTotals[mt].direct += cellDirect;
+          colTotals[mt].impact += cellImpact;
+          colTotals[mt].downtimeSum += cellDownSum;
+
+          const isCellSelected = (fullMatrixSelectedYear === cat && fullMatrixSelectedMedia === mt);
+          const safeMt = mt.replace(/'/g, "\\'");
+
+          if (cnt === 0) {
+            return `<td class="py-3 px-2.5 text-center text-slate-600">-</td>`;
+          }
+
+          let cellDisplay = '';
+          if (fullMatrixMetric === 'count') {
+            const pct = catSigns > 0 ? Math.round((cnt / catSigns) * 100) : 0;
+            cellDisplay = `<div class="font-bold text-white text-sm">${cnt}</div><div class="text-[10px] text-slate-400">${pct}% ของปี</div>`;
+          } else if (fullMatrixMetric === 'impact') {
+            cellDisplay = `<div class="font-bold text-purple-300 font-mono text-xs">฿${Math.round(cellImpact).toLocaleString()}</div><div class="text-[10px] text-slate-400">${cnt} ป้าย</div>`;
+          } else if (fullMatrixMetric === 'direct') {
+            cellDisplay = `<div class="font-bold text-rose-300 font-mono text-xs">฿${Math.round(cellDirect).toLocaleString()}</div><div class="text-[10px] text-slate-400">${cnt} ป้าย</div>`;
+          } else {
+            cellDisplay = `<div class="font-bold text-sky-300 font-mono text-xs">${cellAvgDown} วัน</div><div class="text-[10px] text-slate-400">${cnt} ป้าย</div>`;
+          }
+
+          return `
+            <td onclick="selectFullMatrixDrilldown('${cat}', '${safeMt}')" class="py-2.5 px-2.5 text-center cursor-pointer transition rounded-lg ${isCellSelected ? 'bg-indigo-600/40 ring-2 ring-indigo-400' : 'hover:bg-indigo-500/20'}">
+              ${cellDisplay}
+            </td>
+          `;
+        }).join('');
+
+        return `
+          <tr class="transition-colors ${isRowSelected ? 'bg-indigo-950/60 ring-1 ring-inset ring-indigo-400' : 'hover:bg-slate-800/50'}">
+            <td onclick="selectFullMatrixDrilldown('${cat}', 'ALL')" class="py-3 px-4 font-bold text-white cursor-pointer hover:text-indigo-300 whitespace-nowrap">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full ${cat === '2026' ? 'bg-amber-400' : cat === '2025' ? 'bg-rose-400' : 'bg-emerald-400'}"></span>
+                <span>ปี ${cat}</span>
+              </div>
+            </td>
+            ${cellsHtml}
+            <td onclick="selectFullMatrixDrilldown('${cat}', 'ALL')" class="py-3 px-4 text-right cursor-pointer hover:bg-indigo-500/10">
+              <div class="font-bold text-indigo-300 text-sm">${catSigns} ป้าย</div>
+              <div class="text-[10px] text-slate-400">${catSharePct}% ของพอร์ต</div>
+            </td>
+            <td class="py-3 px-4 text-center font-mono font-semibold text-sky-300">${catAvgDowntime} วัน</td>
+            <td class="py-3 px-4 text-right font-mono text-rose-300">฿${Math.round(catDirect).toLocaleString()}</td>
+            <td class="py-3 px-4 text-right font-mono text-amber-300">฿${Math.round(catLoss).toLocaleString()}</td>
+            <td class="py-3 px-4 text-right font-mono font-bold text-purple-300">฿${Math.round(catImpact).toLocaleString()}</td>
+          </tr>
+        `;
+      }).join('');
+
+      const overallAvgDowntime = totalSignsAll > 0 ? (totalDowntimeAll / totalSignsAll).toFixed(1) : '0.0';
+
+      footEl.innerHTML = `
+        <tr>
+          <td onclick="selectFullMatrixDrilldown('ALL', 'ALL')" class="py-3.5 px-4 text-white font-bold cursor-pointer hover:text-indigo-300">รวมทั้งหมดทุกปี</td>
+          ${mediaTypes.map(mt => {
+            const safeMt = mt.replace(/'/g, "\\'");
+            const c = colTotals[mt];
+            const pct = totalSignsAll > 0 ? ((c.count / totalSignsAll) * 100).toFixed(1) : 0;
+            let footCell = `<div class="text-sm font-bold text-white">${c.count}</div><div class="text-[10px] text-indigo-300 font-normal">${pct}%</div>`;
+            if (fullMatrixMetric === 'impact') {
+              footCell = `<div class="text-xs font-bold text-purple-300 font-mono">฿${Math.round(c.impact).toLocaleString()}</div><div class="text-[10px] text-slate-400 font-normal">${c.count} ป้าย</div>`;
+            } else if (fullMatrixMetric === 'direct') {
+              footCell = `<div class="text-xs font-bold text-rose-300 font-mono">฿${Math.round(c.direct).toLocaleString()}</div><div class="text-[10px] text-slate-400 font-normal">${c.count} ป้าย</div>`;
+            } else if (fullMatrixMetric === 'downtime') {
+              const avgD = c.count > 0 ? (c.downtimeSum / c.count).toFixed(1) : '0.0';
+              footCell = `<div class="text-xs font-bold text-sky-300 font-mono">${avgD} วัน</div><div class="text-[10px] text-slate-400 font-normal">${c.count} ป้าย</div>`;
+            }
+            return `<td onclick="selectFullMatrixDrilldown('ALL', '${safeMt}')" class="py-3 px-2.5 text-center cursor-pointer hover:bg-indigo-500/20 transition">${footCell}</td>`;
+          }).join('')}
+          <td onclick="selectFullMatrixDrilldown('ALL', 'ALL')" class="py-3.5 px-4 text-right font-bold text-indigo-300 cursor-pointer hover:underline">${totalSignsAll} ป้าย (100%)</td>
+          <td class="py-3.5 px-4 text-center font-mono font-bold text-sky-300">${overallAvgDowntime} วัน</td>
+          <td class="py-3.5 px-4 text-right font-mono font-bold text-rose-300">฿${Math.round(totalDirectAll).toLocaleString()}</td>
+          <td class="py-3.5 px-4 text-right font-mono font-bold text-amber-300">฿${Math.round(totalLossAll).toLocaleString()}</td>
+          <td class="py-3.5 px-4 text-right font-mono font-bold text-purple-300">฿${Math.round(totalImpactAll).toLocaleString()}</td>
+        </tr>
+      `;
+
+      // Render Drill-down Table
+      const searchQ = (document.getElementById('fullViewSearchInput')?.value || '').trim().toLowerCase();
+      const drillRecords = masterData.filter(d => {
+        const itemYr = d.year < 2024 ? 'Before 2024' : String(d.year);
+        if (fullMatrixSelectedYear !== 'ALL' && itemYr !== fullMatrixSelectedYear) return false;
+        if (fullMatrixSelectedMedia !== 'ALL' && (d.mediaType || 'Cookies') !== fullMatrixSelectedMedia) return false;
+        if (searchQ) {
+          const hay = `${d.mediaId} ${d.mediaType} ${d.company} ${d.originSite} ${d.destSite} ${d.originArea} ${d.destArea} ${d.causeCategory} ${d.causeDetail}`.toLowerCase();
+          if (!hay.includes(searchQ)) return false;
+        }
+        return true;
+      });
+
+      const titleEl = document.getElementById('fullDrilldownTitle');
+      const countEl = document.getElementById('fullDrilldownCount');
+      const drillBody = document.getElementById('fullDrilldownBody');
+
+      if (titleEl) {
+        const yTxt = fullMatrixSelectedYear === 'ALL' ? 'ทุกปี' : `ปี ${fullMatrixSelectedYear}`;
+        const mTxt = fullMatrixSelectedMedia === 'ALL' ? 'ทุกประเภทสื่อ' : `สื่อ ${fullMatrixSelectedMedia}`;
+        titleEl.innerText = `2. รายการป้ายเจาะลึก (${yTxt} • ${mTxt})`;
+      }
+      if (countEl) countEl.innerText = drillRecords.length;
+
+      if (drillBody) {
+        if (drillRecords.length === 0) {
+          drillBody.innerHTML = `<tr><td colspan="13" class="py-10 text-center text-slate-500">ไม่พบรายการป้ายตามเงื่อนไขที่เลือก</td></tr>`;
+        } else {
+          drillBody.innerHTML = drillRecords.map((item, idx) => `
+            <tr class="hover:bg-slate-800/50 transition-colors">
+              <td class="py-2.5 px-3 text-slate-500 font-mono">${idx + 1}</td>
+              <td class="py-2.5 px-3 font-mono font-semibold text-indigo-300">${item.year}</td>
+              <td class="py-2.5 px-3">
+                <div class="font-bold text-white">${item.mediaId}</div>
+                <div class="text-[11px] text-slate-400">${item.mediaType}</div>
+              </td>
+              <td class="py-2.5 px-3 text-slate-300 max-w-[160px] truncate" title="${item.company}">${item.company}</td>
+              <td class="py-2.5 px-3 max-w-[240px]">
+                <div class="text-slate-200 truncate" title="${item.originSite}">${item.originSite}</div>
+                <span class="text-[10px] text-slate-400">เขต ${item.originArea}</span>
+              </td>
+              <td class="py-2.5 px-3 max-w-[240px]">
+                <div class="text-slate-200 truncate" title="${item.destSite}">${item.destSite || '<span class="text-amber-400">- รอย้าย -</span>'}</div>
+                <span class="text-[10px] text-slate-400">เขต ${item.destArea || '-'}</span>
+              </td>
+              <td class="py-2.5 px-3 whitespace-nowrap text-[11px]">
+                <div class="text-rose-400">รื้อ: ${formatThaiDate(item.dismantleDate)}</div>
+                <div class="${item.installDate ? 'text-emerald-400' : 'text-amber-400'}">ติด: ${item.installDate ? formatThaiDate(item.installDate) : 'รอดำเนินการ'}</div>
+              </td>
+              <td class="py-2.5 px-3 text-center font-mono font-semibold ${item.downtimeDays > 30 ? 'text-rose-400' : 'text-slate-200'}">${item.downtimeDays} วัน</td>
+              <td class="py-2.5 px-3 max-w-[200px]">
+                <div class="text-indigo-300 font-medium truncate">${item.causeCategory}</div>
+                <div class="text-[10px] text-slate-400 truncate" title="${item.causeDetail}">${item.causeDetail}</div>
+              </td>
+              <td class="py-2.5 px-3 text-right font-mono text-slate-200">฿${Math.round(item.directCost || 0).toLocaleString()}</td>
+              <td class="py-2.5 px-3 text-right font-mono text-amber-300">฿${Math.round(item.opportunityLoss || 0).toLocaleString()}</td>
+              <td class="py-2.5 px-3 text-right font-mono font-bold text-purple-300">฿${Math.round(item.totalImpact || 0).toLocaleString()}</td>
+              <td class="py-2.5 px-3 text-center whitespace-nowrap">
+                ${item.status === 'Completed'
+                  ? '<span class="px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">สำเร็จ</span>'
+                  : `<span class="px-2 py-0.5 rounded-full text-[10px] bg-amber-500/20 text-amber-400 border border-amber-500/30">⏳ ${item.pendingStage || 'คงค้าง'}</span>`}
+              </td>
+            </tr>
+          `).join('');
+        }
+      }
+    }
+
+    // Open a standalone detached Pop-up Browser Window (สำหรับวางแยกอีกหน้าจอ)
+    function openMatrixPopupWindow(focusSection = 'matrix') {
+      const popupWin = window.open('', 'StaticMediaRelocationFullPopup', 'width=1520,height=920,resizable=yes,scrollbars=yes');
+      if (!popupWin) {
+        alert('เบราว์เซอร์ของคุณบล็อกหน้าต่าง Pop-up กรุณาอนุญาต Pop-up สำหรับหน้านี้ หรือใช้ปุ่ม "ขยายเต็มจอ (Full View)" แทนครับ');
+        return;
+      }
+
+      const { categories, mediaTypes } = getMatrixCategoriesAndTypes(masterData);
+      const grandTotalAll = masterData.length || 1;
+      const colTotals = {};
+      mediaTypes.forEach(mt => { colTotals[mt] = 0; });
+
+      let totalSignsAll = 0;
+      let totalDirectAll = 0;
+      let totalLossAll = 0;
+      let totalImpactAll = 0;
+      let totalDownAll = 0;
+
+      const matrixRowsHtml = categories.map(cat => {
+        const catItems = masterData.filter(d => (d.year < 2024 ? 'Before 2024' : String(d.year)) === cat);
+        const catSigns = catItems.length;
+        const catDirect = catItems.reduce((a, b) => a + (b.directCost || 0), 0);
+        const catLoss = catItems.reduce((a, b) => a + (b.opportunityLoss || 0), 0);
+        const catImpact = catItems.reduce((a, b) => a + (b.totalImpact || 0), 0);
+        const catDown = catItems.reduce((a, b) => a + (b.downtimeDays || 0), 0);
+        const avgDown = catSigns > 0 ? (catDown / catSigns).toFixed(1) : '0.0';
+
+        totalSignsAll += catSigns;
+        totalDirectAll += catDirect;
+        totalLossAll += catLoss;
+        totalImpactAll += catImpact;
+        totalDownAll += catDown;
+
+        const cells = mediaTypes.map(mt => {
+          const cnt = catItems.filter(d => (d.mediaType || 'Cookies') === mt).length;
+          colTotals[mt] += cnt;
+          return `<td class="py-3 px-3 text-center ${cnt > 0 ? 'font-bold text-white' : 'text-slate-600'}">${cnt > 0 ? cnt : '-'}</td>`;
+        }).join('');
+
+        return `
+          <tr class="border-b border-slate-800 hover:bg-slate-800/50">
+            <td class="py-3 px-4 font-bold text-emerald-400">ปี ${cat}</td>
+            ${cells}
+            <td class="py-3 px-4 text-right font-bold text-indigo-300">${catSigns} ป้าย (${((catSigns / grandTotalAll) * 100).toFixed(1)}%)</td>
+            <td class="py-3 px-4 text-center font-mono text-sky-300">${avgDown} วัน</td>
+            <td class="py-3 px-4 text-right font-mono text-rose-300">฿${Math.round(catDirect).toLocaleString()}</td>
+            <td class="py-3 px-4 text-right font-mono text-amber-300">฿${Math.round(catLoss).toLocaleString()}</td>
+            <td class="py-3 px-4 text-right font-mono font-bold text-purple-300">฿${Math.round(catImpact).toLocaleString()}</td>
+          </tr>
+        `;
+      }).join('');
+
+      const overallAvgDown = totalSignsAll > 0 ? (totalDownAll / totalSignsAll).toFixed(1) : '0.0';
+
+      const logRowsHtml = masterData.map((item, idx) => `
+        <tr class="border-b border-slate-800/70 hover:bg-slate-800/40 log-row" data-year="${item.year < 2024 ? 'Before 2024' : item.year}" data-media="${item.mediaType}">
+          <td class="py-2.5 px-3 text-slate-500 font-mono">${idx + 1}</td>
+          <td class="py-2.5 px-3 font-mono font-bold text-indigo-300">${item.year}</td>
+          <td class="py-2.5 px-3 font-bold text-white">${item.mediaId}</td>
+          <td class="py-2.5 px-3 text-amber-300">${item.mediaType}</td>
+          <td class="py-2.5 px-3 text-slate-300">${item.company}</td>
+          <td class="py-2.5 px-3 text-slate-200">${item.originSite} <span class="text-slate-400 text-[11px]">(เขต ${item.originArea})</span></td>
+          <td class="py-2.5 px-3 text-slate-200">${item.destSite || '- รอย้าย -'} <span class="text-slate-400 text-[11px]">(เขต ${item.destArea || '-'})</span></td>
+          <td class="py-2.5 px-3 whitespace-nowrap text-slate-300">${formatThaiDate(item.dismantleDate)} → ${item.installDate ? formatThaiDate(item.installDate) : '⏳ รอติดตั้ง'}</td>
+          <td class="py-2.5 px-3 text-center font-mono font-bold ${item.downtimeDays > 30 ? 'text-rose-400' : 'text-slate-200'}">${item.downtimeDays}</td>
+          <td class="py-2.5 px-3 text-indigo-300">${item.causeCategory} <div class="text-[11px] text-slate-400">${item.causeDetail}</div></td>
+          <td class="py-2.5 px-3 text-right font-mono text-rose-300">฿${Math.round(item.directCost || 0).toLocaleString()}</td>
+          <td class="py-2.5 px-3 text-right font-mono text-amber-300">฿${Math.round(item.opportunityLoss || 0).toLocaleString()}</td>
+          <td class="py-2.5 px-3 text-right font-mono font-bold text-purple-300">฿${Math.round(item.totalImpact || 0).toLocaleString()}</td>
+          <td class="py-2.5 px-3 text-center">${item.status === 'Completed' ? '<span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-xs">สำเร็จ</span>' : '<span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-xs">คงค้าง</span>'}</td>
+        </tr>
+      `).join('');
+
+      const htmlDoc = `<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>Full View Pop-up — ตารางสรุปสถิติรายปี & ประวัติการย้ายป้ายทั้งหมด</title>
+  <script src="https://cdn.tailwindcss.com"><\/script>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Prompt', sans-serif; background: #020617; color: #f1f5f9; }
+    @media print { .no-print { display: none !important; } body { background: #fff; color: #000; } }
+  </style>
+</head>
+<body class="p-6 space-y-6">
+  <div class="flex flex-wrap items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-4 rounded-2xl sticky top-2 z-30 shadow-xl no-print">
+    <div>
+      <h1 class="text-lg font-bold text-white flex items-center gap-2">
+        📊 หน้าต่างแสดงภาพรวมทั้งตาราง (Detached Full View Monitor)
+        <span class="text-xs px-2.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30">จอแยกอิสระ (${totalSignsAll} รายการ)</span>
+      </h1>
+      <p class="text-xs text-slate-400">สามารถลากหน้าต่างนี้ไปวางที่หน้าจอที่ 2 หรือย่อ/ขยายเพื่อดูตารางทั้งหมดแบบไม่ต้องเลื่อนกรอบเล็ก</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="window.print()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold">🖨️ พิมพ์ / บันทึก PDF</button>
+      <button onclick="window.close()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-rose-600 text-slate-200 hover:text-white text-xs font-semibold">✖ ปิดหน้าต่างนี้</button>
+    </div>
+  </div>
+
+  <!-- Section 1: Yearly Summary Matrix -->
+  <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-lg">
+    <h2 class="text-base font-bold text-white mb-1">1. ตารางสรุปสถิติจำนวนป้ายแยกรายปี & Media Type (Yearly Summary Matrix)</h2>
+    <p class="text-xs text-slate-400 mb-4">แสดงครบทุกปีงบประมาณและทุกประเภทสื่อในมุมมองเดียว</p>
+    <div class="overflow-x-auto rounded-xl border border-slate-800">
+      <table class="w-full text-left text-xs sm:text-sm">
+        <thead class="bg-slate-950 text-slate-300 border-b border-slate-800">
+          <tr>
+            <th class="py-3 px-4">ปีงบ/รอบงาน</th>
+            ${mediaTypes.map(mt => `<th class="py-3 px-3 text-center">${mt}</th>`).join('')}
+            <th class="py-3 px-4 text-right text-indigo-300">รวมป้าย</th>
+            <th class="py-3 px-4 text-center text-sky-300">Downtime เฉลี่ย</th>
+            <th class="py-3 px-4 text-right text-rose-300">Direct Cost</th>
+            <th class="py-3 px-4 text-right text-amber-300">สูญเสียรายได้</th>
+            <th class="py-3 px-4 text-right text-purple-300">ผลกระทบรวม</th>
+          </tr>
+        </thead>
+        <tbody class="bg-slate-900/70">
+          ${matrixRowsHtml}
+        </tbody>
+        <tfoot class="bg-slate-950 font-bold text-white border-t-2 border-indigo-500/40">
+          <tr>
+            <td class="py-3.5 px-4">รวมทั้งหมด</td>
+            ${mediaTypes.map(mt => `<td class="py-3.5 px-3 text-center text-indigo-200">${colTotals[mt]}</td>`).join('')}
+            <td class="py-3.5 px-4 text-right text-indigo-300">${totalSignsAll} ป้าย (100%)</td>
+            <td class="py-3.5 px-4 text-center font-mono text-sky-300">${overallAvgDown} วัน</td>
+            <td class="py-3.5 px-4 text-right font-mono text-rose-300">฿${Math.round(totalDirectAll).toLocaleString()}</td>
+            <td class="py-3.5 px-4 text-right font-mono text-amber-300">฿${Math.round(totalLossAll).toLocaleString()}</td>
+            <td class="py-3.5 px-4 text-right font-mono text-purple-300">฿${Math.round(totalImpactAll).toLocaleString()}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- Section 2: Full History Table -->
+  <div id="popupLogSection" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-lg">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+      <div>
+        <h2 class="text-base font-bold text-white">2. ตารางสมุดบันทึกประวัติการย้ายป้ายทั้งหมด (${totalSignsAll} รายการ)</h2>
+        <p class="text-xs text-slate-400">แสดงข้อมูลครบทุกคอลัมน์ในหน้าเดียว</p>
+      </div>
+      <div class="flex items-center gap-2 no-print">
+        <select id="popYearFilter" onchange="filterPopupRows()" class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white">
+          <option value="ALL">ทุกปีงบประมาณ</option>
+          ${categories.map(c => `<option value="${c}">ปี ${c}</option>`).join('')}
+        </select>
+        <select id="popMediaFilter" onchange="filterPopupRows()" class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white">
+          <option value="ALL">ทุกประเภทสื่อ</option>
+          ${mediaTypes.map(m => `<option value="${m}">${m}</option>`).join('')}
+        </select>
+        <input type="text" id="popSearch" oninput="filterPopupRows()" placeholder="ค้นหาป้าย, สถานที่, เขต..." class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white w-56">
+      </div>
+    </div>
+    <div class="overflow-x-auto rounded-xl border border-slate-800">
+      <table class="w-full text-left text-xs">
+        <thead class="bg-slate-950 text-slate-300 border-b border-slate-800">
+          <tr>
+            <th class="py-3 px-3">#</th>
+            <th class="py-3 px-3">ปี</th>
+            <th class="py-3 px-3">Media ID</th>
+            <th class="py-3 px-3">ประเภทสื่อ</th>
+            <th class="py-3 px-3">บริษัท</th>
+            <th class="py-3 px-3">จุดติดตั้งเดิม (Origin)</th>
+            <th class="py-3 px-3">จุดติดตั้งใหม่ (Destination)</th>
+            <th class="py-3 px-3">วันที่รื้อ → ติดตั้ง</th>
+            <th class="py-3 px-3 text-center">Downtime</th>
+            <th class="py-3 px-3">สาเหตุการย้าย</th>
+            <th class="py-3 px-3 text-right">Direct Cost</th>
+            <th class="py-3 px-3 text-right">ค่าเสียโอกาส</th>
+            <th class="py-3 px-3 text-right">ผลกระทบรวม</th>
+            <th class="py-3 px-3 text-center">สถานะ</th>
+          </tr>
+        </thead>
+        <tbody id="popTableBody">
+          ${logRowsHtml}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    function filterPopupRows() {
+      const yr = document.getElementById('popYearFilter').value;
+      const mt = document.getElementById('popMediaFilter').value;
+      const q = document.getElementById('popSearch').value.trim().toLowerCase();
+      document.querySelectorAll('.log-row').forEach(row => {
+        const matchYr = (yr === 'ALL' || row.getAttribute('data-year') === yr);
+        const matchMt = (mt === 'ALL' || row.getAttribute('data-media') === mt);
+        const matchQ = (!q || row.innerText.toLowerCase().includes(q));
+        row.style.display = (matchYr && matchMt && matchQ) ? '' : 'none';
+      });
+    }
+    ${focusSection === 'log' ? "setTimeout(() => document.getElementById('popupLogSection').scrollIntoView({behavior:'smooth'}), 200);" : ""}
+  <\/script>
+</body>
+</html>`;
+
+      popupWin.document.open();
+      popupWin.document.write(htmlDoc);
+      popupWin.document.close();
+      popupWin.focus();
     }
 
     // ----------------------------------------------------
