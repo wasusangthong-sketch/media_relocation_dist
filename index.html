@@ -75,8 +75,8 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
 
-  <!-- Top Navigation Bar -->
-  <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-40 px-6 py-3.5 flex flex-wrap items-center justify-between gap-4">
+  <!-- Top Navigation Bar (Desktop) -->
+  <header id="desktopHeader" class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-40 px-6 py-3.5 flex flex-wrap items-center justify-between gap-4">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-rose-500/20">
         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -86,19 +86,25 @@
       <div>
         <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
           Static Media Relocation & Impact Tracker
-          <span class="px-2 py-0.5 text-xs font-semibold bg-emerald-500/20 text-emerald-400 rounded-full border border-emerald-500/30">v2.1 Pro</span>
+          <span class="px-2 py-0.5 text-xs font-semibold bg-emerald-500/20 text-emerald-400 rounded-full border border-emerald-500/30">v2.2 Pro</span>
         </h1>
         <p class="text-xs text-slate-400">ระบบบันทึกประวัติย้ายจุดติดตั้งสื่อ Static Media คำนวณต้นทุน/ค่าเสียโอกาส และผลักดันเคสคงค้าง</p>
       </div>
     </div>
 
     <!-- Quick Action Bar -->
-    <div class="flex items-center gap-3 text-xs">
+    <div class="flex flex-wrap items-center gap-2.5 text-xs">
       <!-- Auto-Save Status Indicator -->
       <div id="saveStatusIndicator" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs bg-slate-900 border border-slate-800 text-slate-400" title="ข้อมูลจะถูกบันทึกเก็บไว้ในเครื่องของคุณอัตโนมัติ">
         <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
         <span id="saveStatusText">บันทึกอัตโนมัติแล้ว</span>
       </div>
+
+      <!-- Switch to Mobile App View Button -->
+      <button onclick="setDeviceViewMode('mobile')" class="px-3.5 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-400 hover:to-rose-400 text-white font-semibold flex items-center gap-1.5 transition-all shadow-md shadow-rose-500/20" title="สลับเป็นหน้าต่างโหมดมือถือ (Mobile Executive & Pending App)">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+        📱 โหมดมือถือ (Mobile View)
+      </button>
 
       <button onclick="manualSaveData()" class="px-3.5 py-2 rounded-lg bg-blue-600/90 hover:bg-blue-600 text-white font-medium flex items-center gap-1.5 transition-all shadow-md shadow-blue-600/30" title="บันทึกข้อมูลปัจจุบันลงในเบราว์เซอร์ทันที">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
@@ -123,8 +129,8 @@
     </div>
   </header>
 
-  <!-- Main Tabs Navigation Bar -->
-  <div class="bg-slate-900 border-b border-slate-800 px-6">
+  <!-- Main Tabs Navigation Bar (Desktop) -->
+  <div id="desktopTabBar" class="bg-slate-900 border-b border-slate-800 px-6">
     <div class="max-w-[1700px] mx-auto flex items-center gap-2">
       <!-- Tab 1: Overview & History -->
       <button onclick="switchTab('tab-overview')" id="nav-tab-overview" class="tab-btn px-4 py-3.5 text-xs font-semibold border-b-2 border-indigo-500 text-white flex items-center gap-2 transition-all">
@@ -141,8 +147,8 @@
     </div>
   </div>
 
-  <!-- Main Container -->
-  <main class="flex-1 p-6 max-w-[1700px] w-full mx-auto space-y-6">
+  <!-- Main Container (Desktop) -->
+  <main id="desktopMain" class="flex-1 p-6 max-w-[1700px] w-full mx-auto space-y-6">
 
     <!-- ========================================== -->
     <!-- TAB 1: OVERVIEW & HISTORY SECTION -->
@@ -854,6 +860,232 @@
     </div>
 
   </main>
+
+  <!-- ========================================================= -->
+  <!-- MOBILE APP MODE (โหมดหน้าต่างมือถืออัจฉริยะ ซิงค์ข้อมูล 100%) -->
+  <!-- ========================================================= -->
+  <div id="mobileAppView" class="hidden min-h-screen bg-slate-950 text-slate-100 pb-24">
+    <!-- Mobile Frame Container (Centered nicely if previewed on PC, Full-width on Phone) -->
+    <div class="max-w-md mx-auto min-h-screen bg-slate-950 sm:border-x sm:border-slate-800/80 sm:shadow-2xl flex flex-col">
+
+      <!-- Sticky Mobile App Top Header & Action Navigation (ไม่โดนโลโก้ด้านล่างบัง 100%) -->
+      <div class="sticky top-0 z-30 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-3.5 pt-3 pb-2.5 space-y-2.5 shadow-lg">
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-indigo-600 flex items-center justify-center shadow-md shadow-rose-500/20 shrink-0">
+              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+              </svg>
+            </div>
+            <div>
+              <div class="flex items-center gap-1.5">
+                <h1 class="text-sm font-bold text-white leading-tight">Media Relocation</h1>
+                <span class="px-1.5 py-0.5 text-[9px] font-bold bg-indigo-500/20 text-indigo-300 rounded-full border border-indigo-500/30">Mobile</span>
+              </div>
+              <p class="text-[10px] text-slate-400">สรุปผู้บริหาร & ติดตามเคสคงค้าง</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1.5">
+            <button type="button" onclick="openAddModal()" class="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold flex items-center gap-1 shadow-md shadow-emerald-600/20 active:scale-95 transition">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              เพิ่มรายการ
+            </button>
+            <button type="button" onclick="setDeviceViewMode('desktop')" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-[11px] font-medium flex items-center gap-1 transition" title="สลับไปหน้าจอแบบเต็ม (PC Mode)">
+              💻 PC
+            </button>
+          </div>
+        </div>
+
+        <!-- Top Segmented Navigation Bar (แทนแถบด้านล่างที่โดนบัง) -->
+        <div class="grid grid-cols-3 gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800">
+          <button type="button" onclick="switchMobileTab('overview')" id="mob-nav-overview" class="mob-nav-btn flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold text-white bg-indigo-600 shadow-sm transition">
+            <span>📊 สรุปภาพรวม</span>
+          </button>
+
+          <button type="button" onclick="switchMobileTab('pending')" id="mob-nav-pending" class="mob-nav-btn flex items-center justify-center gap-1 py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">
+            <span>⏳ เคสคงค้าง</span>
+            <span id="mobNavPendingBadge" class="px-1.5 py-0.2 text-[10px] font-extrabold rounded-full bg-amber-500 text-slate-950">0</span>
+          </button>
+
+          <button type="button" onclick="openAddModal()" class="flex items-center justify-center gap-1 py-2 rounded-lg text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 active:scale-95 transition">
+            <span>➕ บันทึกใหม่</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ================================================= -->
+      <!-- MOBILE TAB 1: สรุปผู้บริหาร (EXECUTIVE OVERVIEW) -->
+      <!-- ================================================= -->
+      <div id="mob-tab-overview" class="p-4 space-y-4 flex-1">
+
+        <!-- Year Filter Pills (Touch-Friendly) -->
+        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-2 flex items-center justify-between gap-1">
+          <button type="button" onclick="setMobileYearFilter('all')" id="mob-yr-all" class="mob-yr-btn flex-1 py-2 rounded-xl text-xs font-semibold bg-indigo-600 text-white shadow-sm transition">ทั้งหมด</button>
+          <button type="button" onclick="setMobileYearFilter('2024')" id="mob-yr-2024" class="mob-yr-btn flex-1 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition">2024</button>
+          <button type="button" onclick="setMobileYearFilter('2025')" id="mob-yr-2025" class="mob-yr-btn flex-1 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition">2025</button>
+          <button type="button" onclick="setMobileYearFilter('2026')" id="mob-yr-2026" class="mob-yr-btn flex-1 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition">2026</button>
+        </div>
+
+        <!-- 2x2 Executive KPI Cards -->
+        <div class="grid grid-cols-2 gap-3">
+          <!-- KPI 1: Total Signs -->
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 relative overflow-hidden">
+            <div class="flex items-center justify-between text-[11px] text-slate-400 mb-1">
+              <span>ป้ายที่ย้ายรวม</span>
+              <span class="w-2 h-2 rounded-full bg-blue-400"></span>
+            </div>
+            <div class="text-2xl font-extrabold text-white font-mono" id="mobKpiTotal">0</div>
+            <div class="mt-1.5 flex items-center justify-between text-[10px]">
+              <span class="text-emerald-400 font-semibold" id="mobKpiCompleted">0 สำเร็จ</span>
+              <button type="button" onclick="switchMobileTab('pending')" class="text-amber-400 font-bold underline" id="mobKpiPending">0 ค้าง ➔</button>
+            </div>
+          </div>
+
+          <!-- KPI 2: Total Financial Impact -->
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 relative overflow-hidden">
+            <div class="flex items-center justify-between text-[11px] text-slate-400 mb-1">
+              <span>ผลกระทบรวมสุทธิ</span>
+              <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+            </div>
+            <div class="text-xl font-extrabold text-purple-300 font-mono truncate" id="mobKpiImpact">฿0</div>
+            <div class="mt-1.5 text-[10px] text-slate-400 truncate" id="mobKpiAvgImpact">เฉลี่ย ฿0/ป้าย</div>
+          </div>
+
+          <!-- KPI 3: Direct Cost -->
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 relative overflow-hidden">
+            <div class="flex items-center justify-between text-[11px] text-slate-400 mb-1">
+              <span>ค่าใช้จ่ายทางตรง</span>
+              <span class="w-2 h-2 rounded-full bg-rose-400"></span>
+            </div>
+            <div class="text-lg font-bold text-rose-400 font-mono truncate" id="mobKpiDirect">฿0</div>
+            <div class="mt-1 text-[10px] text-slate-400">รื้อถอน + ฐานราก + ติดตั้ง</div>
+          </div>
+
+          <!-- KPI 4: Downtime Opportunity Loss -->
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 relative overflow-hidden">
+            <div class="flex items-center justify-between text-[11px] text-slate-400 mb-1">
+              <span>สูญเสียรายได้</span>
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            </div>
+            <div class="text-lg font-bold text-amber-400 font-mono truncate" id="mobKpiLoss">฿0</div>
+            <div class="mt-1 text-[10px] text-slate-400">Downtime เฉลี่ย <strong class="text-white" id="mobKpiDowntime">0</strong> วัน</div>
+          </div>
+        </div>
+
+        <!-- Alert Banner for Pending Cases (Quick Jump) -->
+        <div id="mobPendingBanner" onclick="switchMobileTab('pending')" class="bg-gradient-to-r from-amber-950/70 via-slate-900 to-slate-900 border border-amber-700/50 rounded-2xl p-3.5 flex items-center justify-between cursor-pointer active:scale-[0.99] transition">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div>
+              <div class="text-xs font-bold text-amber-300" id="mobBannerTitle">มีเคสคงค้างรอดำเนินการ 0 เคส</div>
+              <div class="text-[11px] text-slate-400">แตะเพื่อเปิดการ์ดติดตามและกดอัปเดตสถานะ</div>
+            </div>
+          </div>
+          <span class="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 text-xs font-bold shrink-0">เปิดดู ➔</span>
+        </div>
+
+        <!-- Compact Yearly Summary Cards (2024 - 2026) -->
+        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xs font-bold text-white flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                สรุปยอดเปรียบเทียบรายปี (2024 - 2026)
+              </h2>
+              <p class="text-[10px] text-slate-400">ย่อจากตาราง Matrix ให้ดูง่ายบนมือถือ (แตะเพื่อดูป้าย)</p>
+            </div>
+          </div>
+          <div id="mobYearlySummaryList" class="space-y-2.5">
+            <!-- Dynamically populated in JS -->
+          </div>
+        </div>
+
+        <!-- Compact Media Type Breakdown -->
+        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xs font-bold text-white flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
+                สัดส่วนแยกตามประเภทสื่อ (Media Portfolio)
+              </h2>
+              <p class="text-[10px] text-slate-400">เรียงตามจำนวนป้ายที่ย้ายในรอบที่เลือก</p>
+            </div>
+          </div>
+          <div id="mobMediaTypeList" class="space-y-2.5">
+            <!-- Dynamically populated in JS -->
+          </div>
+        </div>
+
+        <!-- Compact Recent / Filtered Sign Cards (Expandable) -->
+        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <h2 class="text-xs font-bold text-white flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+              ค้นหาและดูประวัติป้ายย่อ (<span id="mobSignListCount">0</span>)
+            </h2>
+          </div>
+          <div class="relative">
+            <input type="text" id="mobSearchInput" oninput="renderMobileApp()" placeholder="พิมพ์รหัสป้าย, สถานที่, เขต..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+            <svg class="w-4 h-4 text-slate-500 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          </div>
+          <div id="mobSignCardsContainer" class="space-y-2 max-h-96 overflow-y-auto pr-0.5">
+            <!-- Dynamically populated compact sign cards -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ================================================= -->
+      <!-- MOBILE TAB 2: การ์ดเคสคงค้าง (PENDING ACTION CARDS) -->
+      <!-- ================================================= -->
+      <div id="mob-tab-pending" class="p-4 space-y-4 flex-1 hidden">
+
+        <!-- Pending Header & Quick Add Button -->
+        <div class="bg-gradient-to-br from-amber-950/60 via-slate-900 to-slate-900 border border-amber-800/50 rounded-2xl p-4">
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+              Pending Action Cards
+            </span>
+            <button type="button" onclick="openAddModal(true)" class="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold flex items-center gap-1 shadow-md shadow-amber-600/20 active:scale-95 transition">
+              + เพิ่มเคสรอย้าย
+            </button>
+          </div>
+          <h2 class="text-sm font-bold text-white">ติดตามและผลักดันเคสคงค้าง</h2>
+          <p class="text-[11px] text-slate-300 mt-0.5">แตะปุ่มบนการ์ดเพื่ออัปเดตสถานะ ใส่จุดติดตั้งใหม่ หรือกดปิดงานได้ทันที</p>
+
+          <!-- 3 Stage Mini Counters + Loss -->
+          <div class="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-slate-800/80 text-center">
+            <div class="bg-slate-950/80 rounded-xl p-2 border border-slate-800">
+              <div class="text-[10px] text-slate-400">1. รอย้าย/หาจุด</div>
+              <div class="text-sm font-extrabold text-rose-400 mt-0.5" id="mobStage1Count">0</div>
+            </div>
+            <div class="bg-slate-950/80 rounded-xl p-2 border border-slate-800">
+              <div class="text-[10px] text-slate-400">2. รอฐานราก</div>
+              <div class="text-sm font-extrabold text-amber-400 mt-0.5" id="mobStage2Count">0</div>
+            </div>
+            <div class="bg-slate-950/80 rounded-xl p-2 border border-slate-800">
+              <div class="text-[10px] text-slate-400">3. รอติดตั้ง</div>
+              <div class="text-sm font-extrabold text-sky-400 mt-0.5" id="mobStage3Count">0</div>
+            </div>
+          </div>
+          <div class="mt-2 bg-slate-950/80 rounded-xl px-3 py-2 border border-slate-800 flex items-center justify-between text-xs">
+            <span class="text-slate-400">สูญเสียรายได้สะสมระหว่างรอ:</span>
+            <span class="font-mono font-bold text-purple-300" id="mobPendingLossTotal">฿0</span>
+          </div>
+        </div>
+
+        <!-- Pending Cards List -->
+        <div id="mobPendingCardsList" class="space-y-3">
+          <!-- Rendered dynamically in JS -->
+        </div>
+
+      </div>
+
+    </div>
+  </div>
 
   <!-- ========================================== -->
   <!-- MODAL: ADD / EDIT RELOCATION RECORD -->
@@ -3586,6 +3818,9 @@
       renderDashboard();
       updatePendingBadge();
       updateBefore2024Badge();
+      if (typeof renderMobileApp === 'function') {
+        renderMobileApp();
+      }
     }
 
     function updatePendingBadge() {
@@ -5555,6 +5790,340 @@
     }
 
     // ----------------------------------------------------
+    // MOBILE APP VIEW LOGIC (โหมดมือถืออัจฉริยะ ซิงค์ข้อมูล 100%)
+    // ----------------------------------------------------
+    let currentDeviceMode = 'desktop'; // 'desktop' | 'mobile'
+    let currentMobileTab = 'overview'; // 'overview' | 'pending'
+    let mobileYearFilter = 'all';
+
+    function setDeviceViewMode(mode) {
+      currentDeviceMode = mode;
+      const dHeader = document.getElementById('desktopHeader');
+      const dTabBar = document.getElementById('desktopTabBar');
+      const dMain = document.getElementById('desktopMain');
+      const mView = document.getElementById('mobileAppView');
+
+      if (mode === 'mobile') {
+        dHeader?.classList.add('hidden');
+        dTabBar?.classList.add('hidden');
+        dMain?.classList.add('hidden');
+        mView?.classList.remove('hidden');
+        renderMobileApp();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        mView?.classList.add('hidden');
+        dHeader?.classList.remove('hidden');
+        dTabBar?.classList.remove('hidden');
+        dMain?.classList.remove('hidden');
+        applyFilters();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    function switchMobileTab(tabName) {
+      currentMobileTab = tabName;
+      const tabOverview = document.getElementById('mob-tab-overview');
+      const tabPending = document.getElementById('mob-tab-pending');
+      const navOverview = document.getElementById('mob-nav-overview');
+      const navPending = document.getElementById('mob-nav-pending');
+
+      if (tabName === 'pending') {
+        tabOverview?.classList.add('hidden');
+        tabPending?.classList.remove('hidden');
+        if (navPending) {
+          navPending.className = "mob-nav-btn flex items-center justify-center gap-1 py-2 rounded-lg text-xs font-bold text-slate-950 bg-amber-400 shadow-sm transition";
+        }
+        if (navOverview) {
+          navOverview.className = "mob-nav-btn flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
+        }
+      } else {
+        tabPending?.classList.add('hidden');
+        tabOverview?.classList.remove('hidden');
+        if (navOverview) {
+          navOverview.className = "mob-nav-btn flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold text-white bg-indigo-600 shadow-sm transition";
+        }
+        if (navPending) {
+          navPending.className = "mob-nav-btn flex items-center justify-center gap-1 py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
+        }
+      }
+      renderMobileApp();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function setMobileYearFilter(yr) {
+      mobileYearFilter = yr;
+      document.querySelectorAll('.mob-yr-btn').forEach(btn => {
+        btn.classList.remove('bg-indigo-600', 'text-white', 'shadow-sm');
+        btn.classList.add('text-slate-400');
+      });
+      const activeBtn = document.getElementById(`mob-yr-${yr}`);
+      if (activeBtn) {
+        activeBtn.classList.remove('text-slate-400');
+        activeBtn.classList.add('bg-indigo-600', 'text-white', 'shadow-sm');
+      }
+      // Also sync with main year filter so both views stay in sync
+      currentYearFilter = yr;
+      renderMobileApp();
+    }
+
+    function renderMobileApp() {
+      const mView = document.getElementById('mobileAppView');
+      if (!mView) return;
+
+      // Filter data according to mobileYearFilter & mobile search
+      const searchQ = (document.getElementById('mobSearchInput')?.value || '').trim().toLowerCase();
+      const mobFiltered = masterData.filter(item => {
+        if (mobileYearFilter !== 'all' && String(item.year) !== String(mobileYearFilter)) return false;
+        return true;
+      });
+
+      const total = mobFiltered.length;
+      const completed = mobFiltered.filter(d => d.status === 'Completed').length;
+      const pending = mobFiltered.filter(d => d.status === 'Pending').length;
+      const allPendingCount = masterData.filter(d => d.status === 'Pending').length;
+
+      const sumDirect = mobFiltered.reduce((a, b) => a + (b.directCost || 0), 0);
+      const sumLoss = mobFiltered.reduce((a, b) => a + (b.opportunityLoss || 0), 0);
+      const sumImpact = mobFiltered.reduce((a, b) => a + (b.totalImpact || 0), 0);
+      const avgImpact = total > 0 ? Math.round(sumImpact / total) : 0;
+      const avgDowntime = total > 0 ? Math.round(mobFiltered.reduce((a, b) => a + (b.downtimeDays || 0), 0) / total) : 0;
+
+      // Update 2x2 KPIs
+      const elTotal = document.getElementById('mobKpiTotal');
+      const elComp = document.getElementById('mobKpiCompleted');
+      const elPend = document.getElementById('mobKpiPending');
+      const elImp = document.getElementById('mobKpiImpact');
+      const elAvgImp = document.getElementById('mobKpiAvgImpact');
+      const elDir = document.getElementById('mobKpiDirect');
+      const elLoss = document.getElementById('mobKpiLoss');
+      const elDown = document.getElementById('mobKpiDowntime');
+
+      if (elTotal) elTotal.innerText = `${total} ป้าย`;
+      if (elComp) elComp.innerText = `${completed} สำเร็จ`;
+      if (elPend) elPend.innerText = `${pending} คงค้าง ➔`;
+      if (elImp) elImp.innerText = `฿${Math.round(sumImpact).toLocaleString()}`;
+      if (elAvgImp) elAvgImp.innerText = `เฉลี่ย ฿${avgImpact.toLocaleString()}/ป้าย`;
+      if (elDir) elDir.innerText = `฿${Math.round(sumDirect).toLocaleString()}`;
+      if (elLoss) elLoss.innerText = `฿${Math.round(sumLoss).toLocaleString()}`;
+      if (elDown) elDown.innerText = avgDowntime;
+
+      // Update Pending Badges & Banner
+      const navBadge = document.getElementById('mobNavPendingBadge');
+      if (navBadge) navBadge.innerText = allPendingCount;
+      const bannerTitle = document.getElementById('mobBannerTitle');
+      if (bannerTitle) {
+        bannerTitle.innerText = allPendingCount > 0
+          ? `มีเคสคงค้างรอดำเนินการ ${allPendingCount} เคส`
+          : `ไม่มีเคสคงค้างในระบบ (สำเร็จครบ 100%)`;
+      }
+
+      // 1. Render Compact Yearly Summary Cards (2024, 2025, 2026)
+      const yrContainer = document.getElementById('mobYearlySummaryList');
+      if (yrContainer) {
+        const years = ['2024', '2025', '2026'];
+        yrContainer.innerHTML = years.map(yr => {
+          const yrItems = masterData.filter(d => String(d.year) === yr);
+          const yrCount = yrItems.length;
+          const yrImpact = yrItems.reduce((a, b) => a + (b.totalImpact || 0), 0);
+          const yrDirect = yrItems.reduce((a, b) => a + (b.directCost || 0), 0);
+          const yrPending = yrItems.filter(d => d.status === 'Pending').length;
+          const yrAvgDown = yrCount > 0 ? (yrItems.reduce((a, b) => a + (b.downtimeDays || 0), 0) / yrCount).toFixed(1) : '0';
+
+          // Media breakdown tags
+          const mediaCounts = {};
+          yrItems.forEach(d => {
+            const mt = d.mediaType || 'Cookies';
+            mediaCounts[mt] = (mediaCounts[mt] || 0) + 1;
+          });
+          const mediaTagsHtml = Object.entries(mediaCounts)
+            .sort((a, b) => b[1] - a[1])
+            .map(([mt, cnt]) => `<span class="px-2 py-0.5 rounded-md bg-slate-900 border border-slate-700/80 text-[10px] text-slate-300">${mt}: <strong class="text-white">${cnt}</strong></span>`)
+            .join('');
+
+          const isSelectedYr = mobileYearFilter === yr;
+
+          return `
+            <div onclick="setMobileYearFilter('${isSelectedYr ? 'all' : yr}')" class="p-3 rounded-xl border transition cursor-pointer ${isSelectedYr ? 'bg-indigo-950/50 border-indigo-500 ring-1 ring-indigo-500/40' : 'bg-slate-950/80 border-slate-800/90 hover:border-slate-700'}">
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 rounded-lg text-xs font-bold font-mono ${yr === '2026' ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30' : yr === '2025' ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'}">ปี ${yr}</span>
+                  <span class="text-sm font-extrabold text-white">${yrCount} ป้าย</span>
+                  ${yrPending > 0 ? `<span class="text-[10px] px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-300 font-semibold">⏳ ค้าง ${yrPending}</span>` : '<span class="text-[10px] text-emerald-400">✓ ครบ</span>'}
+                </div>
+                <div class="text-right">
+                  <div class="text-xs font-bold font-mono text-purple-300">฿${Math.round(yrImpact).toLocaleString()}</div>
+                  <div class="text-[9px] text-slate-400">Direct: ฿${Math.round(yrDirect).toLocaleString()} • เฉลี่ย ${yrAvgDown} วัน</div>
+                </div>
+              </div>
+              <div class="flex flex-wrap gap-1 mt-2 pt-2 border-t border-slate-800/70">
+                ${mediaTagsHtml || '<span class="text-[10px] text-slate-500">ไม่มีรายการ</span>'}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // 2. Render Compact Media Type Breakdown
+      const mtContainer = document.getElementById('mobMediaTypeList');
+      if (mtContainer) {
+        const mtMap = {};
+        mobFiltered.forEach(d => {
+          const mt = d.mediaType || 'Cookies';
+          if (!mtMap[mt]) mtMap[mt] = { count: 0, impact: 0 };
+          mtMap[mt].count += 1;
+          mtMap[mt].impact += (d.totalImpact || 0);
+        });
+        const sortedMt = Object.entries(mtMap).sort((a, b) => b[1].count - a[1].count);
+        if (sortedMt.length === 0) {
+          mtContainer.innerHTML = `<div class="text-center py-4 text-xs text-slate-500">ไม่มีข้อมูลในรอบปีที่เลือก</div>`;
+        } else {
+          mtContainer.innerHTML = sortedMt.map(([mt, info]) => {
+            const pct = total > 0 ? Math.round((info.count / total) * 100) : 0;
+            return `
+              <div class="bg-slate-950/80 border border-slate-800/80 rounded-xl p-2.5">
+                <div class="flex items-center justify-between text-xs mb-1">
+                  <span class="font-bold text-slate-200">${mt}</span>
+                  <div class="flex items-center gap-2 font-mono">
+                    <span class="text-indigo-300 font-bold">${info.count} ป้าย (${pct}%)</span>
+                    <span class="text-purple-300 text-[11px]">฿${Math.round(info.impact).toLocaleString()}</span>
+                  </div>
+                </div>
+                <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                  <div class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full" style="width: ${Math.max(pct, 4)}%"></div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      // 3. Render Compact Sign Lookup Cards
+      const signCardsContainer = document.getElementById('mobSignCardsContainer');
+      const signListCountEl = document.getElementById('mobSignListCount');
+      if (signCardsContainer) {
+        const signList = mobFiltered.filter(d => {
+          if (!searchQ) return true;
+          const hay = `${d.mediaId} ${d.mediaType} ${d.originSite} ${d.destSite} ${d.originArea} ${d.destArea} ${d.causeCategory}`.toLowerCase();
+          return hay.includes(searchQ);
+        });
+        if (signListCountEl) signListCountEl.innerText = `${signList.length} ป้าย`;
+
+        if (signList.length === 0) {
+          signCardsContainer.innerHTML = `<div class="py-6 text-center text-xs text-slate-500">ไม่พบป้ายที่ค้นหา</div>`;
+        } else {
+          signCardsContainer.innerHTML = signList.map(item => `
+            <div onclick="showDetail('${item.id}')" class="p-3 bg-slate-950/90 border border-slate-800 hover:border-indigo-500/50 rounded-xl cursor-pointer active:scale-[0.99] transition">
+              <div class="flex items-center justify-between gap-2 mb-1">
+                <div class="flex items-center gap-1.5">
+                  <span class="font-bold text-white text-xs">${item.mediaId}</span>
+                  <span class="text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-300">${item.mediaType}</span>
+                  <span class="text-[10px] font-mono text-indigo-400">(${item.year})</span>
+                </div>
+                ${item.status === 'Completed'
+                  ? '<span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">สำเร็จ</span>'
+                  : '<span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold">⏳ คงค้าง</span>'}
+              </div>
+              <div class="text-[11px] text-slate-300 truncate">📍 เดิม: ${item.originSite} (เขต ${item.originArea})</div>
+              <div class="text-[11px] text-emerald-300/90 truncate">🎯 ใหม่: ${item.destSite || 'อยู่ระหว่างจัดหาพื้นที่'}</div>
+              <div class="mt-1.5 pt-1.5 border-t border-slate-800/80 flex items-center justify-between text-[10px] text-slate-400">
+                <span>Downtime: <strong class="text-slate-200">${item.downtimeDays} วัน</strong></span>
+                <span class="font-mono text-purple-300 font-semibold">ผลกระทบ ฿${Math.round(item.totalImpact || 0).toLocaleString()}</span>
+              </div>
+            </div>
+          `).join('');
+        }
+      }
+
+      // 4. Render Mobile Tab 2: Pending Action Cards
+      const pendingList = masterData.filter(d => d.status === 'Pending');
+      const s1 = pendingList.filter(d => (d.pendingStage || '').includes('รอย้าย') || (d.pendingStage || '').includes('จัดหา')).length;
+      const s2 = pendingList.filter(d => (d.pendingStage || '').includes('ฐานราก') || (d.pendingStage || '').includes('อนุญาต')).length;
+      const s3 = pendingList.filter(d => (d.pendingStage || '').includes('รอติดตั้ง') || (d.pendingStage || '').includes('ระบบไฟ')).length;
+      const pLoss = pendingList.reduce((a, b) => a + (b.opportunityLoss || 0), 0);
+
+      const elS1 = document.getElementById('mobStage1Count');
+      const elS2 = document.getElementById('mobStage2Count');
+      const elS3 = document.getElementById('mobStage3Count');
+      const elPLoss = document.getElementById('mobPendingLossTotal');
+      if (elS1) elS1.innerText = `${s1} เคส`;
+      if (elS2) elS2.innerText = `${s2} เคส`;
+      if (elS3) elS3.innerText = `${s3} เคส`;
+      if (elPLoss) elPLoss.innerText = `฿${Math.round(pLoss).toLocaleString()}`;
+
+      const mobPendingContainer = document.getElementById('mobPendingCardsList');
+      if (mobPendingContainer) {
+        if (pendingList.length === 0) {
+          mobPendingContainer.innerHTML = `
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center">
+              <div class="text-2xl mb-2">🎉</div>
+              <div class="text-sm font-bold text-emerald-400">ไม่มีเคสคงค้างในขณะนี้</div>
+              <p class="text-xs text-slate-400 mt-1">ป้ายทั้งหมดได้รับการติดตั้งเรียบร้อยแล้ว</p>
+            </div>
+          `;
+        } else {
+          mobPendingContainer.innerHTML = pendingList.map(item => `
+            <div class="bg-slate-900 border border-amber-500/30 rounded-2xl p-4 space-y-3 shadow-md">
+              <!-- Card Header -->
+              <div class="flex items-start justify-between gap-2">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full ${item.downtimeDays > 45 ? 'bg-rose-500 animate-pulse' : 'bg-amber-400'}"></span>
+                    <span class="text-base font-extrabold text-white">${item.mediaId}</span>
+                    <span class="px-2 py-0.5 rounded-md bg-slate-800 text-amber-300 text-[11px] font-medium">${item.mediaType}</span>
+                  </div>
+                  <p class="text-[11px] text-slate-400 mt-0.5">${item.company}</p>
+                </div>
+                <span class="px-2.5 py-1 rounded-xl text-xs font-bold font-mono ${item.downtimeDays > 45 ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'}">
+                  ค้าง ${item.downtimeDays} วัน
+                </span>
+              </div>
+
+              <!-- Current Workflow Stage Badge -->
+              <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+                <span class="text-[11px] text-slate-400">ขั้นตอนปัจจุบัน:</span>
+                <span class="text-xs font-bold text-amber-300">⏳ ${item.pendingStage || 'รอย้าย / จัดหาพื้นที่ใหม่'}</span>
+              </div>
+
+              <!-- Origin & Destination Info -->
+              <div class="space-y-1.5 text-xs bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
+                <div>
+                  <span class="text-[10px] font-bold text-rose-400 uppercase">จุดติดตั้งเดิม (รื้อเมื่อ: ${formatThaiDate(item.dismantleDate)})</span>
+                  <p class="text-slate-200 font-medium mt-0.5">${item.originSite} <span class="text-slate-400">(เขต ${item.originArea})</span></p>
+                </div>
+                <div class="pt-1.5 border-t border-slate-800/70">
+                  <span class="text-[10px] font-bold text-emerald-400 uppercase">จุดติดตั้งใหม่ (Destination)</span>
+                  <p class="text-slate-200 font-medium mt-0.5">${item.destSite || '<span class="text-amber-400">ยังไม่ได้จุดใหม่ / อยู่ระหว่างจัดหา</span>'} <span class="text-slate-400">(เขต ${item.destArea || '-'})</span></p>
+                </div>
+              </div>
+
+              <!-- Bottleneck & Cost Impact -->
+              <div class="flex items-center justify-between text-xs px-1">
+                <div class="text-slate-400 truncate max-w-[60%]">
+                  <span class="text-slate-500">สาเหตุ/ติดขัด:</span> <span class="text-slate-300">${item.bottleneck || item.causeDetail}</span>
+                </div>
+                <div class="text-right font-mono">
+                  <span class="text-[10px] text-slate-400 block">ค่าเสียโอกาสสะสม</span>
+                  <span class="text-xs font-bold text-amber-300">฿${Math.round(item.opportunityLoss || 0).toLocaleString()}</span>
+                </div>
+              </div>
+
+              <!-- Touch Action Buttons -->
+              <div class="grid grid-cols-3 gap-2 pt-1">
+                <button type="button" onclick="openPushModal('${item.id}')" class="col-span-2 py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-amber-600/20 active:scale-[0.98] transition">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                  อัปเดตสถานะ / ปิดงาน
+                </button>
+                <button type="button" onclick="showDetail('${item.id}')" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs flex items-center justify-center gap-1 active:scale-[0.98] transition">
+                  ดูข้อมูล
+                </button>
+              </div>
+            </div>
+          `).join('');
+        }
+      }
+    }
+
+    // ----------------------------------------------------
     // INITIALIZATION
     // ----------------------------------------------------
     window.addEventListener('DOMContentLoaded', () => {
@@ -5563,6 +6132,12 @@
       applyFilters();
       updatePendingBadge();
       updateBefore2024Badge();
+
+      // Auto-detect mobile screen width (< 768px) or ?view=mobile query parameter
+      const urlParams = new URLSearchParams(window.location.search);
+      if (window.innerWidth < 768 || urlParams.get('view') === 'mobile') {
+        setDeviceViewMode('mobile');
+      }
     });
   </script>
 </body>

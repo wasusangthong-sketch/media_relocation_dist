@@ -9,3 +9,7 @@ default_master_data_js.txt
 
 # Excel temporary / working files
 ~$*.xlsx
+
+# Netlify local state
+.netlify
+
