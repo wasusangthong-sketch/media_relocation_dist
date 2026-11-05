@@ -1,0 +1,11 @@
+# Dependency and system files
+.DS_Store
+Thumbs.db
+
+# Staging & Temporary JSON files
+clean_master_data.json
+parsed_master_data.json
+default_master_data_js.txt
+
+# Excel temporary / working files
+~$*.xlsx
