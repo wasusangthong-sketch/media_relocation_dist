@@ -757,9 +757,9 @@
         </div>
 
         <!-- Table Container (Single Floating Sticky Bottom Scrollbar below) -->
-        <div id="mainLogTableContainer" onscroll="syncTableScroll('mainLogTableContainer', 'stickyBottomScrollbarMain')" class="overflow-x-auto no-native-scrollbar">
+        <div id="mainLogTableContainer" class="overflow-auto" style="max-height: calc(100vh - 150px);">
           <table id="mainLogTableElement" class="w-full text-left text-xs text-slate-300">
-            <thead class="bg-slate-950/90 text-slate-300 border-b border-slate-800">
+            <thead class="bg-slate-950 text-slate-300 border-b border-slate-800 sticky top-0 z-20">
               <tr>
                 <th class="py-3 px-4 font-semibold">Media ID / สื่อ</th>
                 <th class="py-3 px-4 font-semibold">จุดติดตั้งเดิม (Origin Site)</th>
@@ -780,10 +780,6 @@
           </table>
         </div>
 
-        <!-- Single Floating Sticky Bottom Horizontal Scrollbar (ลอยแช่ขอบล่างหน้าจออัตโนมัติ) -->
-        <div id="stickyBottomScrollbarMain" onscroll="syncTableScroll('stickyBottomScrollbarMain', 'mainLogTableContainer')" class="sticky bottom-0 z-30 overflow-x-auto bg-slate-950/95 backdrop-blur border-t border-slate-800 h-3.5 shadow-lg">
-          <div id="topScrollbarMainLogInner" class="h-1" style="width: 1500px;"></div>
-        </div>
 
         <!-- Pagination / Footer -->
         <div class="p-3 bg-slate-950/60 border-t border-slate-800 rounded-b-2xl flex items-center justify-between text-xs text-slate-400">
@@ -873,9 +869,9 @@
           </div>
         </div>
 
-        <div id="pendingTableContainer" onscroll="syncTableScroll('pendingTableContainer', 'stickyBottomScrollbarPending')" class="overflow-x-auto no-native-scrollbar">
+        <div id="pendingTableContainer" class="overflow-auto" style="max-height: calc(100vh - 150px);">
           <table id="pendingTableElement" class="w-full text-left text-xs text-slate-300">
-            <thead class="bg-slate-950/90 text-slate-300 border-b border-slate-800">
+            <thead class="bg-slate-950 text-slate-300 border-b border-slate-800 sticky top-0 z-20">
               <tr>
                 <th class="py-3 px-4 font-semibold">Media ID / สื่อ</th>
                 <th class="py-3 px-4 font-semibold">จุดเดิมที่ถูกรื้อถอน</th>
@@ -893,10 +889,6 @@
           </table>
         </div>
 
-        <!-- Single Floating Sticky Bottom Horizontal Scrollbar -->
-        <div id="stickyBottomScrollbarPending" onscroll="syncTableScroll('stickyBottomScrollbarPending', 'pendingTableContainer')" class="sticky bottom-0 z-30 overflow-x-auto bg-slate-950/95 backdrop-blur border-t border-slate-800 rounded-b-2xl h-3.5 shadow-lg">
-          <div id="topScrollbarPendingInner" class="h-1" style="width: 1400px;"></div>
-        </div>
       </div>
 
     </div>
@@ -4588,35 +4580,9 @@
       activateTabDOM(tabId);
     }
 
-    // Zero-lag 1:1 Synchronized Floating Sticky Bottom Horizontal Scrollbar
-    function syncTableScroll(sourceId, targetId) {
-      const src = document.getElementById(sourceId);
-      const tgt = document.getElementById(targetId);
-      if (!src || !tgt) return;
-      if (tgt.scrollLeft !== src.scrollLeft) {
-        tgt.scrollLeft = src.scrollLeft;
-      }
-    }
-
-    function scrollTableHorizontally(containerId, deltaX) {
-      const el = document.getElementById(containerId);
-      if (!el) return;
-      el.scrollBy({ left: deltaX, behavior: 'smooth' });
-    }
-
-    function updateTopScrollbarWidths() {
-      const mainTbl = document.getElementById('mainLogTableElement');
-      const mainInner = document.getElementById('topScrollbarMainLogInner');
-      if (mainTbl && mainInner) {
-        mainInner.style.width = mainTbl.scrollWidth + 'px';
-      }
-      const pendTbl = document.getElementById('pendingTableElement');
-      const pendInner = document.getElementById('topScrollbarPendingInner');
-      if (pendTbl && pendInner) {
-        pendInner.style.width = pendTbl.scrollWidth + 'px';
-      }
-    }
-    window.addEventListener('resize', updateTopScrollbarWidths);
+    // Tables use the browser's native (single) scrollbar inside a viewport-height container,
+    // so the horizontal bar always sits at the bottom of the screen with zero scroll lag.
+    function updateTopScrollbarWidths() { /* no-op: kept for backward compatibility */ }
 
     // ----------------------------------------------------
     // FILTER & SEARCH LOGIC
