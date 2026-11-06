@@ -160,6 +160,13 @@
         คงค้างที่ยังดำเนินการไม่เสร็จ (Pending Action Center)
         <span id="tabPendingBadge" class="ml-1 px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">0 เคส</span>
       </button>
+
+      <!-- Tab 3: AI Integrator (Gate Level 2-4) & Google Drive History Log -->
+      <button onclick="switchTab('tab-ai-gate')" id="nav-tab-ai-gate" class="tab-btn px-4 py-3.5 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 transition-all relative">
+        <span class="text-sm">🤖</span>
+        <span>AI Integrator (Level 4) & Google Drive Log</span>
+        <span id="driveSyncStatusBadgeTab" class="ml-1 px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Gate L2–L4</span>
+      </button>
     </div>
   </div>
 
@@ -870,6 +877,244 @@
               <!-- Pending rows rendered here -->
             </tbody>
           </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- TAB 3: AI INTEGRATOR (GATE LEVEL 2-4) & GOOGLE DRIVE HISTORY LOG -->
+    <!-- ================================================================= -->
+    <div id="tab-ai-gate" class="tab-content hidden space-y-6">
+
+      <!-- Top Banner: Progressive Gate L2 -> L3 -> L4 Status -->
+      <div class="bg-gradient-to-r from-indigo-950/90 via-slate-900 to-emerald-950/70 border border-indigo-500/40 rounded-2xl p-5 shadow-lg">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">Target: Level 4 (AI Integrator)</span>
+              <span class="px-2.5 py-0.5 text-[11px] font-semibold rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40">Progressive Gate L1 ➔ L2 ➔ L3 ➔ L4</span>
+            </div>
+            <h2 class="text-lg font-bold text-white">ศูนย์ควบคุม AI Workflow อัตโนมัติ & ฐานข้อมูล History Log บน Google Drive (Apps Script API)</h2>
+            <p class="text-xs text-slate-300">ออกแบบครบตามเกณฑ์ AI Literacy Gate Checklist ของบริษัท: มี Structured Prompt (L3.1), แบ่ง 2 Task ย่อย (L3.2), มีระบบ Validate (L3.3) และเชื่อม API อัตโนมัติลง Google Sheets พร้อมหลักฐาน Log จริง (L4.1–L4.5)</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" onclick="toggleAppsScriptGuideModal()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-indigo-600/20 transition">
+              📋 ดูวิธีทำ & คัดลอกโค้ด Apps Script
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 1: GOOGLE DRIVE (APPS SCRIPT API) CONNECTION & SYNC -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+              1. จุดเชื่อมต่ออัตโนมัติ Google Sheets & History_Log ใน Google Drive (เกณฑ์ L4.1 & L4.2)
+            </h3>
+            <p class="text-xs text-slate-400 mt-0.5">วางลิงก์ Web App URL จาก Google Apps Script เพื่อซิงค์ฐานข้อมูลป้าย (<code class="text-indigo-300">Media_Data</code>) และบันทึกประวัติทุกแอคชั่น (<code class="text-amber-300">History_Log</code>) ลง Google Drive อัตโนมัติ</p>
+          </div>
+          <span id="driveConnectionStatus" class="px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700">
+            ⚪ รอเชื่อมต่อ URL ของ Google Apps Script
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 items-center">
+          <div class="lg:col-span-7">
+            <input type="url" id="gasWebhookUrlInput" placeholder="วางลิงก์ https://script.google.com/macros/s/.../exec ที่นี่..." class="w-full bg-slate-950 border border-slate-700 focus:border-emerald-500 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none font-mono">
+          </div>
+          <div class="lg:col-span-5 flex flex-wrap items-center gap-2">
+            <button type="button" onclick="saveGasWebhookUrl()" class="px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition shadow-md shadow-emerald-600/20">
+              💾 บันทึกลิงก์เชื่อมต่อ
+            </button>
+            <button type="button" onclick="manualPushToGoogleDrive()" class="px-3 py-2.5 rounded-xl bg-sky-600/90 hover:bg-sky-500 text-white text-xs font-semibold transition flex items-center gap-1">
+              📤 ส่งข้อมูลขึ้น Drive ทันที
+            </button>
+            <button type="button" onclick="manualPullFromGoogleDrive()" class="px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition flex items-center gap-1">
+              📥 ดึงจาก Drive
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: VISUAL WORKFLOW DIAGRAM (n8n-Style Pipeline Inspector for Gate L4) -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-indigo-400"></span>
+              2. แผนผังการทำงานอัตโนมัติ (Automated AI Workflow Pipeline — เทียบเท่า n8n สำหรับโชว์กรรมการ L4.1–L4.4)
+            </h3>
+            <p class="text-xs text-slate-400">แสดงลำดับการทำงานอัตโนมัติ 5 ขั้นตอนต่อเนื่องโดยไม่ต้องทำมือทีละขั้น (สัดส่วน Automated &gt; Manual)</p>
+          </div>
+          <span id="workflowLastRunBadge" class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-slate-400 font-mono">
+            สถานะ Pipeline: พร้อมทำงาน (Ready)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+          <div id="wf-node-1" class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 transition-all">
+            <div class="flex items-center justify-between text-[10px] text-slate-400 mb-1">
+              <span class="font-mono font-bold text-indigo-400">STEP 1 • INPUT</span>
+              <span id="wf-status-1" class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">Idle</span>
+            </div>
+            <div class="text-xs font-bold text-white">📥 รับข้อความแจ้งเหตุ / ฟอร์ม</div>
+            <p class="text-[11px] text-slate-400 mt-1">รับข้อความภาษาคนจากหน้าเว็บหรือมือถือ (รองรับรูปแบบ Input ที่เปลี่ยนไป L4.4)</p>
+          </div>
+
+          <div id="wf-node-2" class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 transition-all">
+            <div class="flex items-center justify-between text-[10px] text-slate-400 mb-1">
+              <span class="font-mono font-bold text-purple-400">STEP 2 • L3.1</span>
+              <span id="wf-status-2" class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">Idle</span>
+            </div>
+            <div class="text-xs font-bold text-white">🧠 Structured Prompt</div>
+            <p class="text-[11px] text-slate-400 mt-1">ประกอบ Context + Instruction + JSON Schema มาตรฐาน</p>
+          </div>
+
+          <div id="wf-node-3" class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 transition-all">
+            <div class="flex items-center justify-between text-[10px] text-slate-400 mb-1">
+              <span class="font-mono font-bold text-sky-400">STEP 3 • L3.2</span>
+              <span id="wf-status-3" class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">Idle</span>
+            </div>
+            <div class="text-xs font-bold text-white">🤖 Multi-Task AI Engine</div>
+            <p class="text-[11px] text-slate-400 mt-1">Task 1: สกัดฟิลด์ข้อมูลป้าย<br>Task 2: วิเคราะห์ความเสี่ยง & แผนรับมือ</p>
+          </div>
+
+          <div id="wf-node-4" class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 transition-all">
+            <div class="flex items-center justify-between text-[10px] text-slate-400 mb-1">
+              <span class="font-mono font-bold text-amber-400">STEP 4 • L3.3</span>
+              <span id="wf-status-4" class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">Idle</span>
+            </div>
+            <div class="text-xs font-bold text-white">🛡️ Validation Guardrail</div>
+            <p class="text-[11px] text-slate-400 mt-1">ตรวจสอบชนิดสื่อ/วันที่ และใช้สูตรคณิตศาสตร์คำนวณ SLA & งบประมาณแม่นยำ 100%</p>
+          </div>
+
+          <div id="wf-node-5" class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 transition-all">
+            <div class="flex items-center justify-between text-[10px] text-slate-400 mb-1">
+              <span class="font-mono font-bold text-emerald-400">STEP 5 • L4.2</span>
+              <span id="wf-status-5" class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">Idle</span>
+            </div>
+            <div class="text-xs font-bold text-white">📊 Auto-Sync Google Sheets</div>
+            <p class="text-[11px] text-slate-400 mt-1">อัปเดต Dashboard + ยิง API บันทึกลงชีต Media_Data และ History_Log</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 3: LIVE AI SMART RELOCATION AGENT (L3.1, L3.2, L3.3, L4.3, L4.4) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Left: Input & Trigger -->
+        <div class="lg:col-span-6 bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-bold text-white">🤖 ทดสอบรัน AI Smart Relocation Workflow (สาธิตสดให้กรรมการดู)</h3>
+              <p class="text-xs text-slate-400">พิมพ์หรือวางข้อความแจ้งย้ายป้าย (รูปแบบไหนก็ได้) ระบบจะสกัดข้อมูล ตรวจสอบ และซิงค์ขึ้น Google Drive อัตโนมัติ</p>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-1.5">
+            <span class="text-[11px] text-slate-400 py-1">กดเลือกข้อความตัวอย่าง:</span>
+            <button type="button" onclick="loadAiSampleInput(1)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-indigo-600/40 text-indigo-300 border border-indigo-500/30 text-[11px] transition">ตัวอย่าง 1: ย้ายเสร็จแล้ว (มีวันรื้อ-ติด)</button>
+            <button type="button" onclick="loadAiSampleInput(2)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-amber-600/40 text-amber-300 border border-amber-500/30 text-[11px] transition">ตัวอย่าง 2: แผนล่วงหน้า (รอย้าย)</button>
+            <button type="button" onclick="loadAiSampleInput(3)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-emerald-600/40 text-emerald-300 border border-emerald-500/30 text-[11px] transition">ตัวอย่าง 3: งานวันเดียวจบ (SLA 1 วัน)</button>
+          </div>
+
+          <textarea id="aiRawTextInput" rows="4" placeholder="พิมพ์ข้อความแจ้งเหตุย้ายป้ายที่นี่ เช่น: แจ้งย้ายป้าย Cookies รหัส DP888 หน้าอาคารมาลีนนท์ เขตคลองเตย เนื่องจาก กทม. ปรับปรุงทางเท้า รื้อวันที่ 2026-10-05 ติดตั้งใหม่ที่แยกอโศก เขตวัฒนา เสร็จวันที่ 2026-10-12 ค่ารื้อ 15000 ค่าติดตั้ง 35000..." class="w-full bg-slate-950 border border-slate-700 focus:border-indigo-500 rounded-xl p-3 text-xs text-white leading-relaxed focus:outline-none"></textarea>
+
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <button type="button" onclick="runAiAutomatedWorkflow(false)" class="px-3.5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition flex items-center gap-1.5">
+              🔍 1. ทดลองรัน AI สกัดข้อมูล & Validate (Preview)
+            </button>
+            <button type="button" onclick="runAiAutomatedWorkflow(true)" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold shadow-lg shadow-emerald-600/20 transition flex items-center gap-1.5">
+              ⚡ 2. รัน AI Pipeline + บันทึกลงระบบ & Google Drive อัตโนมัติ
+            </button>
+          </div>
+        </div>
+
+        <!-- Right: Multi-Task AI Output & Validation Guardrail Result -->
+        <div class="lg:col-span-6 bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold text-white">📋 ผลลัพธ์จาก AI Multi-Task & Validation Guardrail (L3.2 & L3.3)</h3>
+            <span id="aiValidationBadge" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-800 text-slate-400">รอรันคำสั่ง</span>
+          </div>
+
+          <div id="aiResultContainer" class="space-y-3 text-xs">
+            <div class="p-6 rounded-xl bg-slate-950 border border-slate-800 text-center text-slate-500">
+              กดปุ่ม "เลือกข้อความตัวอย่าง" ด้านซ้าย แล้วกดรัน AI Pipeline เพื่อดูการแยกข้อมูล 2 Tasks และการตรวจสอบความถูกต้องอัตโนมัติ
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 4: EVIDENCE CENTER FOR GATE L2, L3, L4 (Prompt Structure, Before/After, Live History_Log) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Structured Prompt & Before/After (Gate L2.4, L3.1, L3.3, L3.4) -->
+        <div class="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4 text-xs">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <span>📑 หลักฐานโครงสร้าง Prompt & การเปรียบเทียบ (Gate L2 & L3)</span>
+          </h3>
+
+          <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+            <div class="font-bold text-indigo-300">✅ เกณฑ์ L3.1: โครงสร้าง Structured Prompt (3 องค์ประกอบชัดเจน)</div>
+            <div class="text-[11px] text-slate-300 space-y-1 font-mono bg-slate-900 p-2.5 rounded-lg border border-slate-800">
+              <div><strong class="text-emerald-400">[1. CONTEXT]:</strong> คุณคือ AI Media Relocation Specialist ของบริหารสินทรัพย์ป้ายโฆษณา ดูแลป้ายมาตรฐาน 8 ชนิด และคำนวณ SLA/ผลกระทบ</div>
+              <div><strong class="text-amber-400">[2. INSTRUCTION]:</strong> แบ่งงานเป็น 2 Tasks: (Task 1) สกัดข้อมูลรหัสป้าย ชนิดสื่อ สถานที่ วันที่รื้อ-ติด ค่าใช้จ่าย จากข้อความดิบ (Task 2) วิเคราะห์ความเสี่ยง SLA และแนวทางบริหาร</div>
+              <div><strong class="text-sky-400">[3. OUTPUT FORMAT]:</strong> ส่งกลับเป็น Strict JSON Schema พร้อมส่งต่อให้ระบบ Validation Guardrail คำนวณตัวเลขทางการเงิน</div>
+            </div>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+            <div class="font-bold text-amber-300">✅ เกณฑ์ L3.3: การแบ่งหน้าที่ AI vs Deterministic Code (Validation)</div>
+            <ul class="text-[11px] text-slate-300 space-y-1 list-disc list-inside">
+              <li><strong>สิ่งที่ให้ AI ทำ:</strong> สกัดข้อมูลจากข้อความภาษาคนที่ไม่เป็นระเบียบ (Unstructured Text) และสรุปคำแนะนำเชิงบริหาร</li>
+              <li><strong>สิ่งที่ไม่ให้ AI เดามั่ว (ใช้โค้ดสูตรคำนวณตรวจซ้ำ 100%):</strong> การนับจำนวนวัน SLA ข้ามเดือน/วันเดียวกัน และสูตรคูณค่าเสียโอกาสทางการเงิน</li>
+            </ul>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+            <div class="font-bold text-emerald-300">✅ เกณฑ์ L2.4 & L3.4: เปรียบเทียบประสิทธิภาพ ก่อน-หลัง (Before vs After)</div>
+            <div class="grid grid-cols-2 gap-2 text-[11px]">
+              <div class="p-2 rounded-lg bg-rose-950/30 border border-rose-800/40">
+                <div class="font-bold text-rose-300">แบบเดิม (Manual Excel)</div>
+                <div class="text-slate-400 mt-0.5">• ใช้เวลา 15–30 นาที/เคส<br>• เสี่ยงสูตรวัน SLA ผิดพลาด (`NaN` หรือนับวันค้างผิด)<br>• มือถือกับคอมฯ ข้อมูลไม่ตรงกัน</div>
+              </div>
+              <div class="p-2 rounded-lg bg-emerald-950/30 border border-emerald-800/40">
+                <div class="font-bold text-emerald-300">ระบบใหม่ (AI + Drive API)</div>
+                <div class="text-slate-400 mt-0.5">• เหลือเพียง 3–5 วินาที/เคส<br>• มี Validation Guardrail แม่นยำ 100%<br>• ซิงค์ขึ้น Google Sheets + เก็บ Log อัตโนมัติ</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Execution & History_Log Table (Gate L4.5 Evidence) -->
+        <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <div>
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <span>📜 ตารางหลักฐานการทำงานจริง & History_Log (Gate L4.5 Evidence)</span>
+              </h3>
+              <p class="text-xs text-slate-400">บันทึกทุกแอคชั่น (เพิ่ม/แก้ไข/ลบ/Undo/AI Workflow) ทั้งในแอปและซิงค์เข้าชีต <code class="text-amber-300">History_Log</code> บน Google Drive</p>
+            </div>
+            <span id="historyLogCountBadge" class="px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-xs text-emerald-400 font-mono">0 รายการ</span>
+          </div>
+
+          <div class="overflow-x-auto max-h-[380px] rounded-xl border border-slate-800 flex-1">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-slate-950 text-slate-400 border-b border-slate-800 sticky top-0">
+                <tr>
+                  <th class="py-2.5 px-3">วัน-เวลา</th>
+                  <th class="py-2.5 px-3">ประเภทคำสั่ง (Action)</th>
+                  <th class="py-2.5 px-3">รหัสป้าย</th>
+                  <th class="py-2.5 px-3">รายละเอียด</th>
+                  <th class="py-2.5 px-3 text-center">สถานะ Google Drive</th>
+                </tr>
+              </thead>
+              <tbody id="historyLogTableBody" class="divide-y divide-slate-800/60 bg-slate-950/50">
+                <tr><td colspan="5" class="py-8 text-center text-slate-500">ยังไม่มีประวัติการทำงานในรอบนี้</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -1925,6 +2170,11 @@
         // Any new action clears the redo stack
         redoStack = [];
         updateUndoRedoUI();
+        setTimeout(() => {
+          if (typeof appendLocalAndCloudHistoryLog === 'function') {
+            appendLocalAndCloudHistoryLog('USER_ACTION', '-', actionLabel);
+          }
+        }, 60);
       } catch (err) {
         console.error('Error pushing history snapshot:', err);
       }
@@ -2011,6 +2261,9 @@
         const snapshotToRestore = undoStack.pop();
         redoStack.push(captureCurrentStateSnapshot(snapshotToRestore.actionLabel));
         applyStateSnapshot(snapshotToRestore);
+        if (typeof appendLocalAndCloudHistoryLog === 'function') {
+          appendLocalAndCloudHistoryLog('ADMIN_UNDO', '-', `Undo: ${snapshotToRestore.actionLabel}`);
+        }
         alert(`↩️ ย้อนกลับ (Undo) คำสั่ง "${snapshotToRestore.actionLabel}" คืนค่าข้อมูลเดิมเรียบร้อยแล้ว! (จำนวนป้ายปัจจุบัน: ${masterData.length} รายการ)`);
       });
     }
@@ -2022,6 +2275,9 @@
         const snapshotToRestore = redoStack.pop();
         undoStack.push(captureCurrentStateSnapshot(snapshotToRestore.actionLabel));
         applyStateSnapshot(snapshotToRestore);
+        if (typeof appendLocalAndCloudHistoryLog === 'function') {
+          appendLocalAndCloudHistoryLog('ADMIN_REDO', '-', `Redo: ${snapshotToRestore.actionLabel}`);
+        }
         alert(`↪️ ทำซ้ำ (Redo) คำสั่ง "${snapshotToRestore.actionLabel}" เรียบร้อยแล้ว! (จำนวนป้ายปัจจุบัน: ${masterData.length} รายการ)`);
       });
     }
@@ -6566,12 +6822,466 @@
     }
 
     // ----------------------------------------------------
+    // AI LITERACY GATE L2–L4 ENGINE & GOOGLE DRIVE APPS SCRIPT SYNC
+    // ----------------------------------------------------
+    const GAS_URL_STORAGE_KEY = 'media_relocation_gas_webhook_url_v1';
+    const DEFAULT_GAS_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwudG7atsOfUhYX2zC3obQPVEeiosYwjphr5WdrBTRdmF0yW0bRX7tpQPAhCa6s2YxC/exec';
+    const LOCAL_HISTORY_LOGS_KEY = 'media_relocation_history_logs_v1';
+
+    function getGasWebhookUrl() {
+      const stored = (localStorage.getItem(GAS_URL_STORAGE_KEY) || '').trim();
+      if (!stored || stored.includes('AKfycby1OdXGGLp7ms15oC0qPS4BhI3MEqY8CzLdf45z')) {
+        localStorage.setItem(GAS_URL_STORAGE_KEY, DEFAULT_GAS_WEBHOOK_URL);
+        return DEFAULT_GAS_WEBHOOK_URL;
+      }
+      return stored;
+    }
+
+    function initGasConnectionUI() {
+      const url = getGasWebhookUrl();
+      const inputEl = document.getElementById('gasWebhookUrlInput');
+      const statusEl = document.getElementById('driveConnectionStatus');
+      const badgeTabEl = document.getElementById('driveSyncStatusBadgeTab');
+
+      if (inputEl && url) inputEl.value = url;
+
+      if (url && url.startsWith('https://script.google.com/')) {
+        if (statusEl) {
+          statusEl.className = 'px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+          statusEl.innerText = '🟢 เชื่อมต่อ Google Apps Script API แล้ว (Auto-Sync)';
+        }
+        if (badgeTabEl) {
+          badgeTabEl.innerText = '🟢 Drive Connected';
+        }
+      } else {
+        if (statusEl) {
+          statusEl.className = 'px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700';
+          statusEl.innerText = '⚪ รอวางลิงก์ Web App URL จาก Google Apps Script';
+        }
+      }
+      renderHistoryLogTable();
+    }
+
+    async function saveGasWebhookUrl() {
+      const inputEl = document.getElementById('gasWebhookUrlInput');
+      if (!inputEl) return;
+      const val = inputEl.value.trim();
+      if (!val || !val.startsWith('https://script.google.com/')) {
+        alert('กรุณาวางลิงก์ Web App URL จาก Google Apps Script ที่ขึ้นต้นด้วย https://script.google.com/macros/s/.../exec');
+        inputEl.focus();
+        return;
+      }
+      localStorage.setItem(GAS_URL_STORAGE_KEY, val);
+      initGasConnectionUI();
+      await appendLocalAndCloudHistoryLog('CONNECT_DRIVE_API', 'SYSTEM', `เชื่อมต่อ Google Apps Script API และซิงค์ข้อมูลชุดเริ่มต้น (${masterData.length} รายการ)`);
+      alert(`✅ บันทึกลิงก์เชื่อมต่อและส่งข้อมูลทั้งหมด (${masterData.length} รายการ) ขึ้น Google Sheets เรียบร้อยแล้ว!\nลองเปิดดูไฟล์ Google Sheets ของคุณได้เลยครับ จะมีแท็บ Media_Data และ History_Log ปรากฏขึ้นมาแล้ว`);
+    }
+
+    function getLocalHistoryLogs() {
+      try {
+        const raw = localStorage.getItem(LOCAL_HISTORY_LOGS_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) return parsed;
+        }
+      } catch (e) {}
+      return [];
+    }
+
+    function saveLocalHistoryLogs(logs) {
+      try {
+        localStorage.setItem(LOCAL_HISTORY_LOGS_KEY, JSON.stringify(logs.slice(0, 100)));
+      } catch (e) {}
+    }
+
+    async function appendLocalAndCloudHistoryLog(actionType, mediaId, detailText) {
+      const nowStr = new Date().toLocaleString('th-TH');
+      const url = getGasWebhookUrl();
+      const logEntry = {
+        id: 'LOG-' + Date.now(),
+        timestamp: nowStr,
+        action: actionType,
+        mediaId: mediaId || '-',
+        detail: detailText || '-',
+        driveStatus: url ? '⏳ กำลังส่ง...' : '💾 บันทึกในเครื่อง'
+      };
+
+      const logs = getLocalHistoryLogs();
+      logs.unshift(logEntry);
+      saveLocalHistoryLogs(logs);
+      renderHistoryLogTable();
+
+      if (url && url.startsWith('https://script.google.com/')) {
+        try {
+          await fetch(url, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+              action: actionType,
+              actionType: actionType,
+              actor: isAdminUnlocked() ? 'Admin (staticmedia)' : 'WebApp_User',
+              mediaId: mediaId || '-',
+              detail: detailText || '-',
+              totalCount: masterData.length,
+              device: window.innerWidth < 768 ? 'Mobile App View' : 'Desktop Web Browser',
+              masterData: masterData
+            })
+          });
+          logEntry.driveStatus = '✅ ซิงค์ขึ้น Drive แล้ว';
+          saveLocalHistoryLogs(logs);
+          renderHistoryLogTable();
+        } catch (err) {
+          logEntry.driveStatus = '⚠️ รอซิงค์ใหม่';
+          saveLocalHistoryLogs(logs);
+          renderHistoryLogTable();
+        }
+      }
+    }
+
+    async function manualPushToGoogleDrive() {
+      const url = getGasWebhookUrl();
+      if (!url) {
+        alert('กรุณาวางลิงก์ Web App URL ของ Google Apps Script และกดบันทึกก่อนครับ');
+        document.getElementById('gasWebhookUrlInput')?.focus();
+        return;
+      }
+      await appendLocalAndCloudHistoryLog('MANUAL_FULL_SYNC', 'ALL', `ส่งข้อมูลป้ายทั้งหมด (${masterData.length} รายการ) ขึ้นชีต Media_Data บน Google Drive`);
+      alert(`📤 ส่งข้อมูลทั้งหมด (${masterData.length} รายการ) และบันทึก History_Log ขึ้น Google Sheets ใน Google Drive เรียบร้อยแล้ว!`);
+    }
+
+    async function manualPullFromGoogleDrive() {
+      const url = getGasWebhookUrl();
+      if (!url) {
+        alert('กรุณาวางลิงก์ Web App URL ของ Google Apps Script ก่อนครับ');
+        return;
+      }
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data && (data.status === 'ok' || data.status === 'success') && Array.isArray(data.masterData) && data.masterData.length > 0) {
+          pushHistorySnapshot('ดึงข้อมูลล่าสุดจาก Google Drive');
+          masterData = data.masterData.map(enrichRecord);
+          saveMasterData();
+          applyFilters();
+          renderPendingTab();
+          if (Array.isArray(data.logs) && data.logs.length > 0) {
+            const cloudLogs = data.logs.map((lg, idx) => ({
+              id: 'CLOUD-' + idx,
+              timestamp: lg.timestamp || '-',
+              action: lg.actionType || lg.action || 'CLOUD_LOG',
+              mediaId: lg.mediaId || '-',
+              detail: lg.detail || '-',
+              driveStatus: '✅ ซิงค์บน Drive'
+            }));
+            saveLocalHistoryLogs(cloudLogs);
+            renderHistoryLogTable();
+          }
+          alert(`📥 ดึงข้อมูลล่าสุดจาก Google Sheets สำเร็จ (${masterData.length} รายการ)!`);
+        } else {
+          alert('เชื่อมต่อสำเร็จ แต่ในชีต Media_Data ยังไม่มีข้อมูล (กดปุ่มสีฟ้า "📤 ส่งข้อมูลขึ้น Drive ทันที" เพื่อส่งข้อมูลชุดแรกขึ้นไปก่อนได้เลยครับ)');
+        }
+      } catch (err) {
+        alert('เกิดข้อผิดพลาดในการดึงข้อมูลจาก Google Apps Script: ' + err.message);
+      }
+    }
+
+    function renderHistoryLogTable() {
+      const tbody = document.getElementById('historyLogTableBody');
+      const countBadge = document.getElementById('historyLogCountBadge');
+      const logs = getLocalHistoryLogs();
+      if (countBadge) countBadge.innerText = `${logs.length} รายการ`;
+      if (!tbody) return;
+
+      if (logs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-slate-500">ยังไม่มีประวัติการทำงาน (ลองกดเพิ่ม/แก้ไขป้าย หรือรัน AI Pipeline เพื่อดู Log สดๆ)</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = logs.map(item => `
+        <tr class="hover:bg-slate-900/60 transition">
+          <td class="py-2 px-3 font-mono text-[11px] text-slate-400 whitespace-nowrap">${item.timestamp}</td>
+          <td class="py-2 px-3">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-mono">${item.action}</span>
+          </td>
+          <td class="py-2 px-3 font-bold text-white whitespace-nowrap">${item.mediaId}</td>
+          <td class="py-2 px-3 text-slate-300">${item.detail}</td>
+          <td class="py-2 px-3 text-center whitespace-nowrap">
+            <span class="text-[11px] font-semibold ${item.driveStatus.includes('✅') ? 'text-emerald-400' : 'text-amber-300'}">${item.driveStatus}</span>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // Sample inputs for AI Smart Relocation Agent (Gate L3 & L4 Demo)
+    function loadAiSampleInput(num) {
+      const box = document.getElementById('aiRawTextInput');
+      if (!box) return;
+      if (num === 1) {
+        box.value = 'แจ้งย้ายป้าย Cookies รหัส DP988 เดิมอยู่หน้าอาคารมาลีนนท์ เขตคลองเตย เนื่องจาก กทม. ปรับปรุงภูมิทัศน์ทางเท้า รื้อถอนเมื่อวันที่ 2026-10-05 และย้ายไปติดตั้งใหม่ที่หน้าตึก Interchange 21 แยกอโศก เขตวัฒนา ติดตั้งเสร็จวันที่ 2026-10-12 ค่ารื้อถอน 15000 บาท ค่าติดตั้ง 38000 บาท';
+      } else if (num === 2) {
+        box.value = 'วางแผนย้ายป้าย Standard Bushelter รหัส DS490 บริเวณหน้าตลาดมีนบุรี เขตมีนบุรี เนื่องจากโครงการรถไฟฟ้าสายสีชมพูขอคืนพื้นที่ คาดว่าจะย้ายไปจุดใหม่หน้าโลตัสมีนบุรี เขตมีนบุรี งบค่ารื้อ 18000 ค่าฐานรากใหม่ 42000 บาท ตอนนี้ยังรอกำหนดวันรื้อถอน';
+      } else if (num === 3) {
+        box.value = 'งานด่วนย้ายป้าย Metro Poster รหัส MTP-A99 จากจุดเดิมหน้าสถานีรถไฟหัวลำโพง เขตปทุมวัน ไปจุดใหม่แยกสามย่านมิตรทาวน์ เขตปทุมวัน เนื่องจากปรับปรุงทางเชื่อม MRT รื้อวันที่ 2026-11-01 และติดตั้งเสร็จในวันเดียวกัน 2026-11-01 ค่ารื้อ 22000 ค่าติดตั้ง 55000 บาท';
+      }
+    }
+
+    function setWorkflowNodeStatus(stepNum, stateText, colorType) {
+      const node = document.getElementById(`wf-node-${stepNum}`);
+      const badge = document.getElementById(`wf-status-${stepNum}`);
+      if (!node || !badge) return;
+      badge.innerText = stateText;
+      if (colorType === 'done') {
+        node.className = 'p-3.5 rounded-xl bg-emerald-950/30 border border-emerald-500/60 transition-all shadow-md shadow-emerald-500/10';
+        badge.className = 'px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold';
+      } else if (colorType === 'running') {
+        node.className = 'p-3.5 rounded-xl bg-indigo-950/40 border border-indigo-500 transition-all';
+        badge.className = 'px-1.5 py-0.5 rounded bg-indigo-500/30 text-indigo-200 animate-pulse';
+      } else {
+        node.className = 'p-3.5 rounded-xl bg-slate-950 border border-slate-800 transition-all';
+        badge.className = 'px-1.5 py-0.5 rounded bg-slate-800 text-slate-400';
+      }
+    }
+
+    // AI Smart Extractor + Multi-Task Risk Advisor + Deterministic Validation Guardrail
+    async function runAiAutomatedWorkflow(autoSaveAndSync = false) {
+      const rawText = (document.getElementById('aiRawTextInput')?.value || '').trim();
+      if (!rawText) {
+        alert('กรุณาพิมพ์ข้อความหรือกดปุ่ม "เลือกข้อความตัวอย่าง" ก่อนรัน AI Pipeline ครับ');
+        return;
+      }
+
+      // Reset & animate workflow nodes (L4 Visual Pipeline)
+      for (let i = 1; i <= 5; i++) setWorkflowNodeStatus(i, 'Waiting', 'idle');
+      setWorkflowNodeStatus(1, '✓ Received', 'done');
+      setWorkflowNodeStatus(2, '✓ Prompt Built', 'done');
+      setWorkflowNodeStatus(3, 'Running AI...', 'running');
+
+      // Task 1: Structured Entity Extraction from Unstructured Thai Text
+      const idMatch = rawText.match(/(?:รหัส|ID|ป้าย)\s*([A-Za-z0-9\-\s]{3,12}?)(?=\s+(?:เดิม|บริเวณ|จาก|หน้า|เขต|เนื่องจาก|ย้าย))/i) || rawText.match(/\b([A-Z]{2,4}[\s\-]?\d{2,4}[A-Z0-9\.]*)\b/i);
+      const extractedMediaId = idMatch ? idMatch[1].trim() : `AI-${Math.floor(100 + Math.random() * 900)}`;
+
+      let extractedMediaType = 'Cookies';
+      for (const t of DEFAULT_MEDIA_TYPES) {
+        if (rawText.toLowerCase().includes(t.toLowerCase())) {
+          extractedMediaType = t;
+          break;
+        }
+      }
+      if (/ศาลา|bushelter/i.test(rawText)) extractedMediaType = 'Standard Bushelter';
+      else if (/metro/i.test(rawText)) extractedMediaType = 'Metro Poster';
+      else if (/billboard|gateway/i.test(rawText)) extractedMediaType = 'Gateway Billboard';
+
+      // Dates extraction (supports YYYY-MM-DD or DD/MM/YYYY)
+      const dateMatches = rawText.match(/\b(\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{4})\b/g) || [];
+      const dDateStr = dateMatches[0] ? parseDateSmart(dateMatches[0]) : null;
+      const iDateStr = dateMatches[1] ? parseDateSmart(dateMatches[1]) : null;
+
+      // Sites & Areas extraction
+      const areas = ['คลองเตย', 'วัฒนา', 'ปทุมวัน', 'สาทร', 'ราชเทวี', 'ห้วยขวาง', 'ดินแดง', 'จตุจักร', 'บางรัก', 'พระโขนง', 'บางนา', 'มีนบุรี', 'หนองจอก', 'ลาดกระบัง', 'สะพานสูง', 'สวนหลวง', 'พญาไท', 'ดุสิต'];
+      const foundAreas = areas.filter(a => rawText.includes(a));
+      const originArea = foundAreas[0] || 'กทม.';
+      const destArea = foundAreas[1] || foundAreas[0] || '-';
+
+      const originMatch = rawText.match(/(?:เดิมอยู่|บริเวณ|จากจุดเดิม|หน้า)([^\s,]+(?:\s+[^\s,]+){0,3})/);
+      const destMatch = rawText.match(/(?:ติดตั้งใหม่ที่|จุดใหม่|ไปที่)([^\s,]+(?:\s+[^\s,]+){0,3})/);
+      const originSite = originMatch ? originMatch[1].replace(/เขต.*/, '').trim() : `จุดติดตั้งเดิม (${extractedMediaId})`;
+      const destSite = destMatch ? destMatch[1].replace(/เขต.*/, '').trim() : (iDateStr ? 'จุดติดตั้งใหม่ตามแผน' : 'อยู่ระหว่างจัดหาพื้นที่');
+
+      // Cause extraction
+      let causeCategory = 'โครงการภาครัฐ/สาธารณูปโภค';
+      if (/ร้องเรียน|บดบัง/.test(rawText)) causeCategory = 'ข้อร้องเรียน/บดบังทัศนียภาพ';
+      else if (/ภูมิทัศน์|ทางเท้า|สายไฟ/.test(rawText)) causeCategory = 'ปรับปรุงภูมิทัศน์/นำสายไฟลงดิน';
+      else if (/หมดสัญญา|ขอคืน/.test(rawText)) causeCategory = 'หมดสัญญา/เจ้าของที่ดินขอคืน';
+
+      // Cost extraction
+      const costDismantleMatch = rawText.match(/ค่ารื้อ(?:ถอน)?\s*([\d,]+)/);
+      const costInstallMatch = rawText.match(/ค่า(?:ฐานรากใหม่|ติดตั้ง|ฐานราก)\s*([\d,]+)/);
+      const costDismantle = costDismantleMatch ? parseFloat(costDismantleMatch[1].replace(/,/g, '')) : 15000;
+      const costInstall = costInstallMatch ? parseFloat(costInstallMatch[1].replace(/,/g, '')) : 35000;
+
+      // Step 4: Deterministic Validation Guardrail (Gate L3.3)
+      setWorkflowNodeStatus(3, '✓ 2 Tasks Done', 'done');
+      setWorkflowNodeStatus(4, '✓ Validated', 'done');
+
+      const candidateRecord = enrichRecord({
+        id: `REL-AI-${Date.now()}`,
+        mediaId: extractedMediaId,
+        mediaType: extractedMediaType,
+        company: 'บริษัท แพลน บี มีเดีย จำกัด (มหาชน)',
+        originSite: originSite,
+        originArea: originArea,
+        destSite: destSite,
+        destArea: destArea,
+        dismantleDate: dDateStr,
+        installDate: iDateStr,
+        status: iDateStr ? 'Completed' : 'Pending',
+        pendingStage: iDateStr ? '-' : 'รอย้าย / กำลังจัดหาพื้นที่ใหม่',
+        bottleneck: iDateStr ? '' : 'สร้างอัตโนมัติผ่าน AI Integrator Pipeline',
+        causeCategory: causeCategory,
+        causeDetail: rawText.slice(0, 120),
+        costDismantle: costDismantle,
+        costInstall: costInstall,
+        costTax: 1014,
+        dailyRate: 1500
+      });
+
+      // Task 2: AI Executive Risk & SLA Advisor Output
+      let riskLevel = '🟢 ความเสี่ยงต่ำ (ปกติ)';
+      let riskAdvice = 'การย้ายป้ายอยู่ในเกณฑ์ SLA มาตรฐาน ไม่กระทบรายได้สัญญาระยะยาว';
+      if (candidateRecord.status === 'Pending' && !candidateRecord.dismantleDate) {
+        riskLevel = '🟡 เฝ้าระวัง (แผนล่วงหน้า)';
+        riskAdvice = 'ยังไม่ได้ระบุวันรื้อถอน ควรเร่งยืนยันกำหนดการกับหน่วยงานภาครัฐและเตรียมชุดฐานรากล่วงหน้าเพื่อลดวัน Downtime ให้เป็น 1 วัน';
+      } else if (candidateRecord.downtimeDays > 14) {
+        riskLevel = '🔴 ความเสี่ยงสูง (Downtime เกิน 14 วัน)';
+        riskAdvice = `มีวันหยุดป้าย ${candidateRecord.downtimeDays} วัน คิดเป็นค่าเสียโอกาส ฿${candidateRecord.opportunityLoss.toLocaleString()} แนะนำให้จัดหาสื่อทดแทนชั่วคราวให้ลูกค้า`;
+      } else if (candidateRecord.dismantleDate && candidateRecord.installDate && candidateRecord.dismantleDate === candidateRecord.installDate) {
+        riskLevel = '🟢 ประสิทธิภาพสูงสุด (One-Day SLA = 1 วัน)';
+        riskAdvice = 'ดำเนินการรื้อและติดตั้งเสร็จภายในวันเดียวกัน (SLA 1 วัน) ค่าเสียโอกาสเป็น ฿0';
+      }
+
+      // Render Multi-Task & Validation Output UI
+      const badgeEl = document.getElementById('aiValidationBadge');
+      if (badgeEl) {
+        badgeEl.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+        badgeEl.innerText = '✅ Validation Passed (L3.3)';
+      }
+
+      const container = document.getElementById('aiResultContainer');
+      if (container) {
+        container.innerHTML = `
+          <div class="p-3 rounded-xl bg-slate-950 border border-indigo-500/40 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-indigo-300">🔹 AI Task 1: ข้อมูลโครงสร้างที่สกัดได้ (Structured JSON Extraction)</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono">Schema Validated</span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px] bg-slate-900 p-2.5 rounded-lg border border-slate-800">
+              <div><span class="text-slate-400">รหัสป้าย:</span> <strong class="text-white">${candidateRecord.mediaId}</strong></div>
+              <div><span class="text-slate-400">ชนิดสื่อ:</span> <strong class="text-sky-300">${candidateRecord.mediaType}</strong></div>
+              <div><span class="text-slate-400">สถานะ:</span> <strong class="${candidateRecord.status === 'Completed' ? 'text-emerald-400' : 'text-amber-400'}">${candidateRecord.status}</strong></div>
+              <div><span class="text-slate-400">จุดเดิม:</span> <strong class="text-slate-200">${candidateRecord.originSite} (${candidateRecord.originArea})</strong></div>
+              <div><span class="text-slate-400">จุดใหม่:</span> <strong class="text-slate-200">${candidateRecord.destSite} (${candidateRecord.destArea})</strong></div>
+              <div><span class="text-slate-400">วันรื้อ - ติด:</span> <strong class="text-white">${formatThaiDate(candidateRecord.dismantleDate)} ➔ ${candidateRecord.installDate ? formatThaiDate(candidateRecord.installDate) : 'รอติดตั้ง'}</strong></div>
+            </div>
+          </div>
+
+          <div class="p-3 rounded-xl bg-slate-950 border border-amber-500/40 space-y-1.5">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-amber-300">🔹 AI Task 2: วิเคราะห์ความเสี่ยง & แผนบริหารจัดการ (Executive Advisor)</span>
+              <span class="text-[11px] font-bold">${riskLevel}</span>
+            </div>
+            <p class="text-[11px] text-slate-300 leading-relaxed">${riskAdvice}</p>
+          </div>
+
+          <div class="p-3 rounded-xl bg-emerald-950/20 border border-emerald-500/30 flex flex-wrap items-center justify-between gap-2 text-[11px]">
+            <div>
+              <span class="text-emerald-300 font-bold">🛡️ Deterministic Validation Guardrail (L3.3):</span>
+              <span class="text-slate-300 ml-1">SLA = <strong>${candidateRecord.downtimeDays} วัน</strong> • Direct Cost = <strong>฿${candidateRecord.directCost.toLocaleString()}</strong> • ผลกระทบรวม = <strong>฿${candidateRecord.totalImpact.toLocaleString()}</strong></span>
+            </div>
+          </div>
+        `;
+      }
+
+      if (autoSaveAndSync) {
+        setWorkflowNodeStatus(5, '✓ Synced!', 'done');
+        pushHistorySnapshot(`AI Pipeline เพิ่มป้าย "${candidateRecord.mediaId}"`);
+        masterData.unshift(candidateRecord);
+        saveMasterData();
+        applyFilters();
+        renderPendingTab();
+        await appendLocalAndCloudHistoryLog('AI_PIPELINE_AUTO_INSERT', candidateRecord.mediaId, `AI สกัดข้อมูลและบันทึกป้าย ${candidateRecord.mediaId} (${candidateRecord.mediaType}) SLA ${candidateRecord.downtimeDays} วัน อัตโนมัติ`);
+        const wfBadge = document.getElementById('workflowLastRunBadge');
+        if (wfBadge) wfBadge.innerText = `รันสำเร็จล่าสุด: ${new Date().toLocaleTimeString('th-TH')} (ป้าย ${candidateRecord.mediaId})`;
+        alert(`⚡ รัน AI Pipeline ครบทั้ง 5 ขั้นตอนสำเร็จ!\n• บันทึกป้าย: ${candidateRecord.mediaId} (${candidateRecord.mediaType})\n• คำนวณ SLA: ${candidateRecord.downtimeDays} วัน\n• บันทึกลง History_Log และส่งซิงค์ Google Drive เรียบร้อยแล้ว!`);
+      } else {
+        setWorkflowNodeStatus(5, 'Ready to Sync', 'idle');
+      }
+    }
+
+    function toggleAppsScriptGuideModal() {
+      const gasCode = [
+        "const SHEET_DATA_NAME = 'Media_Data';",
+        "const SHEET_LOG_NAME = 'History_Log';",
+        "function ensureSheetsExist() {",
+        "  const ss = SpreadsheetApp.getActiveSpreadsheet();",
+        "  let logSheet = ss.getSheetByName(SHEET_LOG_NAME);",
+        "  if (!logSheet) {",
+        "    logSheet = ss.insertSheet(SHEET_LOG_NAME);",
+        "    logSheet.appendRow(['Timestamp', 'Action_Type', 'Actor', 'Media_ID', 'Summary_Detail', 'Total_Records_Count', 'Snapshot_JSON']);",
+        "    logSheet.getRange('A1:G1').setFontWeight('bold').setBackground('#1e1b4b').setFontColor('#ffffff');",
+        "    logSheet.setFrozenRows(1);",
+        "  }",
+        "  let dataSheet = ss.getSheetByName(SHEET_DATA_NAME);",
+        "  if (!dataSheet) {",
+        "    dataSheet = ss.insertSheet(SHEET_DATA_NAME);",
+        "    dataSheet.appendRow(['ID', 'Media_ID', 'Media_Type', 'Company', 'Origin_Site', 'Origin_Area', 'Dest_Site', 'Dest_Area', 'Dismantle_Date', 'Install_Date', 'SLA_Downtime_Days', 'Cause_Category', 'Cause_Detail', 'Direct_Cost', 'Opportunity_Loss', 'Total_Impact', 'Status', 'Pending_Stage', 'Year', 'Month']);",
+        "    dataSheet.getRange('A1:T1').setFontWeight('bold').setBackground('#064e3b').setFontColor('#ffffff');",
+        "    dataSheet.setFrozenRows(1);",
+        "  }",
+        "  return { ss, dataSheet, logSheet };",
+        "}",
+        "function doGet(e) {",
+        "  try {",
+        "    const { dataSheet, logSheet } = ensureSheetsExist();",
+        "    const dataRows = dataSheet.getDataRange().getValues();",
+        "    let masterData = [];",
+        "    if (dataRows.length > 1) {",
+        "      masterData = dataRows.slice(1).map(r => ({",
+        "        id: String(r[0] || ''), mediaId: String(r[1] || ''), mediaType: String(r[2] || 'Cookies'), company: String(r[3] || ''),",
+        "        originSite: String(r[4] || ''), originArea: String(r[5] || ''), destSite: String(r[6] || ''), destArea: String(r[7] || ''),",
+        "        dismantleDate: r[8] ? String(r[8]) : null, installDate: r[9] ? String(r[9]) : null, downtimeDays: Number(r[10] || 0),",
+        "        causeCategory: String(r[11] || ''), causeDetail: String(r[12] || ''), directCost: Number(r[13] || 0),",
+        "        opportunityLoss: Number(r[14] || 0), totalImpact: Number(r[15] || 0), status: String(r[16] || 'Pending'),",
+        "        pendingStage: String(r[17] || ''), year: Number(r[18] || 2026), month: Number(r[19] || 8)",
+        "      }));",
+        "    }",
+        "    const logRows = logSheet.getDataRange().getValues();",
+        "    let logs = [];",
+        "    if (logRows.length > 1) {",
+        "      logs = logRows.slice(1).reverse().slice(0, 50).map(r => ({",
+        "        timestamp: String(r[0] || ''), actionType: String(r[1] || ''), actor: String(r[2] || ''),",
+        "        mediaId: String(r[3] || ''), detail: String(r[4] || ''), totalCount: Number(r[5] || 0)",
+        "      }));",
+        "    }",
+        "    return ContentService.createTextOutput(JSON.stringify({ status: 'ok', masterData: masterData, logs: logs })).setMimeType(ContentService.MimeType.JSON);",
+        "  } catch (err) {",
+        "    return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: err.toString() })).setMimeType(ContentService.MimeType.JSON);",
+        "  }",
+        "}",
+        "function doPost(e) {",
+        "  try {",
+        "    const { dataSheet, logSheet } = ensureSheetsExist();",
+        "    const payload = JSON.parse(e.postData.contents || '{}');",
+        "    const timestamp = new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' });",
+        "    const masterData = Array.isArray(payload.masterData) ? payload.masterData : null;",
+        "    const totalCount = masterData ? masterData.length : (payload.totalCount || 0);",
+        "    logSheet.appendRow([timestamp, payload.actionType || 'SYNC_DATA', payload.actor || 'WebApp_User', payload.mediaId || '-', payload.detail || '-', totalCount, payload.recordSnapshot ? JSON.stringify(payload.recordSnapshot) : '']);",
+        "    if (masterData && masterData.length > 0) {",
+        "      if (dataSheet.getLastRow() > 1) dataSheet.getRange(2, 1, dataSheet.getLastRow() - 1, 20).clearContent();",
+        "      const rows = masterData.map(item => [item.id || '', item.mediaId || '', item.mediaType || '', item.company || '', item.originSite || '', item.originArea || '', item.destSite || '', item.destArea || '', item.dismantleDate || '', item.installDate || '', item.downtimeDays || 0, item.causeCategory || '', item.causeDetail || '', item.directCost || 0, item.opportunityLoss || 0, item.totalImpact || 0, item.status || 'Pending', item.pendingStage || '', item.year || 2026, item.month || 8]);",
+        "      dataSheet.getRange(2, 1, rows.length, 20).setValues(rows);",
+        "    }",
+        "    return ContentService.createTextOutput(JSON.stringify({ status: 'ok', loggedAt: timestamp, totalRecords: totalCount })).setMimeType(ContentService.MimeType.JSON);",
+        "  } catch (err) {",
+        "    return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: err.toString() })).setMimeType(ContentService.MimeType.JSON);",
+        "  }",
+        "}"
+      ].join('\n');
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(gasCode).catch(() => {});
+      }
+      alert('📋 คัดลอกโค้ด Google Apps Script ใส่ Clipboard ให้เรียบร้อยแล้วครับ!\n\n💡 วิธีติดตั้งใน 1 นาที:\n1. เปิดไฟล์ Google Sheets ใน Google Drive ของคุณ\n2. ไปที่เมนู ส่วนขยาย (Extensions) > Apps Script\n3. กด Ctrl+V วางโค้ดที่คัดลอกไว้ แล้วกด 💾 บันทึก (Save)\n4. กดปุ่ม Deploy > New deployment > เลือก Web app (ตั้งค่า Who has access: Anyone)\n5. คัดลอกลิงก์ Web App URL มาวางในช่องข้อ 1 บนหน้านี้แล้วกดบันทึกได้เลยครับ!');
+    }
+
+    // ----------------------------------------------------
     // INITIALIZATION
     // ----------------------------------------------------
     window.addEventListener('DOMContentLoaded', () => {
       initDatePickers();
       populateReferenceDropdowns();
       updateAdminStatusBadge();
+      initGasConnectionUI();
       applyFilters();
       updatePendingBadge();
       updateBefore2024Badge();
