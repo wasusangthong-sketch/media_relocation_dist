@@ -4588,16 +4588,14 @@
       activateTabDOM(tabId);
     }
 
-    // Synchronized Top/Bottom Horizontal Scrollbars & Instant Left/Right Scroll Buttons
-    let isSyncingScroll = false;
+    // Zero-lag 1:1 Synchronized Floating Sticky Bottom Horizontal Scrollbar
     function syncTableScroll(sourceId, targetId) {
-      if (isSyncingScroll) return;
       const src = document.getElementById(sourceId);
       const tgt = document.getElementById(targetId);
       if (!src || !tgt) return;
-      isSyncingScroll = true;
-      tgt.scrollLeft = src.scrollLeft;
-      requestAnimationFrame(() => { isSyncingScroll = false; });
+      if (tgt.scrollLeft !== src.scrollLeft) {
+        tgt.scrollLeft = src.scrollLeft;
+      }
     }
 
     function scrollTableHorizontally(containerId, deltaX) {
@@ -4610,12 +4608,12 @@
       const mainTbl = document.getElementById('mainLogTableElement');
       const mainInner = document.getElementById('topScrollbarMainLogInner');
       if (mainTbl && mainInner) {
-        mainInner.style.width = Math.max(mainTbl.scrollWidth, 1400) + 'px';
+        mainInner.style.width = mainTbl.scrollWidth + 'px';
       }
       const pendTbl = document.getElementById('pendingTableElement');
       const pendInner = document.getElementById('topScrollbarPendingInner');
       if (pendTbl && pendInner) {
-        pendInner.style.width = Math.max(pendTbl.scrollWidth, 1300) + 'px';
+        pendInner.style.width = pendTbl.scrollWidth + 'px';
       }
     }
     window.addEventListener('resize', updateTopScrollbarWidths);
