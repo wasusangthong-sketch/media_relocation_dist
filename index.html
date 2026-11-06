@@ -942,65 +942,218 @@
         </div>
       </div>
 
-      <!-- SECTION 2: VISUAL WORKFLOW DIAGRAM (n8n-Style Pipeline Inspector for Gate L4) -->
+      <!-- SECTION 2: VISUAL WORKFLOW DIAGRAM (n8n-Style Flow Box Canvas for Gate L4) -->
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-2">
           <div>
             <h3 class="text-sm font-bold text-white flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-indigo-400"></span>
-              2. แผนผังการทำงานอัตโนมัติ (Automated AI Workflow Pipeline — เทียบเท่า n8n สำหรับโชว์กรรมการ L4.1–L4.4)
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              2. แผนผังการเชื่อมโยงระบบอัตโนมัติแบบ n8n Workflow Canvas (Gate L4.1 – L4.4 Architecture)
             </h3>
-            <p class="text-xs text-slate-400">แสดงลำดับการทำงานอัตโนมัติ 5 ขั้นตอนต่อเนื่องโดยไม่ต้องทำมือทีละขั้น (สัดส่วน Automated &gt; Manual)</p>
+            <p class="text-xs text-slate-400">แสดง Flow Box การส่งต่อข้อมูล (Data Payload) อัตโนมัติตั้งแต่รับข้อความ ➔ AI 2 Tasks ➔ Validation Guardrail ➔ แยกบันทึกลง 2 ชีตใน Google Drive</p>
           </div>
-          <span id="workflowLastRunBadge" class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-slate-400 font-mono">
-            สถานะ Pipeline: พร้อมทำงาน (Ready)
-          </span>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[11px] font-bold">
+              ⚡ Automated 80% (4 Nodes) : Manual 20% (1 Trigger)
+            </span>
+            <span id="workflowLastRunBadge" class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-slate-400 font-mono">
+              สถานะ Pipeline: พร้อมทำงาน (Ready)
+            </span>
+          </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
-          <div id="wf-node-1" class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 transition-all">
-            <div class="flex items-center justify-between text-[10px] text-slate-400 mb-1">
-              <span class="font-mono font-bold text-indigo-400">STEP 1 • INPUT</span>
-              <span id="wf-status-1" class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">Idle</span>
+        <!-- n8n Dotted Canvas Container -->
+        <div class="relative rounded-2xl border border-slate-700/80 p-5 overflow-x-auto" style="background-color: #090d16; background-image: radial-gradient(rgba(148, 163, 184, 0.22) 1.5px, transparent 1.5px); background-size: 20px 20px;">
+          <!-- Top Legend Bar inside Canvas -->
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-5 pb-3 border-b border-slate-800/80 text-[11px]">
+            <div class="flex flex-wrap items-center gap-3">
+              <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-300 font-mono flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-indigo-400"></span> Trigger / Input Node
+              </span>
+              <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-300 font-mono flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-purple-400"></span> Prompt &amp; AI Nodes (L3.1–L3.2)
+              </span>
+              <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-300 font-mono flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-amber-400"></span> Code Guardrail Node (L3.3)
+              </span>
+              <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-300 font-mono flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Google Drive API Nodes (L4.1–L4.5)
+              </span>
             </div>
-            <div class="text-xs font-bold text-white">📥 รับข้อความแจ้งเหตุ / ฟอร์ม</div>
-            <p class="text-[11px] text-slate-400 mt-1">รับข้อความภาษาคนจากหน้าเว็บหรือมือถือ (รองรับรูปแบบ Input ที่เปลี่ยนไป L4.4)</p>
+            <span class="text-slate-400 font-mono">n8n-Style Visual Integration Pipeline</span>
           </div>
 
-          <div id="wf-node-2" class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 transition-all">
-            <div class="flex items-center justify-between text-[10px] text-slate-400 mb-1">
-              <span class="font-mono font-bold text-purple-400">STEP 2 • L3.1</span>
-              <span id="wf-status-2" class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">Idle</span>
-            </div>
-            <div class="text-xs font-bold text-white">🧠 Structured Prompt</div>
-            <p class="text-[11px] text-slate-400 mt-1">ประกอบ Context + Instruction + JSON Schema มาตรฐาน</p>
-          </div>
+          <!-- Main Horizontal Flow Row -->
+          <div class="min-w-[980px] flex items-start justify-between gap-1 py-2">
 
-          <div id="wf-node-3" class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 transition-all">
-            <div class="flex items-center justify-between text-[10px] text-slate-400 mb-1">
-              <span class="font-mono font-bold text-sky-400">STEP 3 • L3.2</span>
-              <span id="wf-status-3" class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">Idle</span>
+            <!-- NODE 1: WEBHOOK / INPUT TRIGGER -->
+            <div class="w-[180px] shrink-0 flex flex-col items-center">
+              <div id="wf-node-1" class="w-full rounded-xl bg-slate-900/95 border-2 border-indigo-500/70 shadow-lg shadow-indigo-950/50 relative transition-all">
+                <div class="px-3 py-1.5 rounded-t-[10px] bg-indigo-600/30 border-b border-indigo-500/40 flex items-center justify-between">
+                  <span class="font-mono text-[10px] font-bold text-indigo-300">⚡ NODE 1 • TRIGGER</span>
+                  <span id="wf-status-1" class="px-1.5 py-0.2 rounded text-[9px] bg-slate-950 text-slate-300 font-mono">Idle</span>
+                </div>
+                <div class="p-3">
+                  <div class="text-xs font-bold text-white flex items-center gap-1.5">📥 Multi-Format Input</div>
+                  <p class="text-[10px] text-slate-400 mt-1 leading-relaxed">รับข้อความดิบจาก LINE / อีเมล / ฟอร์มหน้าเว็บ (รองรับ 3 รูปแบบ L4.4)</p>
+                  <div class="mt-2 pt-1.5 border-t border-slate-800 flex items-center justify-between text-[9px] font-mono text-indigo-300">
+                    <span>Mode: Manual</span>
+                    <span>Out: rawText</span>
+                  </div>
+                </div>
+                <!-- Output Port Dot -->
+                <span class="w-3 h-3 rounded-full bg-indigo-400 border-2 border-slate-950 absolute -right-1.5 top-1/2 -translate-y-1/2 shadow"></span>
+              </div>
             </div>
-            <div class="text-xs font-bold text-white">🤖 Multi-Task AI Engine</div>
-            <p class="text-[11px] text-slate-400 mt-1">Task 1: สกัดฟิลด์ข้อมูลป้าย<br>Task 2: วิเคราะห์ความเสี่ยง & แผนรับมือ</p>
-          </div>
 
-          <div id="wf-node-4" class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 transition-all">
-            <div class="flex items-center justify-between text-[10px] text-slate-400 mb-1">
-              <span class="font-mono font-bold text-amber-400">STEP 4 • L3.3</span>
-              <span id="wf-status-4" class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">Idle</span>
+            <!-- CONNECTOR 1 -> 2 -->
+            <div class="flex-1 flex flex-col items-center justify-center pt-10 px-1 min-w-[54px]">
+              <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-900 border border-indigo-500/40 text-indigo-300 mb-1 whitespace-nowrap">raw_text</span>
+              <div class="w-full flex items-center">
+                <div class="h-[2px] flex-1 bg-gradient-to-r from-indigo-500 to-purple-500"></div>
+                <span class="text-purple-400 text-xs leading-none -ml-1">▶</span>
+              </div>
             </div>
-            <div class="text-xs font-bold text-white">🛡️ Validation Guardrail</div>
-            <p class="text-[11px] text-slate-400 mt-1">ตรวจสอบชนิดสื่อ/วันที่ และใช้สูตรคณิตศาสตร์คำนวณ SLA & งบประมาณแม่นยำ 100%</p>
-          </div>
 
-          <div id="wf-node-5" class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 transition-all">
-            <div class="flex items-center justify-between text-[10px] text-slate-400 mb-1">
-              <span class="font-mono font-bold text-emerald-400">STEP 5 • L4.2</span>
-              <span id="wf-status-5" class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">Idle</span>
+            <!-- NODE 2: STRUCTURED PROMPT BUILDER -->
+            <div class="w-[180px] shrink-0 flex flex-col items-center">
+              <div id="wf-node-2" class="w-full rounded-xl bg-slate-900/95 border-2 border-purple-500/70 shadow-lg shadow-purple-950/50 relative transition-all">
+                <!-- Input Port Dot -->
+                <span class="w-3 h-3 rounded-full bg-purple-400 border-2 border-slate-950 absolute -left-1.5 top-1/2 -translate-y-1/2 shadow"></span>
+                <div class="px-3 py-1.5 rounded-t-[10px] bg-purple-600/30 border-b border-purple-500/40 flex items-center justify-between">
+                  <span class="font-mono text-[10px] font-bold text-purple-300">🧠 NODE 2 • L3.1</span>
+                  <span id="wf-status-2" class="px-1.5 py-0.2 rounded text-[9px] bg-slate-950 text-slate-300 font-mono">Idle</span>
+                </div>
+                <div class="p-3">
+                  <div class="text-xs font-bold text-white">Structured Prompt</div>
+                  <p class="text-[10px] text-slate-400 mt-1 leading-relaxed">ประกอบ [1.Context] + [2.Instruction] + [3.JSON Schema] อัตโนมัติ</p>
+                  <div class="mt-2 pt-1.5 border-t border-slate-800 flex items-center justify-between text-[9px] font-mono text-purple-300">
+                    <span>Auto: 100%</span>
+                    <span>8 Media Ref</span>
+                  </div>
+                </div>
+                <!-- Output Port Dot -->
+                <span class="w-3 h-3 rounded-full bg-purple-400 border-2 border-slate-950 absolute -right-1.5 top-1/2 -translate-y-1/2 shadow"></span>
+              </div>
             </div>
-            <div class="text-xs font-bold text-white">📊 Auto-Sync Google Sheets</div>
-            <p class="text-[11px] text-slate-400 mt-1">อัปเดต Dashboard + ยิง API บันทึกลงชีต Media_Data และ History_Log</p>
+
+            <!-- CONNECTOR 2 -> 3 -->
+            <div class="flex-1 flex flex-col items-center justify-center pt-10 px-1 min-w-[54px]">
+              <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-900 border border-purple-500/40 text-purple-300 mb-1 whitespace-nowrap">prompt_pkg</span>
+              <div class="w-full flex items-center">
+                <div class="h-[2px] flex-1 bg-gradient-to-r from-purple-500 to-sky-500"></div>
+                <span class="text-sky-400 text-xs leading-none -ml-1">▶</span>
+              </div>
+            </div>
+
+            <!-- NODE 3: MULTI-TASK AI ENGINE (WITH 2 SUB-TASK BRANCHES) -->
+            <div class="w-[195px] shrink-0 flex flex-col items-center">
+              <div id="wf-node-3" class="w-full rounded-xl bg-slate-900/95 border-2 border-sky-500/70 shadow-lg shadow-sky-950/50 relative transition-all">
+                <!-- Input Port Dot -->
+                <span class="w-3 h-3 rounded-full bg-sky-400 border-2 border-slate-950 absolute -left-1.5 top-1/2 -translate-y-1/2 shadow"></span>
+                <div class="px-3 py-1.5 rounded-t-[10px] bg-sky-600/30 border-b border-sky-500/40 flex items-center justify-between">
+                  <span class="font-mono text-[10px] font-bold text-sky-300">🤖 NODE 3 • L3.2</span>
+                  <span id="wf-status-3" class="px-1.5 py-0.2 rounded text-[9px] bg-slate-950 text-slate-300 font-mono">Idle</span>
+                </div>
+                <div class="p-3">
+                  <div class="text-xs font-bold text-white">Multi-Task AI Agent</div>
+                  <p class="text-[10px] text-slate-400 mt-1 leading-relaxed">ประมวลผลแยก 2 งานพร้อมกันในรอบเดียว (Parallel Tasks)</p>
+                  <div class="mt-2 pt-1.5 border-t border-slate-800 flex items-center justify-between text-[9px] font-mono text-sky-300">
+                    <span>Auto: 100%</span>
+                    <span>2 Branches ▾</span>
+                  </div>
+                </div>
+                <!-- Output Port Dot -->
+                <span class="w-3 h-3 rounded-full bg-sky-400 border-2 border-slate-950 absolute -right-1.5 top-1/2 -translate-y-1/2 shadow"></span>
+              </div>
+
+              <!-- Vertical Branch Connector from Node 3 -->
+              <div class="w-[2px] h-3 bg-sky-500/60"></div>
+              <div class="w-full space-y-1.5">
+                <div class="p-2 rounded-lg bg-slate-900/90 border border-sky-500/40 text-[10px]">
+                  <div class="font-bold text-sky-300 font-mono">├─▶ Task 1: Extractor</div>
+                  <div class="text-slate-400 text-[9px]">สกัดรหัสป้าย, ชนิดสื่อ, เขต, วันรื้อ-ติด</div>
+                </div>
+                <div class="p-2 rounded-lg bg-slate-900/90 border border-sky-500/40 text-[10px]">
+                  <div class="font-bold text-sky-300 font-mono">└─▶ Task 2: Risk Advisor</div>
+                  <div class="text-slate-400 text-[9px]">ประเมินความเสี่ยง HIGH/LOW &amp; แผนรับมือ</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- CONNECTOR 3 -> 4 -->
+            <div class="flex-1 flex flex-col items-center justify-center pt-10 px-1 min-w-[54px]">
+              <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-900 border border-sky-500/40 text-sky-300 mb-1 whitespace-nowrap">json_2_tasks</span>
+              <div class="w-full flex items-center">
+                <div class="h-[2px] flex-1 bg-gradient-to-r from-sky-500 to-amber-500"></div>
+                <span class="text-amber-400 text-xs leading-none -ml-1">▶</span>
+              </div>
+            </div>
+
+            <!-- NODE 4: VALIDATION GUARDRAIL & SLA ENGINE -->
+            <div class="w-[185px] shrink-0 flex flex-col items-center">
+              <div id="wf-node-4" class="w-full rounded-xl bg-slate-900/95 border-2 border-amber-500/70 shadow-lg shadow-amber-950/50 relative transition-all">
+                <!-- Input Port Dot -->
+                <span class="w-3 h-3 rounded-full bg-amber-400 border-2 border-slate-950 absolute -left-1.5 top-1/2 -translate-y-1/2 shadow"></span>
+                <div class="px-3 py-1.5 rounded-t-[10px] bg-amber-600/30 border-b border-amber-500/40 flex items-center justify-between">
+                  <span class="font-mono text-[10px] font-bold text-amber-300">🛡️ NODE 4 • L3.3</span>
+                  <span id="wf-status-4" class="px-1.5 py-0.2 rounded text-[9px] bg-slate-950 text-slate-300 font-mono">Idle</span>
+                </div>
+                <div class="p-3">
+                  <div class="text-xs font-bold text-white">Validation Guardrail</div>
+                  <p class="text-[10px] text-slate-400 mt-1 leading-relaxed">ตรวจชนิดสื่อ/กันค่า NaN + คำนวณวัน SLA (งานวันเดียว = 1 วัน) &amp; งบการเงิน</p>
+                  <div class="mt-2 pt-1.5 border-t border-slate-800 flex items-center justify-between text-[9px] font-mono text-amber-300">
+                    <span>Rule Check</span>
+                    <span>100% Exact</span>
+                  </div>
+                </div>
+                <!-- Output Port Dot -->
+                <span class="w-3 h-3 rounded-full bg-amber-400 border-2 border-slate-950 absolute -right-1.5 top-1/2 -translate-y-1/2 shadow"></span>
+              </div>
+            </div>
+
+            <!-- CONNECTOR 4 -> 5 -->
+            <div class="flex-1 flex flex-col items-center justify-center pt-10 px-1 min-w-[54px]">
+              <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-900 border border-emerald-500/40 text-emerald-300 mb-1 whitespace-nowrap">POST /exec</span>
+              <div class="w-full flex items-center">
+                <div class="h-[2px] flex-1 bg-gradient-to-r from-amber-500 to-emerald-500"></div>
+                <span class="text-emerald-400 text-xs leading-none -ml-1">▶</span>
+              </div>
+            </div>
+
+            <!-- NODE 5: GOOGLE APPS SCRIPT API & 2 CLOUD SHEETS -->
+            <div class="w-[195px] shrink-0 flex flex-col items-center">
+              <div id="wf-node-5" class="w-full rounded-xl bg-slate-900/95 border-2 border-emerald-500/70 shadow-lg shadow-emerald-950/50 relative transition-all">
+                <!-- Input Port Dot -->
+                <span class="w-3 h-3 rounded-full bg-emerald-400 border-2 border-slate-950 absolute -left-1.5 top-1/2 -translate-y-1/2 shadow"></span>
+                <div class="px-3 py-1.5 rounded-t-[10px] bg-emerald-600/30 border-b border-emerald-500/40 flex items-center justify-between">
+                  <span class="font-mono text-[10px] font-bold text-emerald-300">☁️ NODE 5 • L4.2</span>
+                  <span id="wf-status-5" class="px-1.5 py-0.2 rounded text-[9px] bg-slate-950 text-slate-300 font-mono">Idle</span>
+                </div>
+                <div class="p-3">
+                  <div class="text-xs font-bold text-white">Apps Script Webhook</div>
+                  <p class="text-[10px] text-slate-400 mt-1 leading-relaxed">อัปเดต Dashboard + ยิง API ซิงค์ลง Google Drive อัตโนมัติ</p>
+                  <div class="mt-2 pt-1.5 border-t border-slate-800 flex items-center justify-between text-[9px] font-mono text-emerald-300">
+                    <span>doPost(e)</span>
+                    <span>2 Sheets ▾</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Vertical Branch Connector from Node 5 -->
+              <div class="w-[2px] h-3 bg-emerald-500/60"></div>
+              <div class="w-full space-y-1.5">
+                <div class="p-2 rounded-lg bg-slate-900/90 border border-emerald-500/40 text-[10px]">
+                  <div class="font-bold text-emerald-300 font-mono">├─▶ 📗 ชีต Media_Data</div>
+                  <div class="text-slate-400 text-[9px]">อัปเดตฐานข้อมูลป้ายทั้งหมด 20 คอลัมน์</div>
+                </div>
+                <div class="p-2 rounded-lg bg-slate-900/90 border border-emerald-500/40 text-[10px]">
+                  <div class="font-bold text-amber-300 font-mono">└─▶ 📘 ชีต History_Log</div>
+                  <div class="text-slate-400 text-[9px]">บันทึก Timestamp, Action, Actor (L4.5)</div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
@@ -7035,14 +7188,14 @@
       if (!node || !badge) return;
       badge.innerText = stateText;
       if (colorType === 'done') {
-        node.className = 'p-3.5 rounded-xl bg-emerald-950/30 border border-emerald-500/60 transition-all shadow-md shadow-emerald-500/10';
-        badge.className = 'px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold';
+        node.className = 'w-full rounded-xl bg-emerald-950/40 border-2 border-emerald-400 shadow-lg shadow-emerald-500/20 relative transition-all ring-2 ring-emerald-400/30';
+        badge.className = 'px-1.5 py-0.5 rounded text-[9px] bg-emerald-500/30 text-emerald-200 font-bold font-mono';
       } else if (colorType === 'running') {
-        node.className = 'p-3.5 rounded-xl bg-indigo-950/40 border border-indigo-500 transition-all';
-        badge.className = 'px-1.5 py-0.5 rounded bg-indigo-500/30 text-indigo-200 animate-pulse';
+        node.className = 'w-full rounded-xl bg-indigo-950/50 border-2 border-indigo-400 shadow-lg shadow-indigo-500/20 relative transition-all animate-pulse';
+        badge.className = 'px-1.5 py-0.5 rounded text-[9px] bg-indigo-500/40 text-indigo-100 font-bold font-mono';
       } else {
-        node.className = 'p-3.5 rounded-xl bg-slate-950 border border-slate-800 transition-all';
-        badge.className = 'px-1.5 py-0.5 rounded bg-slate-800 text-slate-400';
+        node.className = 'w-full rounded-xl bg-slate-900/95 border-2 border-slate-700 shadow-lg relative transition-all';
+        badge.className = 'px-1.5 py-0.5 rounded text-[9px] bg-slate-950 text-slate-400 font-mono';
       }
     }
 
