@@ -161,8 +161,9 @@
         <span id="tabPendingBadge" class="ml-1 px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">0 เคส</span>
       </button>
 
-      <!-- Tab 3: AI Integrator (Gate Level 2-4) & Google Drive History Log -->
-      <button onclick="switchTab('tab-ai-gate')" id="nav-tab-ai-gate" class="tab-btn px-4 py-3.5 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 transition-all relative">
+      <!-- Tab 3: AI Integrator (Gate Level 2-4) & Google Drive History Log (Admin Protected) -->
+      <button onclick="switchTab('tab-ai-gate')" id="nav-tab-ai-gate" class="tab-btn px-4 py-3.5 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 transition-all relative" title="ต้องใช้สิทธิ์ Admin (staticmedia) เพื่อเข้าถึงศูนย์ควบคุม AI & Google Drive Log">
+        <span id="aiGateTabLockIcon" class="text-xs">🔒</span>
         <span class="text-sm">🤖</span>
         <span>AI Integrator (Level 4) & Google Drive Log</span>
         <span id="driveSyncStatusBadgeTab" class="ml-1 px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Gate L2–L4</span>
@@ -2285,13 +2286,18 @@
     }
 
     function updateAdminStatusBadge() {
+      const unlocked = isAdminUnlocked();
       const btnD = document.getElementById('btnAdminStatusDesktop');
       if (btnD) {
-        if (isAdminUnlocked()) {
+        if (unlocked) {
           btnD.classList.remove('hidden');
         } else {
           btnD.classList.add('hidden');
         }
+      }
+      const lockIcon = document.getElementById('aiGateTabLockIcon');
+      if (lockIcon) {
+        lockIcon.innerText = unlocked ? '🔓' : '🔒';
       }
     }
 
@@ -2299,6 +2305,10 @@
       if (isAdminUnlocked()) {
         sessionStorage.removeItem(ADMIN_SESSION_KEY);
         updateAdminStatusBadge();
+        const aiTab = document.getElementById('tab-ai-gate');
+        if (aiTab && !aiTab.classList.contains('hidden')) {
+          switchTab('tab-overview');
+        }
         alert('🔒 ล็อกสิทธิ์ Admin กลับเป็นโหมดผู้ใช้งานทั่วไปเรียบร้อยแล้ว');
       }
     }
@@ -4523,9 +4533,9 @@
     }
 
     // ----------------------------------------------------
-    // TAB NAVIGATION
+    // TAB NAVIGATION (WITH ADMIN PROTECTION ON TAB 3)
     // ----------------------------------------------------
-    function switchTab(tabId) {
+    function activateTabDOM(tabId) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.remove('border-indigo-500', 'text-white');
@@ -4543,9 +4553,21 @@
 
       if (tabId === 'tab-pending') {
         renderPendingTab();
+      } else if (tabId === 'tab-ai-gate') {
+        initGasConnectionUI();
       } else {
         applyFilters();
       }
+    }
+
+    function switchTab(tabId) {
+      if (tabId === 'tab-ai-gate') {
+        requireAdminAuth('เปิดหน้าศูนย์ควบคุม 🤖 AI Integrator (Level 4) & Google Drive Log', () => {
+          activateTabDOM('tab-ai-gate');
+        });
+        return;
+      }
+      activateTabDOM(tabId);
     }
 
     // ----------------------------------------------------
