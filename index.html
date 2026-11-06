@@ -21,18 +21,19 @@
       font-family: 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
     ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
+      width: 10px;
+      height: 11px;
     }
     ::-webkit-scrollbar-track {
       background: #0b1120;
     }
     ::-webkit-scrollbar-thumb {
-      background: #334155;
-      border-radius: 3px;
+      background: #475569;
+      border-radius: 5px;
+      border: 2px solid #0b1120;
     }
     ::-webkit-scrollbar-thumb:hover {
-      background: #475569;
+      background: #6366f1;
     }
     /* Flatpickr Dark Theme Customization */
     .flatpickr-calendar {
@@ -733,9 +734,18 @@
             </h3>
             <p class="text-xs text-slate-400">แสดงความเชื่อมโยงจุดติดตั้งเดิม จุดติดตั้งใหม่ ค่าใช้จ่าย และสาเหตุ</p>
           </div>
-          <div class="flex flex-wrap items-center gap-3">
-            <div class="text-xs text-slate-400">
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="text-xs text-slate-400 mr-1">
               แสดงข้อมูล <span id="filteredCount" class="font-bold text-white">0</span> จาก <span id="totalDataCount" class="font-bold text-white">0</span> รายการ
+            </div>
+            <!-- Quick Left / Right Horizontal Scroll Buttons -->
+            <div class="flex items-center gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800">
+              <button type="button" onclick="scrollTableHorizontally('mainLogTableContainer', -320)" class="px-2 py-1 rounded bg-slate-800 hover:bg-indigo-600 text-slate-200 hover:text-white text-[11px] font-semibold transition flex items-center gap-1" title="เลื่อนตารางไปทางซ้ายทันที">
+                ◀ เลื่อนซ้าย
+              </button>
+              <button type="button" onclick="scrollTableHorizontally('mainLogTableContainer', 320)" class="px-2 py-1 rounded bg-slate-800 hover:bg-indigo-600 text-slate-200 hover:text-white text-[11px] font-semibold transition flex items-center gap-1" title="เลื่อนตารางไปทางขวาทันที">
+                เลื่อนขวา ▶
+              </button>
             </div>
             <button type="button" onclick="openMatrixFullViewModal('ALL', 'ALL', 'log')" class="px-3 py-1.5 rounded-lg bg-indigo-600/80 hover:bg-indigo-500 text-white text-xs font-medium flex items-center gap-1.5 transition-all">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
@@ -748,10 +758,15 @@
           </div>
         </div>
 
-        <!-- Table Container -->
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs text-slate-300">
-            <thead class="bg-slate-950/80 text-slate-400 border-b border-slate-800">
+        <!-- Synchronized Top Horizontal Scrollbar (ลากเลื่อนซ้าย-ขวาได้ทันทีจากด้านบนตาราง) -->
+        <div id="topScrollbarMainLog" onscroll="syncTableScroll('topScrollbarMainLog', 'mainLogTableContainer')" class="overflow-x-auto bg-slate-950/90 border-b border-slate-800 h-4">
+          <div id="topScrollbarMainLogInner" class="h-1" style="width: 1500px;"></div>
+        </div>
+
+        <!-- Table Container with Fixed Max-Height so Bottom Scrollbar & Sticky Header are ALWAYS visible immediately -->
+        <div id="mainLogTableContainer" onscroll="syncTableScroll('mainLogTableContainer', 'topScrollbarMainLog')" class="overflow-x-auto overflow-y-auto max-h-[64vh] relative">
+          <table id="mainLogTableElement" class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-950 text-slate-300 border-b border-slate-800 sticky top-0 z-20 shadow-md">
               <tr>
                 <th class="py-3 px-4 font-semibold">Media ID / สื่อ</th>
                 <th class="py-3 px-4 font-semibold">จุดติดตั้งเดิม (Origin Site)</th>
@@ -858,11 +873,24 @@
             </h3>
             <p class="text-xs text-slate-400">คลิกปุ่ม <strong class="text-amber-400">อัปเดต / ดันเคส</strong> เพื่อเปลี่ยนสถานะ ใส่จุดติดตั้งใหม่ หรือบันทึกจบงาน</p>
           </div>
+          <div class="flex items-center gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800">
+            <button type="button" onclick="scrollTableHorizontally('pendingTableContainer', -320)" class="px-2 py-1 rounded bg-slate-800 hover:bg-amber-600 text-slate-200 hover:text-white text-[11px] font-semibold transition flex items-center gap-1">
+              ◀ เลื่อนซ้าย
+            </button>
+            <button type="button" onclick="scrollTableHorizontally('pendingTableContainer', 320)" class="px-2 py-1 rounded bg-slate-800 hover:bg-amber-600 text-slate-200 hover:text-white text-[11px] font-semibold transition flex items-center gap-1">
+              เลื่อนขวา ▶
+            </button>
+          </div>
         </div>
 
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs text-slate-300">
-            <thead class="bg-slate-950/80 text-slate-400 border-b border-slate-800">
+        <!-- Synchronized Top Horizontal Scrollbar -->
+        <div id="topScrollbarPending" onscroll="syncTableScroll('topScrollbarPending', 'pendingTableContainer')" class="overflow-x-auto bg-slate-950/90 border-b border-slate-800 h-4">
+          <div id="topScrollbarPendingInner" class="h-1" style="width: 1400px;"></div>
+        </div>
+
+        <div id="pendingTableContainer" onscroll="syncTableScroll('pendingTableContainer', 'topScrollbarPending')" class="overflow-x-auto overflow-y-auto max-h-[64vh] relative">
+          <table id="pendingTableElement" class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-950 text-slate-300 border-b border-slate-800 sticky top-0 z-20 shadow-md">
               <tr>
                 <th class="py-3 px-4 font-semibold">Media ID / สื่อ</th>
                 <th class="py-3 px-4 font-semibold">จุดเดิมที่ถูกรื้อถอน</th>
@@ -4570,6 +4598,38 @@
       activateTabDOM(tabId);
     }
 
+    // Synchronized Top/Bottom Horizontal Scrollbars & Instant Left/Right Scroll Buttons
+    let isSyncingScroll = false;
+    function syncTableScroll(sourceId, targetId) {
+      if (isSyncingScroll) return;
+      const src = document.getElementById(sourceId);
+      const tgt = document.getElementById(targetId);
+      if (!src || !tgt) return;
+      isSyncingScroll = true;
+      tgt.scrollLeft = src.scrollLeft;
+      requestAnimationFrame(() => { isSyncingScroll = false; });
+    }
+
+    function scrollTableHorizontally(containerId, deltaX) {
+      const el = document.getElementById(containerId);
+      if (!el) return;
+      el.scrollBy({ left: deltaX, behavior: 'smooth' });
+    }
+
+    function updateTopScrollbarWidths() {
+      const mainTbl = document.getElementById('mainLogTableElement');
+      const mainInner = document.getElementById('topScrollbarMainLogInner');
+      if (mainTbl && mainInner) {
+        mainInner.style.width = Math.max(mainTbl.scrollWidth, 1400) + 'px';
+      }
+      const pendTbl = document.getElementById('pendingTableElement');
+      const pendInner = document.getElementById('topScrollbarPendingInner');
+      if (pendTbl && pendInner) {
+        pendInner.style.width = Math.max(pendTbl.scrollWidth, 1300) + 'px';
+      }
+    }
+    window.addEventListener('resize', updateTopScrollbarWidths);
+
     // ----------------------------------------------------
     // FILTER & SEARCH LOGIC
     // ----------------------------------------------------
@@ -4616,6 +4676,7 @@
       renderDashboard();
       updatePendingBadge();
       updateBefore2024Badge();
+      setTimeout(updateTopScrollbarWidths, 50);
       if (typeof renderMobileApp === 'function') {
         renderMobileApp();
       }
