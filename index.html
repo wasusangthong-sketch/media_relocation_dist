@@ -122,6 +122,22 @@
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
         ส่งออก CSV
       </button>
+
+      <!-- Admin Undo / Redo Controls -->
+      <div class="flex items-center gap-1 bg-slate-900/90 p-1 rounded-lg border border-slate-700/80">
+        <button type="button" id="btnAdminStatusDesktop" onclick="toggleAdminSessionLock()" class="hidden px-2 py-1 rounded-md text-[11px] font-semibold bg-emerald-500/20 hover:bg-rose-500/20 text-emerald-300 hover:text-rose-300 border border-emerald-500/40 transition-all" title="ขณะนี้ปลดล็อกสิทธิ์ Admin แล้ว (คลิกเพื่อล็อกกลับ)">
+          🔓 Admin
+        </button>
+        <button type="button" id="btnUndoDesktop" onclick="adminUndoAction()" disabled class="px-2.5 py-1 rounded-md text-xs font-medium flex items-center gap-1 transition-all text-slate-500 opacity-50 cursor-not-allowed" title="ย้อนกลับคำสั่งล่าสุด (Admin Undo)">
+          <span>↩️ Undo</span>
+          <span id="badgeUndoDesktop" class="hidden px-1.5 py-0.2 text-[10px] rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono">0</span>
+        </button>
+        <button type="button" id="btnRedoDesktop" onclick="adminRedoAction()" disabled class="px-2.5 py-1 rounded-md text-xs font-medium flex items-center gap-1 transition-all text-slate-500 opacity-50 cursor-not-allowed" title="ทำซ้ำคำสั่งที่ย้อนกลับ (Admin Redo)">
+          <span>↪️ Redo</span>
+          <span id="badgeRedoDesktop" class="hidden px-1.5 py-0.2 text-[10px] rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 font-mono">0</span>
+        </button>
+      </div>
+
       <button onclick="resetToZeroData()" class="px-3 py-2 rounded-lg bg-rose-950/40 hover:bg-rose-900/70 text-rose-300 font-medium flex items-center gap-1.5 transition-all border border-rose-800/40" title="ล้างข้อมูลทั้งหมดให้เป็น 0 เพื่อเริ่มนำเข้าไฟล์ใหม่">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
         ล้างข้อมูลเป็น 0
@@ -887,6 +903,12 @@
           </div>
 
           <div class="flex items-center gap-1.5">
+            <button type="button" id="btnUndoMobile" onclick="adminUndoAction()" disabled class="px-2 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700 text-slate-500 text-[11px] font-bold opacity-50 cursor-not-allowed transition" title="ย้อนกลับคำสั่งล่าสุด (Admin Undo)">
+              ↩️ <span id="badgeUndoMobile" class="text-[10px]">0</span>
+            </button>
+            <button type="button" id="btnRedoMobile" onclick="adminRedoAction()" disabled class="px-2 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700 text-slate-500 text-[11px] font-bold opacity-50 cursor-not-allowed transition" title="ทำซ้ำคำสั่ง (Admin Redo)">
+              ↪️ <span id="badgeRedoMobile" class="text-[10px]">0</span>
+            </button>
             <button type="button" onclick="openAddModal()" class="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold flex items-center gap-1 shadow-md shadow-emerald-600/20 active:scale-95 transition">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
               เพิ่มรายการ
@@ -1177,14 +1199,20 @@
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-slate-400 mb-1">วันที่รื้อถอน <span class="text-rose-400">*</span></label>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-slate-400">วันที่รื้อถอน <span class="text-[10px] text-amber-400">(เว้นว่างได้หากตั้งแผนล่วงหน้า)</span></label>
+              <button type="button" onclick="if(fpDismantle) fpDismantle.clear(); else document.getElementById('formDismantleDate').value='';" class="text-[10px] text-slate-400 hover:text-rose-400 underline">ล้างวัน</button>
+            </div>
             <div class="relative">
-              <input type="text" id="formDismantleDate" required placeholder="เลือกวันที่รื้อถอน (วว/ดด/ปปปป)..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 pr-9 text-white focus:outline-none focus:border-indigo-500 cursor-pointer">
+              <input type="text" id="formDismantleDate" placeholder="เลือกวันที่รื้อถอน (หรือเว้นว่างไว้ใส่ทีหลัง)..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 pr-9 text-white focus:outline-none focus:border-indigo-500 cursor-pointer">
               <svg class="w-4 h-4 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
             </div>
           </div>
           <div>
-            <label class="block text-slate-400 mb-1">วันที่ติดตั้งใหม่ (เว้นว่างได้ถ้าเป็นเคสรอย้าย)</label>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-slate-400">วันที่ติดตั้งใหม่ <span class="text-[10px] text-slate-500">(เว้นว่างได้ถ้ารอย้าย)</span></label>
+              <button type="button" onclick="if(fpInstall) fpInstall.clear(); else document.getElementById('formInstallDate').value='';" class="text-[10px] text-slate-400 hover:text-rose-400 underline">ล้างวัน</button>
+            </div>
             <div class="relative">
               <input type="text" id="formInstallDate" placeholder="เลือกวันที่ติดตั้งใหม่ (ถ้ามี)..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 pr-9 text-white focus:outline-none focus:border-indigo-500 cursor-pointer">
               <svg class="w-4 h-4 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
@@ -1245,7 +1273,7 @@
 
       <div class="flex items-center gap-2 mb-1">
         <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
-        <h2 class="text-base font-bold text-white">ผลักดันเคสคงค้าง & อัปเดตความคืบหน้า</h2>
+        <h2 class="text-base font-bold text-white">อัปเดตความคืบหน้า & แก้ไขวันที่รื้อ/ติดตั้ง</h2>
       </div>
       <p class="text-xs text-slate-400 mb-4" id="pushModalSub">Media ID: -</p>
 
@@ -1264,22 +1292,41 @@
           </div>
         </div>
 
-        <div>
-          <label class="block text-slate-400 mb-1">จุดติดตั้งใหม่ที่จัดหาได้</label>
-          <input type="text" id="pushDestSite" placeholder="ระบุชื่อสถานที่จุดใหม่" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-white focus:outline-none focus:border-amber-500">
-        </div>
-
         <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 mb-1">จุดติดตั้งใหม่ที่จัดหาได้</label>
+            <input type="text" id="pushDestSite" placeholder="ระบุชื่อสถานที่จุดใหม่" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-white focus:outline-none focus:border-amber-500">
+          </div>
           <div>
             <label class="block text-slate-400 mb-1">เขต/พื้นที่ใหม่</label>
             <input type="text" id="pushDestArea" list="areaSuggestions" placeholder="เช่น ราชเทวี" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-white focus:outline-none focus:border-amber-500">
           </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 p-3 rounded-xl bg-slate-950/80 border border-slate-800">
           <div>
-            <label class="block text-slate-400 mb-1">วันที่ติดตั้งเสร็จจริง (กรณีปิดงาน)</label>
-            <div class="relative">
-              <input type="text" id="pushInstallDate" placeholder="เลือกวันที่ติดตั้งสำเร็จ..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 pr-9 text-white focus:outline-none focus:border-amber-500 cursor-pointer">
-              <svg class="w-4 h-4 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-rose-300 font-semibold">1. วันที่รื้อถอน / ย้ายออก</label>
+              <button type="button" onclick="clearPushDate('dismantle')" class="text-[10px] text-slate-400 hover:text-rose-400 underline">ล้างวัน</button>
             </div>
+            <div class="relative">
+              <input type="text" id="pushDismantleDate" placeholder="เลือกวันที่รื้อถอน..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 pr-8 text-white focus:outline-none focus:border-rose-500 cursor-pointer">
+              <svg class="w-4 h-4 text-rose-400 absolute right-2.5 top-2.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-emerald-300 font-semibold">2. วันที่ติดตั้งเสร็จ (ปิดงาน)</label>
+              <button type="button" onclick="clearPushDate('install')" class="text-[10px] text-slate-400 hover:text-rose-400 underline">ล้างวัน</button>
+            </div>
+            <div class="relative">
+              <input type="text" id="pushInstallDate" placeholder="เลือกวันที่ติดตั้งสำเร็จ..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 pr-8 text-white focus:outline-none focus:border-emerald-500 cursor-pointer">
+              <svg class="w-4 h-4 text-emerald-400 absolute right-2.5 top-2.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            </div>
+          </div>
+          <div class="col-span-2 pt-1.5 border-t border-slate-800/80 flex items-center justify-between text-[11px]">
+            <span class="text-slate-400">⏱️ คำนวณจำนวนวัน SLA / Downtime อัตโนมัติ:</span>
+            <span id="pushSlaPreview" class="font-bold text-amber-300">-</span>
           </div>
         </div>
 
@@ -1590,6 +1637,67 @@
     </div>
   </div>
 
+  <!-- ========================================== -->
+  <!-- MODAL: ADMIN SECURITY AUTHENTICATION       -->
+  <!-- ========================================== -->
+  <div id="adminAuthModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-[70] hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-rose-500/40 rounded-2xl max-w-md w-full p-6 shadow-2xl relative overflow-hidden">
+      <div class="flex items-start justify-between gap-3 pb-4 border-b border-slate-800">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-400 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">ยืนยันสิทธิ์ผู้ดูแลระบบ (Admin)</h3>
+            <p class="text-xs text-slate-400 mt-0.5">กรุณาระบุ Username และ Password เพื่อดำเนินการลบข้อมูล</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeAdminAuthModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="mt-4 p-3 rounded-xl bg-rose-950/30 border border-rose-500/30 text-xs text-rose-200 flex items-center gap-2">
+        <span class="text-base">🛡️</span>
+        <div>
+          <span class="text-slate-400 block text-[11px]">คำสั่งที่ต้องการสิทธิ์ Admin:</span>
+          <strong id="adminAuthActionLabel" class="text-rose-300 font-semibold">ลบข้อมูลสำคัญ</strong>
+        </div>
+      </div>
+
+      <form id="adminAuthForm" onsubmit="submitAdminAuth(event)" class="mt-4 space-y-3.5">
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">Username (ชื่อผู้ใช้งาน Admin)</label>
+          <input type="text" id="adminUsernameInput" autocomplete="off" required placeholder="กรอก Username..." class="w-full bg-slate-950 border border-slate-700 focus:border-indigo-500 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">Password (รหัสผ่าน Admin)</label>
+          <div class="relative">
+            <input type="password" id="adminPasswordInput" autocomplete="off" required placeholder="กรอก Password..." class="w-full bg-slate-950 border border-slate-700 focus:border-indigo-500 rounded-xl px-3.5 py-2 pr-10 text-sm text-white focus:outline-none">
+            <button type="button" onclick="toggleAdminPasswordVisibility()" class="absolute right-2.5 top-2 text-slate-400 hover:text-slate-200 text-xs px-1 py-0.5">
+              👁️
+            </button>
+          </div>
+        </div>
+
+        <div id="adminAuthErrorMsg" class="hidden p-2.5 rounded-xl bg-rose-950/70 border border-rose-500/60 text-rose-300 text-xs font-medium text-center">
+          ❌ Username หรือ Password ไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-800">
+          <button type="button" onclick="closeAdminAuthModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition">
+            ยกเลิก
+          </button>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold shadow-lg shadow-rose-600/20 transition flex items-center gap-1.5">
+            🔓 ยืนยันสิทธิ์และดำเนินการ
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Datalist for District / Area Auto-complete -->
   <datalist id="areaSuggestions">
     <option value="พระนคร"></option><option value="ดุสิต"></option><option value="หนองจอก"></option><option value="บางรัก"></option>
@@ -1763,9 +1871,232 @@
       }).join('');
     }
 
+    // ----------------------------------------------------
+    // ADMIN SECURITY AUTHENTICATION & UNDO / REDO ENGINE
+    // ----------------------------------------------------
+    const ADMIN_AUTH_USER = 'staticmedia';
+    const ADMIN_AUTH_PASS = 'super691';
+    const ADMIN_SESSION_KEY = 'media_relocation_admin_unlocked';
+    let pendingAdminCallback = null;
+
+    function isAdminUnlocked() {
+      return sessionStorage.getItem(ADMIN_SESSION_KEY) === '1';
+    }
+
+    function updateAdminStatusBadge() {
+      const btnD = document.getElementById('btnAdminStatusDesktop');
+      if (btnD) {
+        if (isAdminUnlocked()) {
+          btnD.classList.remove('hidden');
+        } else {
+          btnD.classList.add('hidden');
+        }
+      }
+    }
+
+    function toggleAdminSessionLock() {
+      if (isAdminUnlocked()) {
+        sessionStorage.removeItem(ADMIN_SESSION_KEY);
+        updateAdminStatusBadge();
+        alert('🔒 ล็อกสิทธิ์ Admin กลับเป็นโหมดผู้ใช้งานทั่วไปเรียบร้อยแล้ว');
+      }
+    }
+
+    // Undo / Redo History Stacks (Max 25 snapshots)
+    let undoStack = [];
+    let redoStack = [];
+    const MAX_HISTORY_STEPS = 25;
+
+    function captureCurrentStateSnapshot(actionLabel) {
+      return {
+        actionLabel: actionLabel || 'แก้ไขข้อมูล',
+        timestamp: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+        masterData: JSON.parse(JSON.stringify(typeof masterData !== 'undefined' ? masterData : [])),
+        refMediaTypes: JSON.parse(JSON.stringify(getReferenceMediaTypes()))
+      };
+    }
+
+    function pushHistorySnapshot(actionLabel) {
+      try {
+        undoStack.push(captureCurrentStateSnapshot(actionLabel));
+        if (undoStack.length > MAX_HISTORY_STEPS) {
+          undoStack.shift();
+        }
+        // Any new action clears the redo stack
+        redoStack = [];
+        updateUndoRedoUI();
+      } catch (err) {
+        console.error('Error pushing history snapshot:', err);
+      }
+    }
+
+    function applyStateSnapshot(snapshot) {
+      if (!snapshot) return;
+      masterData = JSON.parse(JSON.stringify(snapshot.masterData || []));
+      localStorage.setItem('ref_static_media_types', JSON.stringify(snapshot.refMediaTypes || DEFAULT_MEDIA_TYPES));
+      populateReferenceDropdowns();
+      if (typeof renderReferenceManagerList === 'function') {
+        renderReferenceManagerList();
+      }
+      saveMasterData();
+      applyFilters();
+      renderPendingTab();
+      updateUndoRedoUI();
+    }
+
+    function updateUndoRedoUI() {
+      const undoCount = undoStack.length;
+      const redoCount = redoStack.length;
+      const lastUndoLabel = undoCount > 0 ? undoStack[undoCount - 1].actionLabel : '';
+      const lastRedoLabel = redoCount > 0 ? redoStack[redoCount - 1].actionLabel : '';
+
+      // Desktop Undo
+      const btnUndoD = document.getElementById('btnUndoDesktop');
+      const badgeUndoD = document.getElementById('badgeUndoDesktop');
+      if (btnUndoD) {
+        btnUndoD.disabled = undoCount === 0;
+        btnUndoD.title = undoCount > 0 ? `ย้อนกลับ: ${lastUndoLabel} (ต้องใช้สิทธิ์ Admin)` : 'ยังไม่มีประวัติให้ย้อนกลับ';
+        btnUndoD.className = undoCount > 0
+          ? 'px-2.5 py-1 rounded-md text-xs font-semibold flex items-center gap-1 transition-all bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 cursor-pointer shadow-sm'
+          : 'px-2.5 py-1 rounded-md text-xs font-medium flex items-center gap-1 transition-all text-slate-500 opacity-50 cursor-not-allowed';
+      }
+      if (badgeUndoD) {
+        badgeUndoD.textContent = undoCount;
+        if (undoCount > 0) badgeUndoD.classList.remove('hidden');
+        else badgeUndoD.classList.add('hidden');
+      }
+
+      // Desktop Redo
+      const btnRedoD = document.getElementById('btnRedoDesktop');
+      const badgeRedoD = document.getElementById('badgeRedoDesktop');
+      if (btnRedoD) {
+        btnRedoD.disabled = redoCount === 0;
+        btnRedoD.title = redoCount > 0 ? `ทำซ้ำ: ${lastRedoLabel} (ต้องใช้สิทธิ์ Admin)` : 'ยังไม่มีรายการให้ทำซ้ำ';
+        btnRedoD.className = redoCount > 0
+          ? 'px-2.5 py-1 rounded-md text-xs font-semibold flex items-center gap-1 transition-all bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 cursor-pointer shadow-sm'
+          : 'px-2.5 py-1 rounded-md text-xs font-medium flex items-center gap-1 transition-all text-slate-500 opacity-50 cursor-not-allowed';
+      }
+      if (badgeRedoD) {
+        badgeRedoD.textContent = redoCount;
+        if (redoCount > 0) badgeRedoD.classList.remove('hidden');
+        else badgeRedoD.classList.add('hidden');
+      }
+
+      // Mobile Undo / Redo
+      const btnUndoM = document.getElementById('btnUndoMobile');
+      const badgeUndoM = document.getElementById('badgeUndoMobile');
+      if (btnUndoM) {
+        btnUndoM.disabled = undoCount === 0;
+        btnUndoM.className = undoCount > 0
+          ? 'px-2 py-1.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[11px] font-bold transition active:scale-95'
+          : 'px-2 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700 text-slate-500 text-[11px] font-bold opacity-50 cursor-not-allowed transition';
+      }
+      if (badgeUndoM) badgeUndoM.textContent = undoCount;
+
+      const btnRedoM = document.getElementById('btnRedoMobile');
+      const badgeRedoM = document.getElementById('badgeRedoMobile');
+      if (btnRedoM) {
+        btnRedoM.disabled = redoCount === 0;
+        btnRedoM.className = redoCount > 0
+          ? 'px-2 py-1.5 rounded-xl bg-sky-500/20 border border-sky-500/40 text-sky-300 text-[11px] font-bold transition active:scale-95'
+          : 'px-2 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700 text-slate-500 text-[11px] font-bold opacity-50 cursor-not-allowed transition';
+      }
+      if (badgeRedoM) badgeRedoM.textContent = redoCount;
+    }
+
+    function adminUndoAction() {
+      if (undoStack.length === 0) return;
+      const targetSnapshot = undoStack[undoStack.length - 1];
+      requireAdminAuth(`↩️ ย้อนกลับ (Undo): ${targetSnapshot.actionLabel}`, () => {
+        const snapshotToRestore = undoStack.pop();
+        redoStack.push(captureCurrentStateSnapshot(snapshotToRestore.actionLabel));
+        applyStateSnapshot(snapshotToRestore);
+        alert(`↩️ ย้อนกลับ (Undo) คำสั่ง "${snapshotToRestore.actionLabel}" คืนค่าข้อมูลเดิมเรียบร้อยแล้ว! (จำนวนป้ายปัจจุบัน: ${masterData.length} รายการ)`);
+      });
+    }
+
+    function adminRedoAction() {
+      if (redoStack.length === 0) return;
+      const targetSnapshot = redoStack[redoStack.length - 1];
+      requireAdminAuth(`↪️ ทำซ้ำ (Redo): ${targetSnapshot.actionLabel}`, () => {
+        const snapshotToRestore = redoStack.pop();
+        undoStack.push(captureCurrentStateSnapshot(snapshotToRestore.actionLabel));
+        applyStateSnapshot(snapshotToRestore);
+        alert(`↪️ ทำซ้ำ (Redo) คำสั่ง "${snapshotToRestore.actionLabel}" เรียบร้อยแล้ว! (จำนวนป้ายปัจจุบัน: ${masterData.length} รายการ)`);
+      });
+    }
+
+    function requireAdminAuth(actionLabel, onAuthorized) {
+      if (isAdminUnlocked()) {
+        updateAdminStatusBadge();
+        if (typeof onAuthorized === 'function') onAuthorized();
+        return;
+      }
+
+      pendingAdminCallback = onAuthorized;
+      const modal = document.getElementById('adminAuthModal');
+      const labelEl = document.getElementById('adminAuthActionLabel');
+      const userEl = document.getElementById('adminUsernameInput');
+      const passEl = document.getElementById('adminPasswordInput');
+      const errEl = document.getElementById('adminAuthErrorMsg');
+
+      if (labelEl) labelEl.textContent = actionLabel || 'ลบหรือรีเซ็ตข้อมูลสำคัญ';
+      if (userEl) userEl.value = '';
+      if (passEl) {
+        passEl.value = '';
+        passEl.type = 'password';
+      }
+      if (errEl) errEl.classList.add('hidden');
+      if (modal) {
+        modal.classList.remove('hidden');
+        setTimeout(() => { if (userEl) userEl.focus(); }, 80);
+      }
+    }
+
+    function closeAdminAuthModal() {
+      const modal = document.getElementById('adminAuthModal');
+      if (modal) modal.classList.add('hidden');
+      pendingAdminCallback = null;
+    }
+
+    function toggleAdminPasswordVisibility() {
+      const passEl = document.getElementById('adminPasswordInput');
+      if (!passEl) return;
+      passEl.type = passEl.type === 'password' ? 'text' : 'password';
+    }
+
+    function submitAdminAuth(event) {
+      if (event) event.preventDefault();
+      const userEl = document.getElementById('adminUsernameInput');
+      const passEl = document.getElementById('adminPasswordInput');
+      const errEl = document.getElementById('adminAuthErrorMsg');
+
+      const username = (userEl ? userEl.value.trim() : '');
+      const password = (passEl ? passEl.value : '');
+
+      if (username === ADMIN_AUTH_USER && password === ADMIN_AUTH_PASS) {
+        sessionStorage.setItem(ADMIN_SESSION_KEY, '1');
+        updateAdminStatusBadge();
+        const callbackToRun = pendingAdminCallback;
+        closeAdminAuthModal();
+        if (typeof callbackToRun === 'function') {
+          callbackToRun();
+        }
+      } else {
+        if (errEl) errEl.classList.remove('hidden');
+        if (passEl) {
+          passEl.value = '';
+          passEl.focus();
+        }
+      }
+    }
+
     function deleteRefMediaType(name) {
-      deleteReferenceItem('ref_static_media_types', DEFAULT_MEDIA_TYPES, name);
-      renderReferenceManagerList();
+      requireAdminAuth(`ลบชนิดสื่ออ้างอิง: "${name}"`, () => {
+        pushHistorySnapshot(`ลบชนิดสื่ออ้างอิง "${name}"`);
+        deleteReferenceItem('ref_static_media_types', DEFAULT_MEDIA_TYPES, name);
+        renderReferenceManagerList();
+      });
     }
 
     function addNewRefMediaType() {
@@ -1782,19 +2113,23 @@
         input.focus();
         return;
       }
+      pushHistorySnapshot(`เพิ่มชนิดสื่ออ้างอิง "${val}"`);
       saveReferenceMediaType(val);
       input.value = '';
       renderReferenceManagerList();
     }
 
     function resetReferenceMediaTypesPrompt() {
-      if (confirm('⚠️ ต้องการล้างรายการประเภทสื่อทั้งหมด และคืนค่าเป็น 8 ชนิดมาตรฐานใช่หรือไม่?\n\n• Cookies\n• Standard Bushelter\n• Metro Poster\n• Gateway Billboard\n• Serie Pole\n• SAT Pole wrap\n• Flyover 2.0\n• Cream\n\n(รายการขยะหรือที่อยู่จากการนำเข้าก่อนหน้านี้จะถูกลบออกทั้งหมด)')) {
-        resetReferenceList('ref_static_media_types', DEFAULT_MEDIA_TYPES);
-        if (typeof renderReferenceManagerList === 'function') {
-          renderReferenceManagerList();
+      requireAdminAuth('ล้างรายการประเภทสื่อและคืนค่ามาตรฐาน 8 ชนิด', () => {
+        if (confirm('⚠️ ต้องการล้างรายการประเภทสื่อทั้งหมด และคืนค่าเป็น 8 ชนิดมาตรฐานใช่หรือไม่?\n\n• Cookies\n• Standard Bushelter\n• Metro Poster\n• Gateway Billboard\n• Serie Pole\n• SAT Pole wrap\n• Flyover 2.0\n• Cream\n\n(รายการขยะหรือที่อยู่จากการนำเข้าก่อนหน้านี้จะถูกลบออกทั้งหมด)')) {
+          pushHistorySnapshot('คืนค่ามาตรฐานชนิดสื่อ 8 ชนิด');
+          resetReferenceList('ref_static_media_types', DEFAULT_MEDIA_TYPES);
+          if (typeof renderReferenceManagerList === 'function') {
+            renderReferenceManagerList();
+          }
+          alert('✅ คืนค่าประเภทสื่อเป็น 8 ชนิดมาตรฐานเรียบร้อยแล้ว!');
         }
-        alert('✅ คืนค่าประเภทสื่อเป็น 8 ชนิดมาตรฐานเรียบร้อยแล้ว!');
-      }
+      });
     }
 
     function populateReferenceDropdowns() {
@@ -3561,7 +3896,13 @@
     }
 ];
 
-    // Calculated fields helper (Supports all 17 CSV columns & preserves explicit metrics)
+    function isValidDateString(val) {
+      if (!val || val === 'รอดำเนินการ' || val === '-') return false;
+      const d = new Date(val);
+      return !isNaN(d.getTime());
+    }
+
+    // Calculated fields helper (Supports all 17 CSV columns & dynamic SLA recalculation)
     function enrichRecord(rec) {
       if (!rec.originArea || /^\d+(\.\d+)?$/.test(String(rec.originArea).trim())) {
         rec.originArea = '\u0E01\u0E17\u0E21.';
@@ -3570,32 +3911,50 @@
         rec.destArea = '-';
       }
 
-      const hasDismantle = rec.dismantleDate && rec.dismantleDate !== '\u0E23\u0E2D\u0E14\u0E33\u0E40\u0E19\u0E34\u0E19\u0E01\u0E32\u0E23';
-      const hasInstall = rec.installDate && rec.installDate !== '\u0E23\u0E2D\u0E14\u0E33\u0E40\u0E19\u0E34\u0E19\u0E01\u0E32\u0E23';
+      const hasDismantle = isValidDateString(rec.dismantleDate);
+      const hasInstall = isValidDateString(rec.installDate);
+
+      if (!hasDismantle) rec.dismantleDate = null;
+      if (!hasInstall) rec.installDate = null;
+
       const dDate = hasDismantle ? new Date(rec.dismantleDate) : null;
       const iDate = hasInstall ? new Date(rec.installDate) : null;
 
       // Status determination
-      if (hasInstall || rec.status === 'Completed') {
+      if (hasInstall) {
         rec.status = 'Completed';
-      } else {
+      } else if (!hasDismantle && !hasInstall) {
+        rec.status = 'Pending';
+        if (!rec.pendingStage || rec.pendingStage === '-') {
+          rec.pendingStage = '\u0E23\u0E2D\u0E22\u0E49\u0E32\u0E22 / \u0E01\u0E33\u0E25\u0E31\u0E07\u0E08\u0E31\u0E14\u0E2B\u0E32\u0E1E\u0E37\u0E49\u0E19\u0E17\u0E35\u0E48\u0E43\u0E2B\u0E21\u0E48';
+        }
+      } else if (rec.status !== 'Completed') {
         rec.status = 'Pending';
         if (!rec.pendingStage || rec.pendingStage === '-') {
           rec.pendingStage = '\u0E23\u0E2D\u0E22\u0E49\u0E32\u0E22 / \u0E01\u0E33\u0E25\u0E31\u0E07\u0E08\u0E31\u0E14\u0E2B\u0E32\u0E1E\u0E37\u0E49\u0E19\u0E17\u0E35\u0E48\u0E43\u0E2B\u0E21\u0E48';
         }
       }
 
-      // Downtime Days: If provided as a positive number from CSV, PRESERVE IT!
-      if (typeof rec.downtimeDays === 'number' && rec.downtimeDays > 0) {
-        // Keep explicit downtime days from CSV
-      } else if (hasDismantle && hasInstall) {
-        const diffTime = iDate - dDate;
-        rec.downtimeDays = Math.max(0, Math.round(diffTime / (1000 * 60 * 60 * 24)));
-      } else if (hasDismantle) {
-        // Aging calculation up to benchmark date 2026-10-15
-        const refDate = new Date('2026-10-15');
-        rec.downtimeDays = Math.max(0, Math.round((refDate - dDate) / (1000 * 60 * 60 * 24)));
+      // SLA / Downtime Days Calculation:
+      // 1. If BOTH dismantleDate & installDate exist -> Always calculate true SLA from the dates!
+      //    If done on the exact same day (diff = 0), count as 1 day (งานทำเสร็จภายใน 1 วัน).
+      const prevDowntime = rec.downtimeDays;
+      let isSameDayJob = false;
+      if (hasDismantle && hasInstall) {
+        const rawDiffDays = Math.round((iDate - dDate) / (1000 * 60 * 60 * 24));
+        if (rawDiffDays <= 0) {
+          rec.downtimeDays = 1;
+          isSameDayJob = true;
+        } else {
+          rec.downtimeDays = rawDiffDays;
+        }
+      } else if (hasDismantle && !hasInstall) {
+        // Pending case that has already been dismantled: calculate aging up to today (or 0 if planned in future)
+        const now = new Date();
+        const diffDays = Math.round((now - dDate) / (1000 * 60 * 60 * 24));
+        rec.downtimeDays = Math.max(0, diffDays);
       } else {
+        // Planned case waiting for dismantle date
         rec.downtimeDays = 0;
       }
 
@@ -3609,18 +3968,18 @@
         rec.directCost = (rec.costDismantle || 0) + (rec.costInstall || 0) + (rec.costTax || 0);
       }
 
-      // Financials: Opportunity Loss
-      if (typeof rec.opportunityLoss === 'number' && rec.opportunityLoss > 0) {
-        // Keep explicit opportunity loss from CSV
-      } else {
+      // Financials: Opportunity Loss & Total Impact
+      if (isSameDayJob) {
+        // Same-day relocation has 0 downtime revenue loss unless explicitly set
+        rec.opportunityLoss = 0;
+        rec.totalImpact = rec.directCost;
+      } else if (prevDowntime !== rec.downtimeDays || typeof rec.opportunityLoss !== 'number') {
         rec.opportunityLoss = rec.downtimeDays * (rec.dailyRate || 1500);
-      }
-
-      // Financials: Total Impact
-      if (typeof rec.totalImpact === 'number' && rec.totalImpact > 0) {
-        // Keep explicit total impact from CSV
-      } else {
         rec.totalImpact = rec.directCost + rec.opportunityLoss;
+      } else {
+        if (typeof rec.totalImpact !== 'number' || rec.totalImpact === 0) {
+          rec.totalImpact = rec.directCost + (rec.opportunityLoss || 0);
+        }
       }
 
       // Year & Month (Never NaN)
@@ -3681,13 +4040,16 @@
     }
 
     function resetToZeroData() {
-      if (confirm('⚠️ ยืนยันการล้างข้อมูลทั้งหมดให้เป็น 0 (Reset to Zero)?\n\nข้อมูลประวัติและเคสทั้งหมดในระบบจะถูกล้างเป็น 0 รายการ เพื่อให้คุณเริ่มต้นนำเข้าไฟล์ CSV หรือบันทึกข้อมูลใหม่จากศูนย์')) {
-        masterData = [];
-        saveMasterData();
-        applyFilters();
-        renderPendingTab();
-        alert('ล้างข้อมูลทั้งหมดเป็น 0 เรียบร้อยแล้ว (Clean Slate) พร้อมสำหรับการนำเข้าไฟล์ CSV!');
-      }
+      requireAdminAuth('ล้างข้อมูลทั้งหมดให้เป็น 0 (Reset to Zero)', () => {
+        if (confirm('⚠️ ยืนยันการล้างข้อมูลทั้งหมดให้เป็น 0 (Reset to Zero)?\n\n(คุณสามารถกดปุ่ม ↩️ Undo เพื่อกู้คืนข้อมูลเดิมได้ตลอดเวลา)')) {
+          pushHistorySnapshot(`ล้างข้อมูลทั้งหมดเป็น 0 (จากเดิม ${masterData.length} รายการ)`);
+          masterData = [];
+          saveMasterData();
+          applyFilters();
+          renderPendingTab();
+          alert('ล้างข้อมูลทั้งหมดเป็น 0 เรียบร้อยแล้ว!\n(หากต้องการกู้คืนข้อมูลเดิม สามารถกดปุ่ม ↩️ Undo ด้านบนได้ทันที)');
+        }
+      });
     }
 
     function indicateSaved() {
@@ -3706,10 +4068,12 @@
     // Initialize Flatpickr variables
     let fpDismantle = null;
     let fpInstall = null;
+    let fpPushDismantle = null;
     let fpPushInstall = null;
 
     // Initialize masterData with persistent storage
     let masterData = loadMasterData();
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(masterData)); } catch (e) {}
     let currentYearFilter = 'all';
     let filteredData = [...masterData];
     let trendChartInstance = null;
@@ -3919,13 +4283,15 @@
             <span class="inline-block mt-0.5 px-1.5 py-0.5 text-[10px] rounded bg-slate-800 text-slate-400">เขต ${item.destArea || '-'}</span>
           </td>
           <td class="py-3 px-4 whitespace-nowrap">
-            <div class="text-rose-400 text-[11px]">รื้อ: ${formatThaiDate(item.dismantleDate)}</div>
+            <div class="${item.dismantleDate ? 'text-rose-400' : 'text-amber-400'} text-[11px]">
+              ${item.dismantleDate ? 'รื้อ: ' + formatThaiDate(item.dismantleDate) : 'รื้อ: ⏳ รอระบุวันรื้อ'}
+            </div>
             <div class="text-[11px] ${item.installDate ? 'text-emerald-400' : 'text-amber-400 font-semibold'}">
               ${item.installDate ? 'ติด: ' + formatThaiDate(item.installDate) : '⏳ อยู่ระหว่างดำเนินการ'}
             </div>
           </td>
           <td class="py-3 px-4 font-semibold ${item.downtimeDays > 30 ? 'text-rose-400' : item.downtimeDays > 14 ? 'text-amber-400' : 'text-slate-300'}">
-            ${item.downtimeDays} วัน ${item.status === 'Pending' ? '<span class=\"text-[10px] text-amber-400\">(สะสม)</span>' : ''}
+            ${item.downtimeDays} วัน ${item.status === 'Pending' ? '<span class=\"text-[10px] text-amber-400\">(สะสม)</span>' : (item.dismantleDate && item.installDate && item.dismantleDate === item.installDate ? '<span class=\"text-[10px] text-emerald-400\">(วันเดียว)</span>' : '')}
           </td>
           <td class="py-3 px-4 max-w-[180px]">
             <div class="text-xs font-medium text-indigo-300 truncate">${item.causeCategory}</div>
@@ -3936,19 +4302,17 @@
           <td class="py-3 px-4 text-right font-bold text-purple-300">฿${item.totalImpact.toLocaleString()}</td>
           <td class="py-3 px-4 text-center">
             ${item.status === 'Completed' ? 
-              '<span class=\"px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30\">ติดตั้งสำเร็จ</span>' : 
-              `<button onclick="openPushModal('${item.id}')" class=\"px-2 py-0.5 rounded-full text-[10px] bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:bg-amber-500/30 transition-all font-medium\">⏳ ${item.pendingStage || 'รอย้าย'}</button>`}
+              `<button onclick="openPushModal('${item.id}')" class="px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30 transition-all" title="คลิกเพื่อแก้ไขวันที่รื้อ/วันที่ติดตั้ง">ติดตั้งสำเร็จ ✎</button>` : 
+              `<button onclick="openPushModal('${item.id}')" class="px-2 py-0.5 rounded-full text-[10px] bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:bg-amber-500/30 transition-all font-medium">⏳ ${item.pendingStage || 'รอย้าย'}</button>`}
           </td>
           <td class="py-3 px-4 text-center whitespace-nowrap">
             <div class="flex items-center justify-center gap-1">
               <button onclick="showDetail('${item.id}')" class="px-2.5 py-1 bg-indigo-600/80 hover:bg-indigo-600 text-white rounded text-[11px] transition-all">
                 ดูประวัติ
               </button>
-              ${item.status === 'Pending' ? `
-                <button onclick="openPushModal('${item.id}')" class="px-2.5 py-1 bg-amber-600/80 hover:bg-amber-600 text-white rounded text-[11px] transition-all">
-                  ผลักดัน
-                </button>
-              ` : ''}
+              <button onclick="openPushModal('${item.id}')" class="px-2.5 py-1 ${item.status === 'Pending' ? 'bg-amber-600/80 hover:bg-amber-600' : 'bg-slate-700 hover:bg-slate-600'} text-white rounded text-[11px] transition-all" title="อัปเดตสถานะ หรือ แก้ไขวันที่รื้อถอน/วันที่ติดตั้ง">
+                ${item.status === 'Pending' ? 'ผลักดัน/ใส่วัน' : 'แก้ไขวัน'}
+              </button>
               <button onclick="deleteRecord('${item.id}')" class="px-2 py-1 bg-rose-600/80 hover:bg-rose-600 text-white rounded text-[11px] transition-all" title="ลบรายการนี้">
                 ลบ
               </button>
@@ -3961,17 +4325,21 @@
     function deleteRecord(id) {
       const item = masterData.find(d => d.id === id);
       if (!item) return;
-      if (confirm(`คุณต้องการลบรายการป้าย "${item.mediaId}" (${item.originSite}) ใช่หรือไม่?\n\nการลบนี้จะถูกบันทึกอัตโนมัติ`)) {
-        masterData = masterData.filter(d => d.id !== id);
-        saveMasterData();
-        applyFilters();
-        renderPendingTab();
-      }
+      requireAdminAuth(`ลบรายการป้าย "${item.mediaId}" (${item.originSite})`, () => {
+        if (confirm(`คุณต้องการลบรายการป้าย "${item.mediaId}" (${item.originSite}) ใช่หรือไม่?\n\n(คุณสามารถกดปุ่ม ↩️ Undo ด้านบนเพื่อกู้คืนรายการที่ลบได้ทันที)`)) {
+          pushHistorySnapshot(`ลบรายการป้าย "${item.mediaId}"`);
+          masterData = masterData.filter(d => d.id !== id);
+          saveMasterData();
+          applyFilters();
+          renderPendingTab();
+        }
+      });
     }
 
     function formatThaiDate(dateStr) {
-      if (!dateStr) return '-';
+      if (!dateStr || dateStr === 'รอดำเนินการ' || dateStr === '-') return 'รอระบุวันที่';
       const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return 'รอระบุวันที่';
       return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
     }
 
@@ -5298,7 +5666,45 @@
       document.getElementById('importModal').classList.add('hidden');
     }
 
-    // Push Pending Modal
+    // Push / Edit Dates & Status Modal
+    function clearPushDate(which) {
+      if (which === 'dismantle') {
+        if (fpPushDismantle) fpPushDismantle.clear();
+        else document.getElementById('pushDismantleDate').value = '';
+      } else if (which === 'install') {
+        if (fpPushInstall) fpPushInstall.clear();
+        else document.getElementById('pushInstallDate').value = '';
+        const pushStageEl = document.getElementById('pushStage');
+        if (pushStageEl && pushStageEl.value === 'Completed') {
+          pushStageEl.value = 'รอย้าย / กำลังจัดหาพื้นที่ใหม่';
+        }
+      }
+      updatePushSlaPreview();
+    }
+
+    function updatePushSlaPreview() {
+      const previewEl = document.getElementById('pushSlaPreview');
+      if (!previewEl) return;
+      const dStr = document.getElementById('pushDismantleDate')?.value;
+      const iStr = document.getElementById('pushInstallDate')?.value;
+      const hasD = isValidDateString(dStr);
+      const hasI = isValidDateString(iStr);
+
+      if (hasD && hasI) {
+        const diffDays = Math.round((new Date(iStr) - new Date(dStr)) / (1000 * 60 * 60 * 24));
+        if (diffDays <= 0) {
+          previewEl.innerHTML = '<span class="text-emerald-400">1 วัน (ทำเสร็จภายในวันเดียว)</span>';
+        } else {
+          previewEl.innerHTML = `<span class="text-emerald-400">${diffDays} วัน (ติดตั้งเสร็จสิ้น)</span>`;
+        }
+      } else if (hasD && !hasI) {
+        const diffDays = Math.max(0, Math.round((new Date() - new Date(dStr)) / (1000 * 60 * 60 * 24)));
+        previewEl.innerHTML = `<span class="text-amber-300">${diffDays} วัน (สะสมระหว่างรอติดตั้ง)</span>`;
+      } else {
+        previewEl.innerHTML = '<span class="text-slate-400">0 วัน (ตั้งแผนล่วงหน้า / รอระบุวันรื้อถอน)</span>';
+      }
+    }
+
     function openPushModal(recordId) {
       const item = masterData.find(d => d.id === recordId);
       if (!item) return;
@@ -5309,7 +5715,9 @@
       
       const pushStageEl = document.getElementById('pushStage');
       if (pushStageEl) {
-        if (item.pendingStage && [...pushStageEl.options].some(o => o.value === item.pendingStage)) {
+        if (item.status === 'Completed') {
+          pushStageEl.value = 'Completed';
+        } else if (item.pendingStage && [...pushStageEl.options].some(o => o.value === item.pendingStage)) {
           pushStageEl.value = item.pendingStage;
         } else {
           pushStageEl.value = 'รอย้าย / กำลังจัดหาพื้นที่ใหม่';
@@ -5320,16 +5728,27 @@
       document.getElementById('pushDestSite').value = item.destSite && !item.destSite.includes('รอย้าย') ? item.destSite : '';
       document.getElementById('pushDestArea').value = item.destArea && item.destArea !== '-' ? item.destArea : item.originArea;
       
+      if (fpPushDismantle) {
+        if (isValidDateString(item.dismantleDate)) {
+          fpPushDismantle.setDate(item.dismantleDate, false, "Y-m-d");
+        } else {
+          fpPushDismantle.clear();
+        }
+      } else {
+        document.getElementById('pushDismantleDate').value = isValidDateString(item.dismantleDate) ? item.dismantleDate : '';
+      }
+
       if (fpPushInstall) {
-        if (item.installDate) {
-          fpPushInstall.setDate(item.installDate, true, "Y-m-d");
+        if (isValidDateString(item.installDate)) {
+          fpPushInstall.setDate(item.installDate, false, "Y-m-d");
         } else {
           fpPushInstall.clear();
         }
       } else {
-        document.getElementById('pushInstallDate').value = item.installDate || '';
+        document.getElementById('pushInstallDate').value = isValidDateString(item.installDate) ? item.installDate : '';
       }
 
+      updatePushSlaPreview();
       document.getElementById('pushNotes').value = item.bottleneck || '';
       document.getElementById('pushModal').classList.remove('hidden');
     }
@@ -5358,17 +5777,27 @@
 
       const destSite = document.getElementById('pushDestSite').value.trim();
       const destArea = document.getElementById('pushDestArea').value.trim();
-      const installDate = document.getElementById('pushInstallDate').value;
+      const dismantleDate = document.getElementById('pushDismantleDate').value || null;
+      const installDate = document.getElementById('pushInstallDate').value || null;
       const notes = document.getElementById('pushNotes').value.trim();
+
+      pushHistorySnapshot(`อัปเดตสถานะ/วันที่ป้าย "${item.mediaId}"`);
+
+      item.dismantleDate = dismantleDate;
 
       if (stage === 'Completed' || installDate) {
         item.status = 'Completed';
-        item.installDate = installDate || '2026-10-15';
+        item.installDate = installDate || dismantleDate || new Date().toISOString().slice(0, 10);
+        if (!item.dismantleDate) {
+          item.dismantleDate = item.installDate;
+        }
+        item.pendingStage = '-';
         item.destSite = destSite || item.destSite || 'จุดติดตั้งใหม่ที่แล้วเสร็จ';
         item.destArea = destArea || item.destArea || item.originArea;
         item.bottleneck = notes;
       } else {
         item.status = 'Pending';
+        item.installDate = null;
         item.pendingStage = stage;
         item.destSite = destSite || item.destSite;
         item.destArea = destArea || item.destArea;
@@ -5380,7 +5809,7 @@
       closePushModal();
       applyFilters();
       renderPendingTab();
-      alert(`อัปเดตความคืบหน้าเคส ${item.mediaId} และบันทึกลงระบบเรียบร้อยแล้ว!`);
+      alert(`อัปเดตข้อมูลและวันที่ของป้าย ${item.mediaId} เรียบร้อยแล้ว! (SLA: ${item.downtimeDays} วัน)`);
     }
 
     // ----------------------------------------------------
@@ -5467,6 +5896,7 @@
         dailyRate: parseFloat(document.getElementById('formDailyRate').value) || 1200
       });
 
+      pushHistorySnapshot(`เพิ่มรายการป้ายใหม่ "${newRec.mediaId}"`);
       masterData.unshift(newRec);
       saveMasterData(); // Firmly auto-save to localStorage
       closeAddModal();
@@ -5547,6 +5977,7 @@
 
         function loadLatestPresetData() {
       if (confirm('\u0E22\u0E37\u0E19\u0E22\u0E31\u0E19\u0E42\u0E2B\u0E25\u0E14\u0E0D\u0E38\u0E14\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E25\u0E48\u0E32\u0E2A\u0E38\u0E14 74 \u0E23\u0E32\u0E22\u0E01\u0E32\u0E23 (\u0E04\u0E23\u0E1A\u0E16\u0E49\u0E27\u0E19\u0E17\u0E31\u0E49\u0E07 17 \u0E04\u0E2D\u0E25\u0E31\u0E21\u0E19\u0E4C) \u0E40\u0E02\u0E49\u0E32\u0E2A\u0E39\u0E48\u0E23\u0E30\u0E1A\u0E1A\u0E2B\u0E23\u0E37\u0E2D\u0E47\u0E21\u0E48?')) {
+        pushHistorySnapshot('โหลดข้อมูลมาตรฐาน 74 รายการ');
         masterData = DEFAULT_MASTER_DATA.map(enrichRecord);
         saveMasterData();
         closeImportModal();
@@ -5698,6 +6129,7 @@
       }
 
       if (importedList.length > 0) {
+        pushHistorySnapshot(`นำเข้าไฟล์ CSV (${importedList.length} รายการ)`);
         masterData = importedList;
         saveMasterData();
         closeImportModal();
@@ -5740,8 +6172,18 @@
         ...commonConfig
       });
 
+      fpPushDismantle = flatpickr("#pushDismantleDate", {
+        ...commonConfig,
+        onChange: function() {
+          updatePushSlaPreview();
+        }
+      });
+
       fpPushInstall = flatpickr("#pushInstallDate", {
-        ...commonConfig
+        ...commonConfig,
+        onChange: function() {
+          updatePushSlaPreview();
+        }
       });
     }
 
@@ -6129,6 +6571,7 @@
     window.addEventListener('DOMContentLoaded', () => {
       initDatePickers();
       populateReferenceDropdowns();
+      updateAdminStatusBadge();
       applyFilters();
       updatePendingBadge();
       updateBefore2024Badge();
