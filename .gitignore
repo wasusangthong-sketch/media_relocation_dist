@@ -13,3 +13,6 @@ default_master_data_js.txt
 # Netlify local state
 .netlify
 
+# Distribution & Submission archives
+*.zip
+
