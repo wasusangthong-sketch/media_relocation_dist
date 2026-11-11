@@ -2361,7 +2361,9 @@
         updateUndoRedoUI();
         setTimeout(() => {
           if (typeof appendLocalAndCloudHistoryLog === 'function') {
-            appendLocalAndCloudHistoryLog('USER_ACTION', '-', actionLabel);
+            const mMatch = actionLabel.match(/"([^"]+)"/);
+            const mId = mMatch ? mMatch[1] : '-';
+            appendLocalAndCloudHistoryLog('USER_ACTION', mId, actionLabel);
           }
         }, 60);
       } catch (err) {
