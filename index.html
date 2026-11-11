@@ -7131,8 +7131,10 @@
       }
       localStorage.setItem(GAS_URL_STORAGE_KEY, val);
       initGasConnectionUI();
-      await appendLocalAndCloudHistoryLog('CONNECT_DRIVE_API', 'SYSTEM', `เชื่อมต่อ Google Apps Script API และซิงค์ข้อมูลชุดเริ่มต้น (${masterData.length} รายการ)`);
-      alert(`✅ บันทึกลิงก์เชื่อมต่อและส่งข้อมูลทั้งหมด (${masterData.length} รายการ) ขึ้น Google Sheets เรียบร้อยแล้ว!\nลองเปิดดูไฟล์ Google Sheets ของคุณได้เลยครับ จะมีแท็บ Media_Data และ History_Log ปรากฏขึ้นมาแล้ว`);
+      // Safeguard: Always pull latest data from Cloud first (Single Source of Truth)
+      await appendLocalAndCloudHistoryLog('CONNECT_DRIVE_API', 'SYSTEM', 'เชื่อมต่อ Google Apps Script API สำเร็จ');
+      await manualPullFromGoogleDrive();
+      alert('✅ เชื่อมต่อ Google Apps Script API สำเร็จ!\nระบบได้ดึงข้อมูลล่าสุดจาก Google Sheets มาอัปเดตบนหน้าจอให้เรียบร้อยแล้วครับ');
     }
 
     function getLocalHistoryLogs() {
@@ -7171,20 +7173,25 @@
 
       if (url && url.startsWith('https://script.google.com/')) {
         try {
+          const postPayload = {
+            action: actionType,
+            actionType: actionType,
+            actor: isAdminUnlocked() ? 'Admin (staticmedia)' : 'WebApp_User',
+            mediaId: mediaId || '-',
+            detail: detailText || '-',
+            totalCount: masterData.length,
+            device: window.innerWidth < 768 ? 'Mobile App View' : 'Desktop Web Browser'
+          };
+          // Safeguard: Only send full masterData array when explicitly doing a full sync
+          if (actionType === 'MANUAL_FULL_SYNC') {
+            postPayload.masterData = masterData;
+          }
+
           await fetch(url, {
             method: 'POST',
             mode: 'no-cors',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({
-              action: actionType,
-              actionType: actionType,
-              actor: isAdminUnlocked() ? 'Admin (staticmedia)' : 'WebApp_User',
-              mediaId: mediaId || '-',
-              detail: detailText || '-',
-              totalCount: masterData.length,
-              device: window.innerWidth < 768 ? 'Mobile App View' : 'Desktop Web Browser',
-              masterData: masterData
-            })
+            body: JSON.stringify(postPayload)
           });
           logEntry.driveStatus = '✅ ซิงค์ขึ้น Drive แล้ว';
           saveLocalHistoryLogs(logs);
@@ -7514,9 +7521,20 @@
         "    const masterData = Array.isArray(payload.masterData) ? payload.masterData : null;",
         "    const totalCount = masterData ? masterData.length : (payload.totalCount || 0);",
         "    logSheet.appendRow([timestamp, payload.actionType || 'SYNC_DATA', payload.actor || 'WebApp_User', payload.mediaId || '-', payload.detail || '-', totalCount, payload.recordSnapshot ? JSON.stringify(payload.recordSnapshot) : '']);",
-        "    if (masterData && masterData.length > 0) {",
+        "    if (payload.actionType === 'MANUAL_FULL_SYNC' && masterData && masterData.length > 0) {",
+        "      const existingData = dataSheet.getDataRange().getValues();",
+        "      let preserved = [];",
+        "      if (existingData.length > 1) {",
+        "        const inIds = new Set(masterData.map(i => String(i.mediaId || i.id).trim().toUpperCase()));",
+        "        for (let r = 1; r < existingData.length; r++) {",
+        "          const rMid = String(existingData[r][1] || '').trim().toUpperCase();",
+        "          const rId = String(existingData[r][0] || '').trim().toUpperCase();",
+        "          if (rMid && !inIds.has(rMid) && !inIds.has(rId)) preserved.push(existingData[r]);",
+        "        }",
+        "      }",
         "      if (dataSheet.getLastRow() > 1) dataSheet.getRange(2, 1, dataSheet.getLastRow() - 1, 20).clearContent();",
         "      const rows = masterData.map(item => [item.id || '', item.mediaId || '', item.mediaType || '', item.company || '', item.originSite || '', item.originArea || '', item.destSite || '', item.destArea || '', item.dismantleDate || '', item.installDate || '', item.downtimeDays || 0, item.causeCategory || '', item.causeDetail || '', item.directCost || 0, item.opportunityLoss || 0, item.totalImpact || 0, item.status || 'Pending', item.pendingStage || '', item.year || 2026, item.month || 8]);",
+        "      preserved.forEach(pr => rows.push(pr));",
         "      dataSheet.getRange(2, 1, rows.length, 20).setValues(rows);",
         "    }",
         "    return ContentService.createTextOutput(JSON.stringify({ status: 'ok', loggedAt: timestamp, totalRecords: totalCount })).setMimeType(ContentService.MimeType.JSON);",

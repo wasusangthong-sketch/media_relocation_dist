@@ -152,11 +152,30 @@ function doPost(e) {
       payload.recordSnapshot ? JSON.stringify(payload.recordSnapshot) : ''
     ]);
 
-    // 2. หากส่งชุดข้อมูล masterData มาด้วย ให้อัปเดตตาราง Media_Data ทั้งแผ่นทันที
-    if (masterData && masterData.length > 0) {
+    // 2. การอัปเดตข้อมูลตาราง Media_Data อย่างปลอดภัย (Smart Merge Guardrail)
+    if (actionType === 'MANUAL_FULL_SYNC' && masterData && masterData.length > 0) {
+      // ดึงข้อมูลเดิมที่มีอยู่ใน Google Sheet ก่อน เพื่อป้องกันข้อมูลสูญหาย (Stale Overwrite Protection)
+      const existingData = dataSheet.getDataRange().getValues();
+      let preservedMissingRecords = [];
+      
+      if (existingData.length > 1) {
+        const incomingIds = new Set(masterData.map(item => String(item.mediaId || item.id).trim().toUpperCase()));
+        for (let r = 1; r < existingData.length; r++) {
+          const rowMediaId = String(existingData[r][1] || '').trim().toUpperCase();
+          const rowId = String(existingData[r][0] || '').trim().toUpperCase();
+          // หากป้ายในชีตมีอยู่แล้ว แต่ในชุดข้อมูลที่เครื่องลูกส่งมาไม่มี (เช่น DS 211) ให้รักษาของเดิมไว้ ไม่ให้ถูกลบทับเด็ดขาด!
+          if (rowMediaId && !incomingIds.has(rowMediaId) && !incomingIds.has(rowId)) {
+            preservedMissingRecords.push(existingData[r]);
+          }
+        }
+      }
+
+      // ล้างเฉพาะแถวข้อมูลเก่าเพื่อเขียนชุดที่อัปเดต
       if (dataSheet.getLastRow() > 1) {
         dataSheet.getRange(2, 1, dataSheet.getLastRow() - 1, 20).clearContent();
       }
+
+      // แปลงชุดข้อมูลใหม่เป็นแถว
       const rows = masterData.map(item => [
         item.id || '',
         item.mediaId || '',
@@ -179,7 +198,38 @@ function doPost(e) {
         item.year || 2026,
         item.month || 8
       ]);
+
+      // นำรายการป้ายที่ถูกรักษาไว้ (Preserved Records) มาต่อท้ายอัตโนมัติ
+      preservedMissingRecords.forEach(pr => {
+        rows.push(pr);
+      });
+
       dataSheet.getRange(2, 1, rows.length, 20).setValues(rows);
+    } else if (payload.newRecord) {
+      // เพิ่มเฉพาะ 1 รายการใหม่ (Atomic Append) ปลอดภัย 100% ไม่แตะต้องแถวอื่น
+      const nr = payload.newRecord;
+      dataSheet.appendRow([
+        nr.id || ('REL-' + Date.now()),
+        nr.mediaId || '',
+        nr.mediaType || 'Cookies',
+        nr.company || 'บริษัท แพลน บี มีเดีย จำกัด (มหาชน)',
+        nr.originSite || '',
+        nr.originArea || '',
+        nr.destSite || '',
+        nr.destArea || '',
+        nr.dismantleDate || '',
+        nr.installDate || '',
+        nr.downtimeDays || 0,
+        nr.causeCategory || '',
+        nr.causeDetail || '',
+        nr.directCost || 0,
+        nr.opportunityLoss || 0,
+        nr.totalImpact || 0,
+        nr.status || 'Pending',
+        nr.pendingStage || '',
+        nr.year || 2026,
+        nr.month || 8
+      ]);
     }
 
     return ContentService
