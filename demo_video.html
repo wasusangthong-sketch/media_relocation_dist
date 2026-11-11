@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo วิดีโอการใช้งาน — Media Relocation Tracker & AI Gate</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #090d16;
+            color: #f8fafc;
+            font-family: 'Prompt', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header-bar {
+            width: 100%;
+            max-width: 1280px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+        .header-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #00a8e8;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header-badges {
+            display: flex;
+            gap: 8px;
+        }
+        .badge {
+            padding: 5px 12px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+            background: rgba(0, 168, 232, 0.15);
+            color: #38bdf8;
+            border: 1px solid rgba(0, 168, 232, 0.3);
+        }
+
+        .player-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 1280px;
+            aspect-ratio: 16 / 9;
+            background: #020617;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.1);
+        }
+
+        canvas#demoCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .controls-bar {
+            width: 100%;
+            max-width: 1280px;
+            background: #0f172a;
+            border-radius: 12px;
+            padding: 12px 18px;
+            margin-top: 14px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border: 1px solid #1e293b;
+        }
+        .btn-ctrl {
+            background: #0284c7;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .btn-ctrl:hover { background: #0369a1; transform: translateY(-1px); }
+        .btn-secondary {
+            background: #1e293b;
+            color: #cbd5e1;
+            border: 1px solid #334155;
+        }
+        .btn-secondary:hover { background: #334155; color: #fff; }
+        .timeline-slider {
+            flex: 1;
+            accent-color: #00a8e8;
+            cursor: pointer;
+        }
+        .time-display {
+            font-size: 13px;
+            font-weight: 500;
+            color: #94a3b8;
+            min-width: 80px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .scene-pills {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+            max-width: 1280px;
+            margin-top: 10px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+        .scene-pill {
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            background: #0f172a;
+            color: #94a3b8;
+            border: 1px solid #1e293b;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.15s;
+        }
+        .scene-pill.active, .scene-pill:hover {
+            background: #0284c7;
+            color: #fff;
+            border-color: #38bdf8;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-bar">
+        <div class="header-title">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
+            Plan B Media — Media Relocation Tracker & AI Gate (Official Demo Video)
+        </div>
+        <div class="header-badges">
+            <span class="badge">ความยาว 50 วินาที</span>
+            <span class="badge">Full HD 1080p</span>
+            <span class="badge">Executive Mode</span>
+        </div>
+    </div>
+
+    <div class="player-wrapper">
+        <canvas id="demoCanvas" width="1920" height="1080"></canvas>
+    </div>
+
+    <div class="controls-bar">
+        <button class="btn-ctrl" id="btnPlayPause">
+            <span id="playIcon">⏸️</span> <span id="playText">หยุดชั่วคราว</span>
+        </button>
+        <button class="btn-ctrl btn-secondary" id="btnRestart">🔄 เล่นใหม่</button>
+        <input type="range" id="timeSlider" class="timeline-slider" min="0" max="50" step="0.1" value="0">
+        <div class="time-display" id="timeDisplay">00:00 / 00:50</div>
+        <button class="btn-ctrl btn-secondary" id="btnDownload" style="background:#059669;border-color:#10b981;color:#fff;">
+            ⬇️ บันทึกคลิป MP4
+        </button>
+    </div>
+
+    <div class="scene-pills">
+        <button class="scene-pill active" onclick="seekTo(0)">1. เปิดเคสใหม่ด้วย AI (0:00)</button>
+        <button class="scene-pill" onclick="seekTo(10)">2. สกัด JSON & Guardrail (0:10)</button>
+        <button class="scene-pill" onclick="seekTo(22)">3. รีวิว Pending Action Center (0:22)</button>
+        <button class="scene-pill" onclick="seekTo(32)">4. ตรวจ Timeline Audit Trail (0:32)</button>
+        <button class="scene-pill" onclick="seekTo(39)">5. ติดตามผลักดันจนสำเร็จ (0:39)</button>
+        <button class="scene-pill" onclick="seekTo(45)">6. สรุปผลสัมฤทธิ์ผู้บริหาร (0:45)</button>
+    </div>
+
+    <!-- Hidden source images used in canvas rendering -->
+    <div style="display:none;">
+        <img id="imgDash" src="shots/dash.png">
+        <img id="imgPending" src="shots/crop_pending.png">
+        <img id="imgAiResult" src="shots/crop_airesult.png">
+        <img id="imgAiCanvas" src="shots/crop_ai.png">
+        <img id="imgSheet" src="shots/crop_sheet.png">
+        <img id="imgMatrix" src="shots/crop_matrix.png">
+    </div>
+
+    <script>
+        const canvas = document.getElementById('demoCanvas');
+        const ctx = canvas.getContext('2d');
+        const TOTAL_DURATION = 50; // 50 seconds total
+        let currentTime = 0;
+        let isPlaying = true;
+        let lastTimestamp = performance.now();
+
+        // Scenes definition
+        const scenes = [
+            {
+                start: 0, end: 11,
+                id: 'SCENE_1',
+                stepNum: 'ขั้นตอนที่ 1 / 5',
+                stepTitle: 'เปิดเคสรายการใหม่ด้วย AI (Auto Case Intake)',
+                badge: '1. เปิดเคสรายการใหม่',
+                badgeColor: '#0284c7',
+                subTitle: 'เจ้าหน้าที่ป้อนข้อความแจ้งย้ายป้ายดิบภาษาธรรมชาติจากไลน์/อีเมลหน้างาน เข้าสู่ระบบ AI Integrator โดยไม่ต้องเสียเวลาพิมพ์คัดลอกลงไฟล์',
+                actionNote: 'กำลังพิมพ์ข้อความแจ้งงานดิบ ➔ กดปุ่ม [⚡ รัน AI วิเคราะห์ + ตรวจ Guardrail + บันทึก Google Drive]'
+            },
+            {
+                start: 11, end: 22,
+                id: 'SCENE_2',
+                stepNum: 'ขั้นตอนที่ 2 / 5',
+                stepTitle: 'การสกัดข้อมูลเป็นโครงสร้าง & ตรวจความถูกต้อง 100% (Dual-Task AI & Guardrail)',
+                badge: '2. สกัด JSON & Guardrail',
+                badgeColor: '#10b981',
+                subTitle: 'Dual-Task AI สกัดข้อมูลเป็น JSON 9 ฟิลด์ (ชื่อป้าย/สถานที่/งบ ฿850,000) พร้อมประเมิน HIGH RISK และสร้างแผนปฏิบัติการ 3 ขั้นตอน ผ่าน Code Guardrail ทันที',
+                actionNote: 'Task 1 JSON สกัดสำเร็จ ➔ Task 2 ประเมินความเสี่ยง High Risk ➔ ตรวจ Guardrail: PASS 100% ➔ ซิงก์ Google Sheets สำเร็จ'
+            },
+            {
+                start: 22, end: 32,
+                id: 'SCENE_3',
+                stepNum: 'ขั้นตอนที่ 3 / 5',
+                stepTitle: 'การรีวิวเคสและจัดลำดับความสำคัญ (Portfolio Review & Pending Center)',
+                badge: '3. รีวิวเคส & จัดลำดับ',
+                badgeColor: '#f59e0b',
+                subTitle: 'สลับมาหน้า Executive Dashboard เพื่อรีวิวภาพรวม 84 โครงการ และศูนย์ติดตามป้ายค้างดำเนินการ (Pending Action Center 24 รายการ) ที่ต้องเร่งผลักดัน',
+                actionNote: 'รีวิว Yearly Matrix 8 ประเภทสื่อ ➔ คัดกรอง 24 ป้ายค้างดำเนินการ ➔ ตรวจสอบงบประมาณและระยะเวลา Aging'
+            },
+            {
+                start: 32, end: 39,
+                id: 'SCENE_4',
+                stepNum: 'ขั้นตอนที่ 4 / 5',
+                stepTitle: 'ตรวจสอบประวัติย้อนหลังเชิงลึก (Timeline Audit Trail Verification)',
+                badge: '4. ตรวจสอบ Audit Trail',
+                badgeColor: '#8b5cf6',
+                subTitle: 'คลิกปุ่ม [ดูประวัติ] ของป้าย เพื่อเปิดดู Timeline ประวัติการแก้ไขย้อนหลังทั้งหมด ระบุวันเวลาและผู้ดำเนินการ ตรวจสอบได้โปร่งใส 100%',
+                actionNote: 'เปิดหน้าต่าง Timeline Audit Trail ➔ ตรวจสอบประวัติการรื้อย้าย วันที่บันทึก และผู้แก้ไขย้อนหลังทุกเวอร์ชัน'
+            },
+            {
+                start: 39, end: 45,
+                id: 'SCENE_5',
+                stepNum: 'ขั้นตอนที่ 5 / 5',
+                stepTitle: 'ติดตามผลักดันจนสำเร็จ & ซิงก์ Cloud DB (Drive to Completion & Real-time Sync)',
+                badge: '5. ติดตามผลักดันจนสำเร็จ',
+                badgeColor: '#059669',
+                subTitle: 'กดปุ่มเปลี่ยนสถานะป้ายเป็น \'ติดตั้งสำเร็จ (Completed)\' ข้อมูลถูกบันทึกขึ้น Google Sheets (แท็บ Media_Data และ History_Log) แบบ Real-time ทันที',
+                actionNote: 'เปลี่ยนสถานะเป็น [ติดตั้งสำเร็จ] ➔ Badge เปลี่ยนเป็นสีเขียว ➔ ยิง API บันทึกลง Google Sheets ทันที'
+            },
+            {
+                start: 45, end: 50,
+                id: 'SCENE_6',
+                stepNum: 'บทสรุปผู้บริหาร',
+                stepTitle: 'สรุปคุณค่าและผลกระทบทางธุรกิจ (Executive Summary & Business Impact)',
+                badge: '6. สรุปผลสัมฤทธิ์ต่อองค์กร',
+                badgeColor: '#00a8e8',
+                subTitle: 'ระบบลดเวลาทำงานจาก 15 นาทีเหลือเพียง 5 วินาที ขจัดข้อผิดพลาดเป็น 0% ควบคุมงบประมาณ ฿120.77M ได้อย่างแม่นยำ พร้อมใช้ระดับองค์กร',
+                actionNote: 'KPIs อัปเดตทันที: เวลาลดลง 98% | ข้อมูลถูกต้อง 100% | ติดตามงบ ฿120.77M โปร่งใส | พร้อมเสนอคณะกรรมการ'
+            }
+        ];
+
+        // Virtual Cursor State
+        let cursor = { x: 960, y: 540, clicking: false, ripple: 0 };
+
+        function getCurrentScene(t) {
+            return scenes.find(s => t >= s.start && t < s.end) || scenes[scenes.length - 1];
+        }
+
+        // Draw Helper Functions
+        function roundRect(ctx, x, y, w, h, r) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.arcTo(x + w, y, x + w, y + h, r);
+            ctx.arcTo(x + w, y + h, x, y + h, r);
+            ctx.arcTo(x, y + h, x, y, r);
+            ctx.arcTo(x, y, x + w, y, r);
+            ctx.closePath();
+        }
+
+        function drawCursor(x, y, isClicking) {
+            ctx.save();
+            if (cursor.ripple > 0) {
+                ctx.beginPath();
+                ctx.arc(x, y, (1 - cursor.ripple) * 35, 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(0, 168, 232, ${cursor.ripple})`;
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                cursor.ripple = Math.max(0, cursor.ripple - 0.05);
+            }
+
+            // Mouse pointer arrow
+            ctx.translate(x, y);
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(0, 22);
+            ctx.lineTo(6, 17);
+            ctx.lineTo(12, 27);
+            ctx.lineTo(16, 25);
+            ctx.lineTo(10, 15);
+            ctx.lineTo(18, 15);
+            ctx.closePath();
+            ctx.fillStyle = isClicking ? '#00a8e8' : '#ffffff';
+            ctx.fill();
+            ctx.strokeStyle = '#0f172a';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function drawSubtitleBar(scene, progressInScene) {
+            const barH = 150;
+            const barY = 1080 - barH;
+
+            // Gradient dark glassmorphic banner
+            const grad = ctx.createLinearGradient(0, barY, 0, 1080);
+            grad.addColorStop(0, 'rgba(15, 23, 42, 0.94)');
+            grad.addColorStop(1, 'rgba(2, 6, 23, 0.98)');
+
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, barY, 1920, barH);
+
+            // Glowing top divider line
+            const lineGrad = ctx.createLinearGradient(0, 0, 1920, 0);
+            lineGrad.addColorStop(0, '#00a8e8');
+            lineGrad.addColorStop(0.5, '#38bdf8');
+            lineGrad.addColorStop(1, '#10b981');
+            ctx.fillStyle = lineGrad;
+            ctx.fillRect(0, barY, 1920, 3);
+
+            // Step Badge & Title
+            ctx.fillStyle = scene.badgeColor;
+            roundRect(ctx, 60, barY + 16, 170, 30, 6);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 15px "Prompt", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(scene.stepNum, 145, barY + 36);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 24px "Prompt", sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(scene.stepTitle, 250, barY + 38);
+
+            // Action Callout Pill (Right side)
+            ctx.fillStyle = 'rgba(2, 132, 199, 0.2)';
+            roundRect(ctx, 1380, barY + 16, 480, 32, 6);
+            ctx.fill();
+            ctx.strokeStyle = '#0284c7';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.fillStyle = '#38bdf8';
+            ctx.font = 'bold 14px "Prompt", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('⚡ ' + scene.actionNote.split('➔')[0].trim(), 1620, barY + 37);
+
+            // Subtitle Description (Thai explanation)
+            ctx.fillStyle = '#e2e8f0';
+            ctx.font = '400 18px "Prompt", sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(scene.subTitle, 60, barY + 76);
+
+            // Micro-action timeline bullet
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '400 15px "Prompt", sans-serif';
+            ctx.fillText('▶ การดำเนินการ: ' + scene.actionNote, 60, barY + 110);
+
+            // Plan B Logo / Branding at bottom right
+            ctx.fillStyle = '#64748b';
+            ctx.font = 'bold 14px "Prompt", sans-serif';
+            ctx.textAlign = 'right';
+            ctx.fillText('Plan B Media  |  Media Relocation Tracker (Production Demo)', 1860, barY + 110);
+        }
+
+        // Top App Header
+        function drawAppHeader(activeTab) {
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(0, 0, 1920, 70);
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(0, 68, 1920, 2);
+
+            // Logo & Title
+            ctx.fillStyle = '#00a8e8';
+            ctx.font = 'bold 22px "Prompt", sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText('⚡ Plan B Media — Media Relocation Tracker & AI Gate', 50, 42);
+
+            ctx.fillStyle = '#059669';
+            roundRect(ctx, 620, 22, 110, 26, 13);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 12px "Prompt", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('● LIVE PROD', 675, 39);
+
+            // Tabs
+            const tabs = [
+                { id: 1, name: '📊 ภาพรวมและสถิติประวัติงาน' },
+                { id: 2, name: '⏳ คลังคำขอที่ยังดำเนินการไม่เสร็จ (24)' },
+                { id: 3, name: '🤖 AI Integrator (Level 4) & Google Drive' }
+            ];
+            let tx = 800;
+            tabs.forEach(t => {
+                const isActive = t.id === activeTab;
+                if (isActive) {
+                    ctx.fillStyle = '#0284c7';
+                    roundRect(ctx, tx, 16, 260, 38, 8);
+                    ctx.fill();
+                    ctx.fillStyle = '#ffffff';
+                } else {
+                    ctx.fillStyle = 'rgba(255,255,255,0.05)';
+                    roundRect(ctx, tx, 16, 260, 38, 8);
+                    ctx.fill();
+                    ctx.fillStyle = '#94a3b8';
+                }
+                ctx.font = (isActive ? 'bold ' : '400 ') + '13px "Prompt", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(t.name, tx + 130, 40);
+                tx += 275;
+            });
+
+            // Admin Badge
+            ctx.fillStyle = '#3b82f6';
+            roundRect(ctx, 1680, 18, 180, 34, 8);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 12px "Prompt", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('👤 Admin: staticmedia', 1770, 40);
+        }
+
+        // Render Frame by Frame
+        function render() {
+            const scene = getCurrentScene(currentTime);
+            const progress = (currentTime - scene.start) / (scene.end - scene.start);
+
+            // Clear Background
+            ctx.fillStyle = '#090d16';
+            ctx.fillRect(0, 0, 1920, 1080);
+
+            if (scene.id === 'SCENE_1') {
+                // SCENE 1: Input text in Tab 3 AI Integrator
+                drawAppHeader(3);
+
+                // Workflow Canvas preview top
+                const imgAiCanvas = document.getElementById('imgAiCanvas');
+                if (imgAiCanvas.complete) {
+                    ctx.drawImage(imgAiCanvas, 50, 90, 1820, 260);
+                }
+
+                // AI Input Box
+                ctx.fillStyle = '#0f172a';
+                roundRect(ctx, 50, 370, 1820, 540, 12);
+                ctx.fill();
+                ctx.strokeStyle = '#0284c7';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                // Title of Section
+                ctx.fillStyle = '#00a8e8';
+                ctx.font = 'bold 20px "Prompt", sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText('📥 นำเข้าข้อความแจ้งย้ายป้ายดิบ (Unstructured Text Intake) — รองรับ LINE / อีเมล / เอกสาร', 80, 410);
+
+                // Sample Prompt Buttons
+                ctx.fillStyle = 'rgba(255,255,255,0.06)';
+                roundRect(ctx, 80, 430, 260, 36, 6);
+                ctx.fill();
+                ctx.fillStyle = '#38bdf8';
+                ctx.font = '13px "Prompt", sans-serif';
+                ctx.fillText('ตัวอย่าง 1: ย้ายเสร็จแล้ว (มีวันเริ่ม-ปิด)', 95, 453);
+
+                ctx.fillStyle = 'rgba(2, 132, 199, 0.3)';
+                roundRect(ctx, 360, 430, 260, 36, 6);
+                ctx.fill();
+                ctx.strokeStyle = '#38bdf8';
+                ctx.stroke();
+                ctx.fillStyle = '#ffffff';
+                ctx.fillText('✓ ตัวอย่าง 2: แผนล่วงหน้า (รอย้าย)', 375, 453);
+
+                // Textarea Box
+                ctx.fillStyle = '#020617';
+                roundRect(ctx, 80, 480, 1760, 220, 8);
+                ctx.fill();
+                ctx.strokeStyle = '#334155';
+                ctx.stroke();
+
+                const fullText = "แจ้งย้ายป้ายด่วน! กทม. สั่งรื้อป้าย Digital LED สี่แยกอโศก (ASOKE-LED-01) เพื่อขยายสะพานลอยคนข้าม งบประเมิน 850,000 บาท กำหนดรื้อถอนให้เสร็จก่อน 30 พ.ย. 2026 โดย บ.กรุงเทพฯวิศวกรรม จำกัด";
+                const charsToShow = Math.floor(Math.min(fullText.length, progress * fullText.length * 1.5));
+                const typedText = fullText.substring(0, charsToShow);
+
+                ctx.fillStyle = '#f8fafc';
+                ctx.font = '19px "Prompt", sans-serif';
+                ctx.fillText(typedText, 110, 525);
+                if (charsToShow < fullText.length && Math.floor(currentTime * 4) % 2 === 0) {
+                    const textW = ctx.measureText(typedText).width;
+                    ctx.fillStyle = '#00a8e8';
+                    ctx.fillRect(115 + textW, 505, 3, 26);
+                }
+
+                // Run Button
+                const btnPulse = Math.sin(currentTime * 6) * 0.15 + 0.85;
+                ctx.fillStyle = (progress > 0.6) ? '#059669' : '#0284c7';
+                roundRect(ctx, 80, 725, 520, 55, 8);
+                ctx.fill();
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 18px "Prompt", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('⚡ รัน AI วิเคราะห์ + ตรวจ Guardrail + บันทึก Google Drive', 340, 760);
+
+                // Move cursor towards button
+                if (progress < 0.6) {
+                    cursor.x = 400 + (progress / 0.6) * 50;
+                    cursor.y = 520;
+                } else if (progress < 0.85) {
+                    cursor.x = 340;
+                    cursor.y = 750;
+                    if (progress > 0.8 && cursor.ripple === 0) {
+                        cursor.ripple = 1;
+                    }
+                }
+                drawCursor(cursor.x, cursor.y, progress > 0.8 && progress < 0.95);
+
+            } else if (scene.id === 'SCENE_2') {
+                // SCENE 2: Dual-Task AI Result & Guardrail PASS
+                drawAppHeader(3);
+
+                const imgAiResult = document.getElementById('imgAiResult');
+                if (imgAiResult.complete) {
+                    ctx.drawImage(imgAiResult, 50, 90, 1820, 800);
+                }
+
+                // Add Highlight Rings around Key Sections
+                if (currentTime < 15) {
+                    // Highlight Task 1 JSON
+                    ctx.strokeStyle = '#00a8e8';
+                    ctx.lineWidth = 4;
+                    roundRect(ctx, 60, 240, 890, 500, 10);
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#0284c7';
+                    roundRect(ctx, 80, 215, 320, 32, 6);
+                    ctx.fill();
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 14px "Prompt", sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('✓ TASK 1 : สกัด JSON 9 ฟิลด์อัตโนมัติ', 240, 236);
+                } else if (currentTime < 19) {
+                    // Highlight Task 2 Risk Advisor
+                    ctx.strokeStyle = '#f59e0b';
+                    ctx.lineWidth = 4;
+                    roundRect(ctx, 970, 240, 890, 360, 10);
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#d97706';
+                    roundRect(ctx, 990, 215, 360, 32, 6);
+                    ctx.fill();
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 14px "Prompt", sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('✓ TASK 2 : ประเมิน HIGH RISK & แผน 3 ขั้น', 1170, 236);
+                } else {
+                    // Highlight Guardrail & Cloud Sync
+                    ctx.strokeStyle = '#10b981';
+                    ctx.lineWidth = 4;
+                    roundRect(ctx, 60, 755, 1800, 125, 10);
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#059669';
+                    roundRect(ctx, 80, 735, 380, 32, 6);
+                    ctx.fill();
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 14px "Prompt", sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('✓ L3.3 GUARDRAIL PASS & GOOGLE DRIVE LOG', 270, 756);
+                }
+
+            } else if (scene.id === 'SCENE_3') {
+                // SCENE 3: Executive Dashboard & Pending Action Center
+                drawAppHeader(1);
+
+                const imgDash = document.getElementById('imgDash');
+                const imgPending = document.getElementById('imgPending');
+
+                if (currentTime < 26) {
+                    if (imgDash.complete) {
+                        ctx.drawImage(imgDash, 50, 90, 1820, 800);
+                    }
+                    // Highlight KPI Cards
+                    ctx.strokeStyle = '#00a8e8';
+                    ctx.lineWidth = 3;
+                    roundRect(ctx, 60, 320, 1800, 140, 10);
+                    ctx.stroke();
+                } else {
+                    // Zoom into Pending Action Center
+                    if (imgPending.complete) {
+                        ctx.drawImage(imgPending, 50, 140, 1820, 700);
+                    }
+
+                    // Highlight the first pending row
+                    ctx.fillStyle = 'rgba(2, 132, 199, 0.15)';
+                    roundRect(ctx, 60, 360, 1800, 90, 8);
+                    ctx.fill();
+                    ctx.strokeStyle = '#00a8e8';
+                    ctx.lineWidth = 2.5;
+                    ctx.stroke();
+
+                    // Cursor pointing to [ดูประวัติ] button
+                    cursor.x = 1580;
+                    cursor.y = 405;
+                    if (currentTime > 30.5 && cursor.ripple === 0) {
+                        cursor.ripple = 1;
+                    }
+                    drawCursor(cursor.x, cursor.y, currentTime > 30.8);
+                }
+
+            } else if (scene.id === 'SCENE_4') {
+                // SCENE 4: Timeline Audit Trail Modal
+                drawAppHeader(1);
+
+                const imgPending = document.getElementById('imgPending');
+                if (imgPending.complete) {
+                    ctx.drawImage(imgPending, 50, 140, 1820, 700);
+                }
+
+                // Dark Backdrop overlay
+                ctx.fillStyle = 'rgba(2, 6, 23, 0.78)';
+                ctx.fillRect(0, 70, 1920, 860);
+
+                // Modal Box
+                ctx.fillStyle = '#0f172a';
+                roundRect(ctx, 360, 130, 1200, 700, 14);
+                ctx.fill();
+                ctx.strokeStyle = '#0284c7';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Modal Header
+                ctx.fillStyle = '#00a8e8';
+                ctx.font = 'bold 22px "Prompt", sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText('📋 Timeline Audit Trail — ประวัติการแก้ไขย้อนหลังของป้าย: ASOKE-LED-01', 400, 180);
+
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '14px "Prompt", sans-serif';
+                ctx.fillText('ตรวจสอบข้อมูลย้อนหลังได้ทุกการดำเนินการ พร้อม ISO Timestamp และชื่อผู้ดำเนินการ', 400, 210);
+
+                // Close button (X)
+                ctx.fillStyle = '#ef4444';
+                roundRect(ctx, 1490, 155, 34, 34, 6);
+                ctx.fill();
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 18px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('✕', 1507, 178);
+
+                // Timeline Items
+                const logs = [
+                    { time: '11/11/2026 14:30:15', actor: 'AI Integrator (Level 4)', act: 'AI_INTAKE_VERIFIED', desc: 'สกัดข้อมูลสำเร็จ 9 ฟิลด์, งบ ฿850,000, ประเมิน High Risk, ผ่าน Guardrail PASS', color: '#10b981' },
+                    { time: '11/11/2026 14:31:00', actor: 'Admin (staticmedia)', act: 'STATUS_PUSH_PENDING', desc: 'ยืนยันเข้าคลังติดตามงานค้าง (Pending Action Center) มอบหมายทีมวิศวกรเข้าพื้นที่', color: '#38bdf8' },
+                    { time: '11/11/2026 14:33:40', actor: 'Admin (staticmedia)', act: 'STATUS_PUSH_COMPLETED', desc: 'รื้อถอนและติดตั้งโครงสร้างใหม่เรียบร้อย อัปเดตสถานะเป็น \'ติดตั้งสำเร็จ\'', color: '#059669' }
+                ];
+
+                let ly = 270;
+                logs.forEach((item, idx) => {
+                    // Timeline Node Dot
+                    ctx.fillStyle = item.color;
+                    ctx.beginPath();
+                    ctx.arc(440, ly + 25, 10, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    if (idx < logs.length - 1) {
+                        ctx.strokeStyle = '#334155';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.moveTo(440, ly + 35);
+                        ctx.lineTo(440, ly + 140);
+                        ctx.stroke();
+                    }
+
+                    // Content Box
+                    ctx.fillStyle = '#1e293b';
+                    roundRect(ctx, 480, ly, 1020, 110, 8);
+                    ctx.fill();
+
+                    ctx.fillStyle = item.color;
+                    roundRect(ctx, 500, ly + 16, 220, 24, 4);
+                    ctx.fill();
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 12px "Prompt", sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(item.act, 610, ly + 32);
+
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.font = '13px "Prompt", sans-serif';
+                    ctx.textAlign = 'left';
+                    ctx.fillText('🕒 ' + item.time + '  |  👤 ผู้ดำเนินการ: ' + item.actor, 740, ly + 33);
+
+                    ctx.fillStyle = '#f8fafc';
+                    ctx.font = '500 15px "Prompt", sans-serif';
+                    ctx.fillText(item.desc, 500, ly + 75);
+
+                    ly += 135;
+                });
+
+            } else if (scene.id === 'SCENE_5') {
+                // SCENE 5: Drive to Completion & Google Sheets Cloud Sync
+                drawAppHeader(1);
+
+                const imgSheet = document.getElementById('imgSheet');
+                if (imgSheet.complete) {
+                    ctx.drawImage(imgSheet, 50, 90, 1820, 480);
+                }
+
+                // Completed Status Card
+                ctx.fillStyle = '#0f172a';
+                roundRect(ctx, 50, 590, 1820, 310, 12);
+                ctx.fill();
+                ctx.strokeStyle = '#059669';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.fillStyle = '#10b981';
+                roundRect(ctx, 80, 620, 260, 34, 6);
+                ctx.fill();
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 16px "Prompt", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('✓ บันทึกสำเร็จเรียบร้อย', 210, 643);
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 22px "Prompt", sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText('สถานะป้าย ASOKE-LED-01 อัปเดตเป็น: [ ติดตั้งสำเร็จ (COMPLETED) ]', 370, 645);
+
+                const cards = [
+                    { title: 'Google Sheets DB', desc: 'ซิงก์ข้อมูลแท็บ Media_Data และ History_Log ทันที', badge: 'Real-time Sync', color: '#0284c7' },
+                    { title: 'Direct Cost Impact', desc: 'บันทึกงบประมาณ ฿850,000 เข้าสรุปบัญชีโครงการ', badge: '฿850,000', color: '#10b981' },
+                    { title: 'SLA Performance', desc: 'เสร็จสิ้นใน 1 วัน (SLA 3 วัน) เร็วกว่ากำหนด 66%', badge: 'Fast Track (1 Day)', color: '#f59e0b' }
+                ];
+
+                let cx = 80;
+                cards.forEach(c => {
+                    ctx.fillStyle = '#1e293b';
+                    roundRect(ctx, cx, 680, 540, 180, 8);
+                    ctx.fill();
+
+                    ctx.fillStyle = c.color;
+                    roundRect(ctx, cx + 20, 705, 180, 28, 4);
+                    ctx.fill();
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 13px "Prompt", sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(c.badge, cx + 110, 724);
+
+                    ctx.fillStyle = '#f8fafc';
+                    ctx.font = 'bold 18px "Prompt", sans-serif';
+                    ctx.textAlign = 'left';
+                    ctx.fillText(c.title, cx + 20, 765);
+
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.font = '14px "Prompt", sans-serif';
+                    ctx.fillText(c.desc, cx + 20, 800);
+
+                    cx += 580;
+                });
+
+            } else if (scene.id === 'SCENE_6') {
+                // SCENE 6: Executive Summary & Business Impact
+                drawAppHeader(1);
+
+                const imgDash = document.getElementById('imgDash');
+                if (imgDash.complete) {
+                    ctx.drawImage(imgDash, 50, 90, 880, 800);
+                }
+
+                // Right Panel: 4 Impact Cards
+                ctx.fillStyle = '#0f172a';
+                roundRect(ctx, 960, 90, 910, 800, 12);
+                ctx.fill();
+                ctx.strokeStyle = '#00a8e8';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.fillStyle = '#00a8e8';
+                ctx.font = 'bold 24px "Prompt", sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText('📊 สรุปผลสัมฤทธิ์และคุณค่าต่อองค์กร (Executive Value Summary)', 1000, 140);
+
+                const summaryKpis = [
+                    { num: '98%', title: 'ประหยัดเวลาทำงาน (Time Reduction)', desc: 'ลดเวลาเปิดเคสและคีย์ข้อมูลจาก 15-20 นาที เหลือเพียง 5 วินาทีต่อเคส', color: '#00a8e8' },
+                    { num: '100%', title: 'ความถูกต้องแม่นยำ (Zero Error)', desc: 'ควบคุมด้วย Code Guardrail 4 ชั้น ขจัด AI Hallucination และข้อมูลตกหล่น', color: '#10b981' },
+                    { num: '฿120.77M', title: 'ควบคุมงบประมาณรวม (Financial Control)', desc: 'บริหารจัดการ 84 โครงการ 8 ประเภทสื่อ ติดตามป้ายค้าง 24 รายการโปร่งใส', color: '#f59e0b' },
+                    { num: '24/7', title: 'ความพร้อมใช้งานผู้บริหาร (Live Governance)', desc: 'ติดตามผลได้ทันทีผ่าน Web & Mobile พร้อม Audit Trail ย้อนหลังทุกเคส', color: '#8b5cf6' }
+                ];
+
+                let sy = 180;
+                summaryKpis.forEach(k => {
+                    ctx.fillStyle = '#1e293b';
+                    roundRect(ctx, 1000, sy, 830, 140, 8);
+                    ctx.fill();
+
+                    ctx.fillStyle = k.color;
+                    ctx.font = 'bold 36px "Prompt", sans-serif';
+                    ctx.textAlign = 'left';
+                    ctx.fillText(k.num, 1030, sy + 60);
+
+                    ctx.fillStyle = '#f8fafc';
+                    ctx.font = 'bold 18px "Prompt", sans-serif';
+                    ctx.fillText(k.title, 1200, sy + 45);
+
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.font = '14px "Prompt", sans-serif';
+                    ctx.fillText(k.desc, 1200, sy + 75);
+
+                    sy += 160;
+                });
+            }
+
+            // Draw Bottom Subtitle Bar
+            drawSubtitleBar(scene, progress);
+
+            // Update UI Slider & Time
+            document.getElementById('timeSlider').value = currentTime;
+            const mins = String(Math.floor(currentTime / 60)).padStart(2, '0');
+            const secs = String(Math.floor(currentTime % 60)).padStart(2, '0');
+            document.getElementById('timeDisplay').innerText = `${mins}:${secs} / 00:50`;
+
+            // Update scene pills
+            document.querySelectorAll('.scene-pill').forEach((pill, idx) => {
+                if (idx === scenes.indexOf(scene)) {
+                    pill.classList.add('active');
+                } else {
+                    pill.classList.remove('active');
+                }
+            });
+        }
+
+        // Animation Loop
+        function loop(timestamp) {
+            const dt = (timestamp - lastTimestamp) / 1000;
+            lastTimestamp = timestamp;
+
+            if (isPlaying) {
+                currentTime += dt;
+                if (currentTime >= TOTAL_DURATION) {
+                    if (isAutoRecording) {
+                        return; // Auto recorder handles stopping
+                    }
+                    currentTime = 0; // loop
+                }
+            }
+            render();
+            requestAnimationFrame(loop);
+        }
+
+        let isAutoRecording = false;
+
+        async function init() {
+            // Preload images
+            const imgs = Array.from(document.querySelectorAll('img'));
+            await Promise.all(imgs.map(img => {
+                if (img.complete) return Promise.resolve();
+                return new Promise(resolve => { img.onload = resolve; img.onerror = resolve; });
+            }));
+
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('autorecord') === '1') {
+                isAutoRecording = true;
+                const stream = canvas.captureStream(30);
+                const mime = MediaRecorder.isTypeSupported('video/mp4; codecs=avc1') ? 'video/mp4; codecs=avc1' : (MediaRecorder.isTypeSupported('video/mp4') ? 'video/mp4' : 'video/webm');
+                const recorder = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 6000000 });
+                const chunks = [];
+                recorder.ondataavailable = e => { if (e.data && e.data.size > 0) chunks.push(e.data); };
+                recorder.onstop = async () => {
+                    const blob = new Blob(chunks, { type: mime });
+                    await fetch('/save_video', { method: 'POST', body: blob });
+                    document.title = 'AUTORECORD_COMPLETE';
+                };
+
+                currentTime = 0;
+                isPlaying = true;
+                recorder.start(100);
+
+                const checkInterval = setInterval(() => {
+                    if (currentTime >= TOTAL_DURATION) {
+                        clearInterval(checkInterval);
+                        recorder.stop();
+                    }
+                }, 200);
+            }
+
+            requestAnimationFrame(loop);
+        }
+        window.onload = init;
+
+        // Control handlers
+        document.getElementById('btnPlayPause').onclick = () => {
+            isPlaying = !isPlaying;
+            document.getElementById('playIcon').innerText = isPlaying ? '⏸️' : '▶️';
+            document.getElementById('playText').innerText = isPlaying ? 'หยุดชั่วคราว' : 'เล่นต่อ';
+        };
+
+        document.getElementById('btnRestart').onclick = () => {
+            currentTime = 0;
+            isPlaying = true;
+            document.getElementById('playIcon').innerText = '⏸️';
+            document.getElementById('playText').innerText = 'หยุดชั่วคราว';
+        };
+
+        document.getElementById('timeSlider').oninput = (e) => {
+            currentTime = parseFloat(e.target.value);
+            render();
+        };
+
+        function seekTo(sec) {
+            currentTime = sec;
+            isPlaying = true;
+            document.getElementById('playIcon').innerText = '⏸️';
+            document.getElementById('playText').innerText = 'หยุดชั่วคราว';
+            render();
+        }
+
+        // Recorder function to record canvas to MP4/WebM
+        document.getElementById('btnDownload').onclick = async () => {
+            const btn = document.getElementById('btnDownload');
+            btn.innerText = '⏳ กำลังบันทึกวิดีโอ (0%)...';
+            btn.disabled = true;
+
+            const stream = canvas.captureStream(30);
+            const mime = MediaRecorder.isTypeSupported('video/mp4; codecs=avc1') ? 'video/mp4; codecs=avc1' : (MediaRecorder.isTypeSupported('video/mp4') ? 'video/mp4' : 'video/webm');
+            const ext = mime.includes('mp4') ? 'mp4' : 'webm';
+            const recorder = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 5000000 });
+            const chunks = [];
+
+            recorder.ondataavailable = e => { if (e.data && e.data.size > 0) chunks.push(e.data); };
+            recorder.onstop = () => {
+                const blob = new Blob(chunks, { type: mime });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `demo_media_relocation_app.${ext}`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                btn.innerText = '✓ บันทึกสำเร็จ!';
+                setTimeout(() => {
+                    btn.innerText = '⬇️ บันทึกคลิป MP4';
+                    btn.disabled = false;
+                }, 3000);
+            };
+
+            // Record entire 50s at accelerated render or real-time
+            currentTime = 0;
+            isPlaying = true;
+            recorder.start(100);
+
+            const checkInterval = setInterval(() => {
+                const pct = Math.floor((currentTime / TOTAL_DURATION) * 100);
+                btn.innerText = `⏳ กำลังบันทึกวิดีโอ (${pct}%)...`;
+                if (currentTime >= TOTAL_DURATION - 0.2) {
+                    clearInterval(checkInterval);
+                    recorder.stop();
+                }
+            }, 500);
+        };
+    </script>
+</body>
+</html>
