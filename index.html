@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8">
@@ -4340,6 +4340,28 @@
         "pendingStage":  "",
         "year":  2024,
         "month":  1
+    },
+    {
+        "id": "REL-2026-075",
+        "mediaId": "DS 211",
+        "mediaType": "Smart Bus Shelter",
+        "company": "บริษัท แพลน บี มีเดีย จำกัด (มหาชน)",
+        "originSite": "โรงพยาบาลเด็ก",
+        "originArea": "ราชเทวี",
+        "destSite": "โรงพยาบาลเด็ก",
+        "destArea": "ราชเทวี",
+        "dismantleDate": "2026-10-18",
+        "installDate": "2026-11-18",
+        "downtimeDays": 31,
+        "causeCategory": "โครงการภาครัฐ/สาธารณูปโภค",
+        "causeDetail": "กทม.มีงานก่อสร้างโครงการ Skywalk",
+        "directCost": 147513,
+        "opportunityLoss": 37200,
+        "totalImpact": 184713,
+        "status": "Completed",
+        "pendingStage": "",
+        "year": 2026,
+        "month": 10
     }
 ];
 
@@ -4455,6 +4477,12 @@
         try {
           const parsed = JSON.parse(saved);
           if (Array.isArray(parsed)) {
+            // Auto-merge any new default records like DS 211
+            DEFAULT_MASTER_DATA.forEach(def => {
+              if (!parsed.some(p => p.id === def.id || (p.mediaId && p.mediaId === def.mediaId))) {
+                parsed.push(JSON.parse(JSON.stringify(def)));
+              }
+            });
             return parsed.map(rec => {
               if (isBadMediaType(rec.mediaType)) {
                 if (!rec.destSite || rec.destSite === 'จุดติดตั้งใหม่') {
@@ -7516,6 +7544,22 @@
       applyFilters();
       updatePendingBadge();
       updateBefore2024Badge();
+
+      // Background auto-sync from Google Sheets if connected
+      const autoSyncGasUrl = getGasWebhookUrl();
+      if (autoSyncGasUrl && autoSyncGasUrl.startsWith('https://script.google.com/')) {
+        fetch(autoSyncGasUrl)
+          .then(r => r.json())
+          .then(data => {
+            if (data && (data.status === 'ok' || data.status === 'success') && Array.isArray(data.masterData) && data.masterData.length > 0) {
+              masterData = data.masterData.map(enrichRecord);
+              saveMasterData();
+              applyFilters();
+              renderPendingTab();
+            }
+          })
+          .catch(e => console.log('Background cloud sync skipped:', e));
+      }
 
       // Auto-detect mobile screen width (< 768px) or ?view=mobile query parameter
       const urlParams = new URLSearchParams(window.location.search);
