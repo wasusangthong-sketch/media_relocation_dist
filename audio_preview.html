@@ -717,6 +717,7 @@
     sliderVoice.addEventListener('input', (e) => {
         const val = e.target.value;
         document.getElementById('valVoice').textContent = val + '%';
+        if (currentAudio) currentAudio.volume = val / 100;
         if (masterVoiceGain) masterVoiceGain.gain.value = val / 100;
     });
 
@@ -913,8 +914,7 @@
         stopCurrentVoice();
 
         const audio = new Audio(`audio/scene_${sceneNum}.mp3`);
-        const source = audioCtx.createMediaElementSource(audio);
-        source.connect(masterVoiceGain);
+        audio.volume = (sliderVoice ? sliderVoice.value / 100 : 1.0);
 
         currentAudio = audio;
         currentPlayingScene = sceneNum;

@@ -1108,26 +1108,21 @@
                 masterBgmGain.connect(audioDest);
                 masterSfxGain.connect(audioDest);
 
-                // Connect audio elements to gain node
-                for (let i = 1; i <= 6; i++) {
-                    try {
-                        const src = audioContext.createMediaElementSource(voiceAudios[i]);
-                        src.connect(masterVoiceGain);
-                        voiceSources[i] = src;
-                    } catch (e) {
-                        // Already connected or direct
-                    }
-                }
+                // Note: We intentionally play voice audios directly through native HTML5 Audio element
+                // rather than createMediaElementSource() to avoid Chromium's file:/// local CORS audio muting bug!
             }
             if (audioContext.state === 'suspended') {
                 audioContext.resume();
             }
         }
 
-        // Preload voice audios
+        let voiceVolumeLevel = 1.0;
+
+        // Preload voice audios with direct HTML5 audio output
         for (let i = 1; i <= 6; i++) {
             const a = new Audio(`audio/scene_${i}.mp3`);
             a.preload = 'auto';
+            a.volume = 1.0;
             voiceAudios[i] = a;
         }
 
@@ -1304,7 +1299,8 @@
                 stopAllVoices();
                 if (isPlaying && voiceAudios[currentSceneNum]) {
                     voiceAudios[currentSceneNum].currentTime = 0;
-                    voiceAudios[currentSceneNum].play().catch(() => {});
+                    voiceAudios[currentSceneNum].volume = voiceVolumeLevel;
+                    voiceAudios[currentSceneNum].play().catch(err => console.log('Audio play error:', err));
                 }
             }
 
@@ -1355,8 +1351,11 @@
 
         volVoice.oninput = (e) => {
             const v = e.target.value;
+            voiceVolumeLevel = v / 100;
             document.getElementById('lblVolVoice').innerText = v + '%';
-            if (masterVoiceGain) masterVoiceGain.gain.value = v / 100;
+            for (let i = 1; i <= 6; i++) {
+                if (voiceAudios[i]) voiceAudios[i].volume = voiceVolumeLevel;
+            }
         };
         volBgm.oninput = (e) => {
             const v = e.target.value;
