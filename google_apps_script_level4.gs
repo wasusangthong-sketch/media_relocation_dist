@@ -264,9 +264,13 @@ function doPost(e) {
  * ฟังก์ชันสร้างและส่งอีเมลสรุปผู้บริหารอัตโนมัติ (Executive Relocation Digest)
  * รองรับทั้งการเรียกผ่าน Webhook API จากหน้าเว็บ และการตั้งเวลาส่งอัตโนมัติ (Time-Driven Trigger)
  */
+
+// ⚙️ กำหนดอีเมลผู้รับเริ่มต้น (สามารถใส่หลายอีเมลคั่นด้วยเครื่องหมายจุลภาค , ได้)
+const DEFAULT_RECIPIENT_EMAILS = 'wasu.sa@planbmedia.co.th';
+
 function sendExecutiveEmailReport(targetEmail) {
   const { dataSheet, logSheet } = ensureSheetsExist();
-  const recipient = targetEmail || Session.getActiveUser().getEmail();
+  const recipient = (targetEmail && targetEmail.trim()) ? targetEmail.trim() : (DEFAULT_RECIPIENT_EMAILS || Session.getActiveUser().getEmail());
   if (!recipient) {
     return { status: 'error', message: 'ไม่พบที่อยู่อีเมลผู้รับ กรุณาระบุอีเมล' };
   }
@@ -503,7 +507,7 @@ function setupWeeklyReportTrigger() {
  * ฟังก์ชัน Wrapper สำหรับ Time-Driven Trigger
  */
 function sendWeeklyEmailReportAuto() {
-  const targetEmail = Session.getActiveUser().getEmail();
+  const targetEmail = DEFAULT_RECIPIENT_EMAILS || Session.getActiveUser().getEmail();
   sendExecutiveEmailReport(targetEmail);
 }
 
@@ -511,7 +515,7 @@ function sendWeeklyEmailReportAuto() {
  * ฟังก์ชันสำหรับกดทดสอบส่งอีเมลทันทีในตัวแก้ไข Apps Script
  */
 function testSendEmailDigest() {
-  const testEmail = Session.getActiveUser().getEmail();
+  const testEmail = DEFAULT_RECIPIENT_EMAILS || Session.getActiveUser().getEmail();
   const res = sendExecutiveEmailReport(testEmail);
   Logger.log(res);
 }
