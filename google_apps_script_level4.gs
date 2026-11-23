@@ -133,6 +133,15 @@ function doPost(e) {
     const { dataSheet, logSheet } = ensureSheetsExist();
     const payload = JSON.parse(e.postData.contents || '{}');
 
+    // ตรวจสอบ Action พิเศษ: ส่งอีเมลสรุปผู้บริหารอัตโนมัติ (L4/L5 Executive Email Digest)
+    if (payload.action === 'send_email_digest' || payload.actionType === 'SEND_EMAIL_DIGEST') {
+      const targetEmail = payload.email || payload.targetEmail || Session.getActiveUser().getEmail();
+      const emailResult = sendExecutiveEmailReport(targetEmail);
+      return ContentService
+        .createTextOutput(JSON.stringify(emailResult))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
     const timestamp = new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' });
     const actionType = payload.actionType || 'SYNC_DATA';
     const actor = payload.actor || 'WebApp_User';
@@ -246,4 +255,263 @@ function doPost(e) {
       .createTextOutput(JSON.stringify({ status: 'error', message: err.toString() }))
       .setMimeType(ContentService.MimeType.JSON);
   }
+}
+
+/**
+ * ============================================================================
+ * 📧 AUTOMATED EXECUTIVE EMAIL DIGEST (GATE LEVEL 4.1 & LEVEL 5)
+ * ============================================================================
+ * ฟังก์ชันสร้างและส่งอีเมลสรุปผู้บริหารอัตโนมัติ (Executive Relocation Digest)
+ * รองรับทั้งการเรียกผ่าน Webhook API จากหน้าเว็บ และการตั้งเวลาส่งอัตโนมัติ (Time-Driven Trigger)
+ */
+function sendExecutiveEmailReport(targetEmail) {
+  const { dataSheet, logSheet } = ensureSheetsExist();
+  const recipient = targetEmail || Session.getActiveUser().getEmail();
+  if (!recipient) {
+    return { status: 'error', message: 'ไม่พบที่อยู่อีเมลผู้รับ กรุณาระบุอีเมล' };
+  }
+
+  // 1. อ่านและประมวลผลสถิติภาพรวมจาก Media_Data
+  const dataRows = dataSheet.getDataRange().getValues();
+  let totalSigns = 0;
+  let completedSigns = 0;
+  let pendingSigns = 0;
+  let totalDirectCost = 0;
+  let totalImpact = 0;
+  let pendingItems = [];
+
+  if (dataRows.length > 1) {
+    const rows = dataRows.slice(1);
+    totalSigns = rows.length;
+    rows.forEach(r => {
+      const status = String(r[16] || '').trim();
+      const directCost = Number(r[13]) || 0;
+      const impact = Number(r[15]) || 0;
+      totalDirectCost += directCost;
+      totalImpact += impact;
+
+      if (status === 'ติดตั้งสำเร็จ' || status === 'Completed') {
+        completedSigns++;
+      } else {
+        pendingSigns++;
+        pendingItems.push({
+          mediaId: String(r[1] || '-'),
+          mediaType: String(r[2] || '-'),
+          location: String(r[4] || '') + ' (' + String(r[5] || '') + ')',
+          dest: String(r[6] || '') + ' (' + String(r[7] || '') + ')',
+          status: status || 'Pending',
+          cost: directCost,
+          impact: impact,
+          cause: String(r[12] || r[11] || '-')
+        });
+      }
+    });
+  }
+
+  // เรียงลำดับป้ายค้างตามมูลค่างบประมาณทางตรงสูงสุด 5 รายการ
+  pendingItems.sort((a, b) => b.cost - a.cost);
+  const topPending = pendingItems.slice(0, 5);
+
+  // 2. ดึง 3 ประวัติการเปลี่ยนแปลงล่าสุดจาก History_Log
+  const logRows = logSheet.getDataRange().getValues();
+  let recentLogs = [];
+  if (logRows.length > 1) {
+    recentLogs = logRows.slice(1).reverse().slice(0, 3).map(r => ({
+      time: String(r[0] || ''),
+      action: String(r[1] || ''),
+      actor: String(r[2] || ''),
+      detail: String(r[4] || '')
+    }));
+  }
+
+  const reportDate = new Date().toLocaleDateString('th-TH', {
+    timeZone: 'Asia/Bangkok',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+  const reportTime = new Date().toLocaleTimeString('th-TH', { timeZone: 'Asia/Bangkok' });
+
+  // 3. ประกอบ HTML Email Template แบบ Responsive สวยงามระดับ Executive
+  const htmlBody = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #0b1120; margin: 0; padding: 20px 10px; color: #f8fafc; }
+        .wrapper { max-width: 660px; margin: 0 auto; background: #1e293b; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #334155; }
+        .header { background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); padding: 30px 24px; text-align: center; border-bottom: 2px solid #0284c7; }
+        .badge { display: inline-block; background: rgba(56, 189, 248, 0.2); border: 1px solid #38bdf8; color: #38bdf8; font-size: 11px; font-weight: bold; letter-spacing: 1px; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; margin-bottom: 12px; }
+        .title { margin: 0; color: #ffffff; font-size: 21px; font-weight: 800; line-height: 1.35; }
+        .subtitle { margin-top: 8px; color: #94a3b8; font-size: 13px; }
+        .content { padding: 26px 24px; }
+        .grid { display: table; width: 100%; table-layout: fixed; margin-bottom: 24px; }
+        .grid-cell { display: table-cell; width: 25%; padding: 4px; }
+        .kpi-card { background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 12px 6px; text-align: center; }
+        .kpi-val { font-size: 19px; font-weight: 800; margin-bottom: 4px; }
+        .kpi-lbl { font-size: 10.5px; color: #94a3b8; text-transform: uppercase; font-weight: 600; }
+        .section-title { font-size: 14.5px; font-weight: 700; color: #38bdf8; margin: 22px 0 10px; border-bottom: 1px solid #334155; padding-bottom: 6px; }
+        .table-wrap { width: 100%; border-collapse: collapse; margin-bottom: 18px; font-size: 12px; }
+        .table-wrap th { background: #0f172a; color: #94a3b8; font-weight: 700; text-align: left; padding: 10px 8px; border-bottom: 1px solid #334155; }
+        .table-wrap td { padding: 10px 8px; border-bottom: 1px solid #334155; color: #cbd5e1; }
+        .risk-pill { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 10.5px; font-weight: 700; }
+        .risk-high { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
+        .risk-med { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; }
+        .log-item { background: #0f172a; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; font-size: 12px; border-left: 3px solid #0284c7; }
+        .btn-cta { display: block; width: 85%; margin: 26px auto 6px; background: linear-gradient(135deg, #0284c7, #00a8e8); color: #ffffff !important; text-decoration: none; text-align: center; padding: 13px 20px; border-radius: 10px; font-weight: 700; font-size: 14px; box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4); }
+        .footer { text-align: center; font-size: 11px; color: #64748b; padding: 18px; border-top: 1px solid #334155; }
+      </style>
+    </head>
+    <body>
+      <div class="wrapper">
+        <div class="header">
+          <div class="badge">PLAN B MEDIA • AI LITERACY GATE L4/L5</div>
+          <h1 class="title">รายงานสรุปสถานะการรื้อย้ายป้ายโฆษณา (Executive Relocation Digest)</h1>
+          <div class="subtitle">ข้อมูลประมวลผล ณ วันที่ ${reportDate} เวลา ${reportTime} น. (ระบบอัตโนมัติ)</div>
+        </div>
+
+        <div class="content">
+          <!-- 4 KPI Metrics -->
+          <div class="grid">
+            <div class="grid-cell">
+              <div class="kpi-card">
+                <div class="kpi-val" style="color: #38bdf8;">${totalSigns}</div>
+                <div class="kpi-lbl">ป้ายทั้งหมด</div>
+              </div>
+            </div>
+            <div class="grid-cell">
+              <div class="kpi-card">
+                <div class="kpi-val" style="color: #10b981;">${completedSigns}</div>
+                <div class="kpi-lbl">ติดตั้งสำเร็จ</div>
+              </div>
+            </div>
+            <div class="grid-cell">
+              <div class="kpi-card">
+                <div class="kpi-val" style="color: #f59e0b;">${pendingSigns}</div>
+                <div class="kpi-lbl">ค้างดำเนินการ</div>
+              </div>
+            </div>
+            <div class="grid-cell">
+              <div class="kpi-card">
+                <div class="kpi-val" style="color: #ef4444;">฿${(totalDirectCost / 1000000).toFixed(2)}M</div>
+                <div class="kpi-lbl">งบทางตรงรวม</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Priority Pending Action Items -->
+          <div class="section-title">🚨 รายการป้ายค้างดำเนินการเร่งด่วน (Top Priority Pending)</div>
+          <table class="table-wrap">
+            <thead>
+              <tr>
+                <th>รหัสป้าย / สื่อ</th>
+                <th>สถานที่ / ปลายทาง</th>
+                <th>งบประมาณ</th>
+                <th>สถานะ / สาเหตุ</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${topPending.map(item => `
+                <tr>
+                  <td><strong>${item.mediaId}</strong><br><span style="font-size:11px;color:#94a3b8;">${item.mediaType}</span></td>
+                  <td>${item.location}<br><span style="font-size:11px;color:#94a3b8;">➔ ${item.dest}</span></td>
+                  <td style="color:#f59e0b;font-weight:bold;">฿${Number(item.cost).toLocaleString()}</td>
+                  <td>
+                    <span class="risk-pill ${item.cost >= 300000 ? 'risk-high' : 'risk-med'}">${item.status}</span>
+                    <div style="font-size:11px;color:#94a3b8;margin-top:2px;">${item.cause}</div>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+
+          <!-- Recent Audit Trail -->
+          <div class="section-title">📅 ประวัติการดำเนินการล่าสุด (Audit Trail Snapshot)</div>
+          ${recentLogs.map(l => `
+            <div class="log-item">
+              <strong style="color:#38bdf8;">[${l.action}]</strong> โดย <em>${l.actor}</em> เมื่อ ${l.time}<br>
+              <span style="color:#cbd5e1;">${l.detail}</span>
+            </div>
+          `).join('')}
+
+          <!-- Action Button -->
+          <a href="https://media-relocation-tracker.netlify.app" class="btn-cta">
+            🌐 เข้าสู่ระบบ Live Executive Dashboard
+          </a>
+        </div>
+
+        <div class="footer">
+          อีเมลนี้ถูกสร้างและจัดส่งโดยระบบอัตโนมัติ Google Apps Script + AI Gate Workflow Integrator<br>
+          บริษัท แพลน บี มีเดีย จำกัด (มหาชน) • ความปลอดภัยระดับ Enterprise
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  // 4. สั่งส่งอีเมลผ่าน MailApp ของ Google
+  MailApp.sendEmail({
+    to: recipient,
+    subject: `📊 [Plan B AI Gate] รายงานสรุปสถานะการรื้อย้ายป้ายโฆษณา (${reportDate})`,
+    htmlBody: htmlBody
+  });
+
+  // 5. บันทึกประวัติการส่งลง History_Log
+  const timestamp = new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' });
+  logSheet.appendRow([
+    timestamp,
+    'EMAIL_EXECUTIVE_DIGEST',
+    'Auto_Reporter (L4/L5)',
+    'ALL_75_SIGNS',
+    `ส่งรายงานสรุปผู้บริหารอัตโนมัติเข้าอีเมล ${recipient} สำเร็จ`,
+    totalSigns,
+    JSON.stringify({ recipient, pendingCount: pendingSigns, totalCost: totalDirectCost })
+  ]);
+
+  return {
+    status: 'ok',
+    message: `ส่งรายงานสรุปผู้บริหารไปยัง ${recipient} เรียบร้อยแล้ว`,
+    sentAt: timestamp,
+    recipient: recipient
+  };
+}
+
+/**
+ * ฟังก์ชันตั้งเวลาส่งอีเมลสรุปอัตโนมัติทุกสัปดาห์ (ทุกเช้าวันจันทร์ เวลา 08:00 น.)
+ * กดรันฟังก์ชันนี้ 1 ครั้งใน Apps Script เพื่อเปิดใช้งานตารางอัตโนมัติ
+ */
+function setupWeeklyReportTrigger() {
+  const triggers = ScriptApp.getProjectTriggers();
+  triggers.forEach(t => {
+    if (t.getHandlerFunction() === 'sendWeeklyEmailReportAuto') {
+      ScriptApp.deleteTrigger(t);
+    }
+  });
+
+  ScriptApp.newTrigger('sendWeeklyEmailReportAuto')
+    .timeBased()
+    .everyWeeks(1)
+    .onWeekDay(ScriptApp.WeekDay.MONDAY)
+    .atHour(8)
+    .create();
+
+  Logger.log('สร้าง Trigger ส่งรายงานทุกเช้าวันจันทร์ 08:00 น. สำเร็จ');
+}
+
+/**
+ * ฟังก์ชัน Wrapper สำหรับ Time-Driven Trigger
+ */
+function sendWeeklyEmailReportAuto() {
+  const targetEmail = Session.getActiveUser().getEmail();
+  sendExecutiveEmailReport(targetEmail);
+}
+
+/**
+ * ฟังก์ชันสำหรับกดทดสอบส่งอีเมลทันทีในตัวแก้ไข Apps Script
+ */
+function testSendEmailDigest() {
+  const testEmail = Session.getActiveUser().getEmail();
+  const res = sendExecutiveEmailReport(testEmail);
+  Logger.log(res);
 }
