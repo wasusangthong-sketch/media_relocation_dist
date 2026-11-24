@@ -418,18 +418,6 @@ function sendExecutiveEmailReport(targetEmails) {
   pendingItems.sort((a, b) => b.cost - a.cost);
   const topPending = pendingItems.slice(0, 5);
 
-  // 2. ดึง 3 ประวัติการเปลี่ยนแปลงล่าสุดจาก History_Log
-  const logRows = logSheet.getDataRange().getValues();
-  let recentLogs = [];
-  if (logRows.length > 1) {
-    recentLogs = logRows.slice(1).reverse().slice(0, 3).map(r => ({
-      time: String(r[0] || ''),
-      action: String(r[1] || ''),
-      actor: String(r[2] || ''),
-      detail: String(r[4] || '')
-    }));
-  }
-
   const reportDate = new Date().toLocaleDateString('th-TH', {
     timeZone: 'Asia/Bangkok',
     year: 'numeric',
@@ -611,15 +599,6 @@ function sendExecutiveEmailReport(targetEmails) {
               `).join('')}
             </tbody>
           </table>
-
-          <!-- Recent Audit Trail -->
-          <div class="section-title">📅 ประวัติการดำเนินการล่าสุด (Audit Trail Snapshot)</div>
-          ${recentLogs.map(l => `
-            <div class="log-item">
-              <strong style="color:#38bdf8;">[${l.action}]</strong> โดย <em>${l.actor}</em> เมื่อ ${l.time}<br>
-              <span style="color:#cbd5e1;">${l.detail}</span>
-            </div>
-          `).join('')}
 
           <!-- Action Button -->
           <a href="https://media-relocation-tracker.netlify.app" class="btn-cta">
