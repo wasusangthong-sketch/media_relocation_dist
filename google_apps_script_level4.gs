@@ -135,8 +135,8 @@ function doPost(e) {
 
     // ตรวจสอบ Action พิเศษ: ส่งอีเมลสรุปผู้บริหารอัตโนมัติ (L4/L5 Executive Email Digest)
     if (payload.action === 'send_email_digest' || payload.actionType === 'SEND_EMAIL_DIGEST') {
-      const targetEmail = payload.email || payload.targetEmail || Session.getActiveUser().getEmail();
-      const emailResult = sendExecutiveEmailReport(targetEmail);
+      const targetEmails = payload.emails || payload.email || payload.targetEmail || DEFAULT_RECIPIENT_EMAILS || Session.getActiveUser().getEmail();
+      const emailResult = sendExecutiveEmailReport(targetEmails);
       return ContentService
         .createTextOutput(JSON.stringify(emailResult))
         .setMimeType(ContentService.MimeType.JSON);
@@ -266,12 +266,30 @@ function doPost(e) {
  */
 
 // ⚙️ กำหนดอีเมลผู้รับเริ่มต้น (สามารถใส่หลายอีเมลคั่นด้วยเครื่องหมายจุลภาค , ได้)
-const DEFAULT_RECIPIENT_EMAILS = 'wasu.sa@planbmedia.co.th';
+const DEFAULT_RECIPIENT_EMAILS = 'wasu.sa@planbmedia.co.th, anucha@planbmedia.co.th';
 
-function sendExecutiveEmailReport(targetEmail) {
+function sendExecutiveEmailReport(targetEmails) {
   const { dataSheet, logSheet } = ensureSheetsExist();
-  const recipient = (targetEmail && targetEmail.trim()) ? targetEmail.trim() : (DEFAULT_RECIPIENT_EMAILS || Session.getActiveUser().getEmail());
-  if (!recipient) {
+  
+  // แปลงและแยกรายชื่อผู้รับ รองรับทั้ง Array, Comma-separated string หรือ Email เดี่ยว
+  let emailList = [];
+  if (Array.isArray(targetEmails)) {
+    emailList = targetEmails.map(e => String(e).trim()).filter(e => e.length > 0 && e.includes('@'));
+  } else if (typeof targetEmails === 'string') {
+    emailList = targetEmails.split(',').map(e => e.trim()).filter(e => e.length > 0 && e.includes('@'));
+  }
+
+  if (emailList.length === 0) {
+    const fallback = DEFAULT_RECIPIENT_EMAILS || Session.getActiveUser().getEmail();
+    if (fallback) {
+      emailList = fallback.split(',').map(e => e.trim()).filter(e => e.length > 0 && e.includes('@'));
+    }
+  }
+
+  // กำจัดอีเมลที่ซ้ำกัน (Deduplicate)
+  emailList = Array.from(new Set(emailList));
+
+  if (emailList.length === 0) {
     return { status: 'error', message: 'ไม่พบที่อยู่อีเมลผู้รับ กรุณาระบุอีเมล' };
   }
 
@@ -454,30 +472,44 @@ function sendExecutiveEmailReport(targetEmail) {
     </html>
   `;
 
-  // 4. สั่งส่งอีเมลผ่าน MailApp ของ Google
-  MailApp.sendEmail({
-    to: recipient,
-    subject: `📊 [Plan B AI Gate] รายงานสรุปสถานะการรื้อย้ายป้ายโฆษณา (${reportDate})`,
-    htmlBody: htmlBody
+  // 4. สั่งส่งอีเมลผ่าน MailApp แบบแยกผู้รับรายบุคคล (Individual Dispatch)
+  // เพื่อรักษาความเป็นส่วนตัว (Privacy) แต่ละท่านจะไม่เห็นรายชื่ออีเมลของผู้อื่น และป้องกันปัญหาอีเมลตกหล่น
+  const sentRecipients = [];
+  const failedRecipients = [];
+
+  emailList.forEach(recipient => {
+    try {
+      MailApp.sendEmail({
+        to: recipient,
+        subject: `📊 [Plan B AI Gate] รายงานสรุปสถานะการรื้อย้ายป้ายโฆษณา (${reportDate})`,
+        htmlBody: htmlBody
+      });
+      sentRecipients.push(recipient);
+    } catch (err) {
+      Logger.log(`ส่งอีเมลไปยัง ${recipient} ไม่สำเร็จ: ` + err.message);
+      failedRecipients.push({ email: recipient, error: err.message });
+    }
   });
 
   // 5. บันทึกประวัติการส่งลง History_Log
   const timestamp = new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' });
+  const recipientSummary = sentRecipients.join(', ');
   logSheet.appendRow([
     timestamp,
     'EMAIL_EXECUTIVE_DIGEST',
     'Auto_Reporter (L4/L5)',
     'ALL_75_SIGNS',
-    `ส่งรายงานสรุปผู้บริหารอัตโนมัติเข้าอีเมล ${recipient} สำเร็จ`,
+    `ส่งรายงานสรุปผู้บริหารแบบแยกรายบุคคล (Individual Dispatch) ถึง ${sentRecipients.length} ท่าน (${recipientSummary}) สำเร็จ`,
     totalSigns,
-    JSON.stringify({ recipient, pendingCount: pendingSigns, totalCost: totalDirectCost })
+    JSON.stringify({ sentRecipients, failedRecipients, pendingCount: pendingSigns, totalCost: totalDirectCost })
   ]);
 
   return {
-    status: 'ok',
-    message: `ส่งรายงานสรุปผู้บริหารไปยัง ${recipient} เรียบร้อยแล้ว`,
-    sentAt: timestamp,
-    recipient: recipient
+    status: sentRecipients.length > 0 ? 'ok' : 'error',
+    message: `ส่งรายงานสรุปผู้บริหารไปยัง ${sentRecipients.length} ท่านเรียบร้อยแล้ว (${recipientSummary})`,
+    sentRecipients: sentRecipients,
+    failedRecipients: failedRecipients,
+    sentAt: timestamp
   };
 }
 
