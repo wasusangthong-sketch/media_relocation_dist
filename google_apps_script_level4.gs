@@ -290,7 +290,7 @@ function doPost(e) {
 // ⚙️ กำหนดอีเมลผู้รับเริ่มต้น (4 รายชื่อผู้บริหารและทีมงานล่าสุด คั่นด้วยเครื่องหมายจุลภาค)
 const DEFAULT_RECIPIENT_EMAILS = 'anucha@planbmedia.co.th, ornrudee.kr@planbmedia.co.th, wasu.sa@planbmedia.co.th, napat@planbmedia.co.th';
 
-function sendExecutiveEmailReport(targetEmails) {
+function sendExecutiveEmailReport(targetEmails, isTest = false) {
   const { dataSheet, logSheet } = ensureSheetsExist();
   
   // แปลงและแยกรายชื่อผู้รับ รองรับทั้ง Array, Comma-separated string หรือ Email เดี่ยว
@@ -317,10 +317,13 @@ function sendExecutiveEmailReport(targetEmails) {
   }
 
   // บันทึกรายชื่อล่าสุดเก็บไว้ใน Script Properties เพื่อให้ Weekly Trigger ดึงไปใช้ส่งอัตโนมัติได้ตลอดเวลา
-  try {
-    PropertiesService.getScriptProperties().setProperty('RECIPIENT_EMAILS', emailList.join(', '));
-  } catch (errProps) {
-    Logger.log('Could not persist RECIPIENT_EMAILS to properties: ' + errProps.message);
+  // (ยกเว้นกรณีรันจากโหมดทดสอบ testSendEmailDigest จะไม่เขียนทับรายชื่อผู้บริหารของจริง)
+  if (!isTest) {
+    try {
+      PropertiesService.getScriptProperties().setProperty('RECIPIENT_EMAILS', emailList.join(', '));
+    } catch (errProps) {
+      Logger.log('Could not persist RECIPIENT_EMAILS to properties: ' + errProps.message);
+    }
   }
 
   // 1. อ่านและประมวลผลสถิติภาพรวมจาก Media_Data
@@ -691,10 +694,12 @@ function sendWeeklyEmailReportAuto() {
 }
 
 /**
- * ฟังก์ชันสำหรับกดทดสอบส่งอีเมลทันทีในตัวแก้ไข Apps Script
+ * ฟังก์ชันสำหรับกดทดสอบส่งอีเมลทันทีในตัวแก้ไข Apps Script (โหมดทดสอบเฉพาะตัว)
+ * ส่งตรงไปยัง wasu.sa@planbmedia.co.th ท่านเดียวเท่านั้น เพื่อทดสอบระบบโดยไม่รบกวนผู้บริหารท่านอื่น
  */
 function testSendEmailDigest() {
-  const testEmail = DEFAULT_RECIPIENT_EMAILS || Session.getActiveUser().getEmail();
-  const res = sendExecutiveEmailReport(testEmail);
-  Logger.log(res);
+  const soloTestEmail = 'wasu.sa@planbmedia.co.th';
+  const res = sendExecutiveEmailReport(soloTestEmail, true);
+  Logger.log('🧪 ผลการทดสอบส่งอีเมลเฉพาะตัว (wasu.sa@planbmedia.co.th): ' + JSON.stringify(res));
+  return res;
 }
