@@ -149,7 +149,7 @@
             Plan B Media — Media Relocation Tracker & AI Gate (Official Demo Video)
         </div>
         <div class="header-badges">
-            <span class="badge">ความยาว 50 วินาที</span>
+            <span class="badge">ความยาว 60 วินาที</span>
             <span class="badge">Full HD 1080p</span>
             <span class="badge">Executive Mode</span>
         </div>
@@ -164,8 +164,8 @@
             <span id="playIcon">⏸️</span> <span id="playText">หยุดชั่วคราว</span>
         </button>
         <button class="btn-ctrl btn-secondary" id="btnRestart">🔄 เล่นใหม่</button>
-        <input type="range" id="timeSlider" class="timeline-slider" min="0" max="50" step="0.1" value="0">
-        <div class="time-display" id="timeDisplay">00:00 / 00:50</div>
+        <input type="range" id="timeSlider" class="timeline-slider" min="0" max="60" step="0.1" value="0">
+        <div class="time-display" id="timeDisplay">00:00 / 01:00</div>
         <button class="btn-ctrl btn-secondary" id="btnDownload" style="background:#059669;border-color:#10b981;color:#fff;">
             ⬇️ บันทึกคลิป MP4
         </button>
@@ -174,10 +174,11 @@
     <div class="scene-pills">
         <button class="scene-pill active" onclick="seekTo(0)">1. เปิดเคสใหม่ด้วย AI (0:00)</button>
         <button class="scene-pill" onclick="seekTo(10)">2. สกัด JSON & Guardrail (0:10)</button>
-        <button class="scene-pill" onclick="seekTo(22)">3. รีวิว Pending Action Center (0:22)</button>
-        <button class="scene-pill" onclick="seekTo(32)">4. ตรวจ Timeline Audit Trail (0:32)</button>
-        <button class="scene-pill" onclick="seekTo(39)">5. ติดตามผลักดันจนสำเร็จ (0:39)</button>
-        <button class="scene-pill" onclick="seekTo(45)">6. สรุปผลสัมฤทธิ์ผู้บริหาร (0:45)</button>
+        <button class="scene-pill" onclick="seekTo(20)">3. รีวิว Pending Action Center (0:20)</button>
+        <button class="scene-pill" onclick="seekTo(30)">4. ตรวจ Timeline Audit Trail (0:30)</button>
+        <button class="scene-pill" onclick="seekTo(38)">5. ติดตามจนสำเร็จ & Real-time Sync (0:38)</button>
+        <button class="scene-pill" onclick="seekTo(46)">6. 📧 ส่งสรุปอีเมล & Weekly Auto (0:46)</button>
+        <button class="scene-pill" onclick="seekTo(54)">7. สรุปผลสัมฤทธิ์ผู้บริหาร (0:54)</button>
     </div>
 
     <!-- Hidden source images used in canvas rendering -->
@@ -193,7 +194,7 @@
     <script>
         const canvas = document.getElementById('demoCanvas');
         const ctx = canvas.getContext('2d');
-        const TOTAL_DURATION = 50; // 50 seconds total
+        const TOTAL_DURATION = 60; // 60 seconds total
         let currentTime = 0;
         let isPlaying = true;
         let lastTimestamp = performance.now();
@@ -201,9 +202,9 @@
         // Scenes definition
         const scenes = [
             {
-                start: 0, end: 11,
+                start: 0, end: 10,
                 id: 'SCENE_1',
-                stepNum: 'ขั้นตอนที่ 1 / 5',
+                stepNum: 'ขั้นตอนที่ 1 / 6',
                 stepTitle: 'เปิดเคสรายการใหม่ด้วย AI (Auto Case Intake)',
                 badge: '1. เปิดเคสรายการใหม่',
                 badgeColor: '#0284c7',
@@ -211,9 +212,9 @@
                 actionNote: 'กำลังพิมพ์ข้อความแจ้งงานดิบ ➔ กดปุ่ม [⚡ รัน AI วิเคราะห์ + ตรวจ Guardrail + บันทึก Google Drive]'
             },
             {
-                start: 11, end: 22,
+                start: 10, end: 20,
                 id: 'SCENE_2',
-                stepNum: 'ขั้นตอนที่ 2 / 5',
+                stepNum: 'ขั้นตอนที่ 2 / 6',
                 stepTitle: 'การสกัดข้อมูลเป็นโครงสร้าง & ตรวจความถูกต้อง 100% (Dual-Task AI & Guardrail)',
                 badge: '2. สกัด JSON & Guardrail',
                 badgeColor: '#10b981',
@@ -221,19 +222,19 @@
                 actionNote: 'Task 1 JSON สกัดสำเร็จ ➔ Task 2 ประเมินความเสี่ยง High Risk ➔ ตรวจ Guardrail: PASS 100% ➔ ซิงก์ Google Sheets สำเร็จ'
             },
             {
-                start: 22, end: 32,
+                start: 20, end: 30,
                 id: 'SCENE_3',
-                stepNum: 'ขั้นตอนที่ 3 / 5',
+                stepNum: 'ขั้นตอนที่ 3 / 6',
                 stepTitle: 'การรีวิวเคสและจัดลำดับความสำคัญ (Portfolio Review & Pending Center)',
                 badge: '3. รีวิวเคส & จัดลำดับ',
                 badgeColor: '#f59e0b',
-                subTitle: 'สลับมาหน้า Executive Dashboard เพื่อรีวิวภาพรวม 84 โครงการ และศูนย์ติดตามป้ายค้างดำเนินการ (Pending Action Center 24 รายการ) ที่ต้องเร่งผลักดัน',
+                subTitle: 'สลับมาหน้า Executive Dashboard เพื่อรีวิวภาพรวม 75 โครงการ (งบทางตรง ฿7.0M) และศูนย์ติดตามป้ายค้างดำเนินการ (Pending Action Center 24 รายการ)',
                 actionNote: 'รีวิว Yearly Matrix 8 ประเภทสื่อ ➔ คัดกรอง 24 ป้ายค้างดำเนินการ ➔ ตรวจสอบงบประมาณและระยะเวลา Aging'
             },
             {
-                start: 32, end: 39,
+                start: 30, end: 38,
                 id: 'SCENE_4',
-                stepNum: 'ขั้นตอนที่ 4 / 5',
+                stepNum: 'ขั้นตอนที่ 4 / 6',
                 stepTitle: 'ตรวจสอบประวัติย้อนหลังเชิงลึก (Timeline Audit Trail Verification)',
                 badge: '4. ตรวจสอบ Audit Trail',
                 badgeColor: '#8b5cf6',
@@ -241,9 +242,9 @@
                 actionNote: 'เปิดหน้าต่าง Timeline Audit Trail ➔ ตรวจสอบประวัติการรื้อย้าย วันที่บันทึก และผู้แก้ไขย้อนหลังทุกเวอร์ชัน'
             },
             {
-                start: 39, end: 45,
+                start: 38, end: 46,
                 id: 'SCENE_5',
-                stepNum: 'ขั้นตอนที่ 5 / 5',
+                stepNum: 'ขั้นตอนที่ 5 / 6',
                 stepTitle: 'ติดตามผลักดันจนสำเร็จ & ซิงก์ Cloud DB (Drive to Completion & Real-time Sync)',
                 badge: '5. ติดตามผลักดันจนสำเร็จ',
                 badgeColor: '#059669',
@@ -251,14 +252,24 @@
                 actionNote: 'เปลี่ยนสถานะเป็น [ติดตั้งสำเร็จ] ➔ Badge เปลี่ยนเป็นสีเขียว ➔ ยิง API บันทึกลง Google Sheets ทันที'
             },
             {
-                start: 45, end: 50,
+                start: 46, end: 54,
+                id: 'SCENE_EMAIL',
+                stepNum: 'ขั้นตอนที่ 6 / 6 (L4/L5)',
+                stepTitle: 'ระบบกระจายรายงานอีเมลผู้บริหาร & ตั้งเวลาอัตโนมัติ (Executive Digest & Weekly Auto)',
+                badge: '6. ส่งสรุปอีเมล & Weekly Auto',
+                badgeColor: '#9333ea',
+                subTitle: 'หน้าต่าง Gmail-Style Compose จัดการรายชื่อผู้รับแบบ Tag/Chip ส่งแยกรายบุคคล (Individual Dispatch) พร้อมตารางเปรียบเทียบรายปี และตั้งเวลาอัตโนมัติทุกเช้าวันจันทร์ 08:00 น.',
+                actionNote: 'คลิกปุ่ม [📧 ส่งสรุปทางอีเมล] ➔ จัดการชิปผู้รับ 4 ท่าน ➔ ส่งรายงานสรุป 75 ป้าย (งบ ฿7.0M) + ตารางรายปี ➔ ตั้งทริกเกอร์อัตโนมัติ'
+            },
+            {
+                start: 54, end: 60,
                 id: 'SCENE_6',
                 stepNum: 'บทสรุปผู้บริหาร',
                 stepTitle: 'สรุปคุณค่าและผลกระทบทางธุรกิจ (Executive Summary & Business Impact)',
-                badge: '6. สรุปผลสัมฤทธิ์ต่อองค์กร',
+                badge: '7. สรุปผลสัมฤทธิ์ต่อองค์กร',
                 badgeColor: '#00a8e8',
-                subTitle: 'ระบบลดเวลาทำงานจาก 15 นาทีเหลือเพียง 5 วินาที ขจัดข้อผิดพลาดเป็น 0% ควบคุมงบประมาณ ฿120.77M ได้อย่างแม่นยำ พร้อมใช้ระดับองค์กร',
-                actionNote: 'KPIs อัปเดตทันที: เวลาลดลง 98% | ข้อมูลถูกต้อง 100% | ติดตามงบ ฿120.77M โปร่งใส | พร้อมเสนอคณะกรรมการ'
+                subTitle: 'ระบบลดเวลาทำงานจาก 15 นาทีเหลือเพียง 5 วินาที ขจัดข้อผิดพลาดเป็น 0% ควบคุมงบประมาณ ฿7.0M (ผลกระทบ ฿9.6M) พร้อมใช้ระดับองค์กร',
+                actionNote: 'KPIs อัปเดตทันที: เวลาลดลง 98% | ข้อมูลถูกต้อง 100% | ติดตามงบ ฿7.0M โปร่งใส | ครบเกณฑ์ AI Gate Level 1 - 5'
             }
         ];
 
@@ -767,6 +778,232 @@
                     cx += 580;
                 });
 
+            } else if (scene.id === 'SCENE_EMAIL') {
+                // SCENE_EMAIL: Executive Email Digest & Scheduled Weekly Automation (L4.1 & L5)
+                drawAppHeader(1);
+
+                // Left Panel: Gmail-Style Executive Email Composer Window
+                ctx.fillStyle = '#0f172a';
+                roundRect(ctx, 50, 90, 900, 800, 16);
+                ctx.fill();
+                ctx.strokeStyle = '#9333ea';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Composer Header
+                ctx.fillStyle = '#1e1b4b';
+                roundRect(ctx, 50, 90, 900, 70, 16);
+                ctx.fill();
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 20px "Prompt", sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText('✉️ ส่งรายงานสรุปผู้บริหาร (Executive Relocation Digest)', 80, 134);
+
+                ctx.fillStyle = '#c084fc';
+                roundRect(ctx, 760, 110, 160, 30, 15);
+                ctx.fill();
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 12px "Prompt", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('L4/L5 Automated', 840, 130);
+
+                // Recipient Row ("ถึง:")
+                ctx.fillStyle = '#020617';
+                roundRect(ctx, 80, 180, 840, 120, 10);
+                ctx.fill();
+                ctx.strokeStyle = '#334155';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = 'bold 14px "Prompt", sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText('ถึง:', 100, 215);
+
+                // 4 Recipient Chips
+                const recipientChips = [
+                    { initial: 'A', name: 'anucha@planbmedia.co.th' },
+                    { initial: 'O', name: 'ornrudee.kr@planbmedia.co.th' },
+                    { initial: 'W', name: 'wasu.sa@planbmedia.co.th' },
+                    { initial: 'N', name: 'napat@planbmedia.co.th' }
+                ];
+                let rx = 140, ry = 195;
+                recipientChips.forEach((chip, cIdx) => {
+                    if (cIdx === 2) { rx = 140; ry = 245; }
+                    ctx.fillStyle = '#1e293b';
+                    roundRect(ctx, rx, ry, 340, 34, 17);
+                    ctx.fill();
+                    ctx.strokeStyle = '#475569';
+                    ctx.stroke();
+
+                    // Avatar
+                    ctx.fillStyle = '#9333ea';
+                    ctx.beginPath();
+                    ctx.arc(rx + 17, ry + 17, 12, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 12px "Prompt", sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(chip.initial, rx + 17, ry + 22);
+
+                    // Name
+                    ctx.fillStyle = '#e2e8f0';
+                    ctx.font = '500 12px "Prompt", sans-serif';
+                    ctx.textAlign = 'left';
+                    ctx.fillText(chip.name, rx + 36, ry + 22);
+
+                    // Cross icon
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.font = 'bold 14px sans-serif';
+                    ctx.fillText('✕', rx + 315, ry + 22);
+
+                    rx += 360;
+                });
+
+                // Subject Row
+                ctx.fillStyle = '#020617';
+                roundRect(ctx, 80, 315, 840, 48, 8);
+                ctx.fill();
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = 'bold 14px "Prompt", sans-serif';
+                ctx.fillText('เรื่อง:', 100, 345);
+                ctx.fillStyle = '#c084fc';
+                ctx.font = 'bold 14px "Prompt", sans-serif';
+                ctx.fillText('📊 [Plan B AI Gate] รายงานสรุปสถานะการรื้อย้ายป้ายโฆษณา (Executive Digest)', 150, 345);
+
+                // Email Preview Card
+                ctx.fillStyle = '#020617';
+                roundRect(ctx, 80, 380, 840, 390, 10);
+                ctx.fill();
+
+                // 4 mini KPIs
+                const miniKpis = [
+                    { val: '75', lbl: 'ป้ายทั้งหมด', color: '#38bdf8' },
+                    { val: '51', lbl: 'ติดตั้งสำเร็จ', color: '#10b981' },
+                    { val: '24', lbl: 'ค้างดำเนินการ', color: '#f59e0b' },
+                    { val: '฿7.0M', lbl: 'งบทางตรงรวม', color: '#ef4444' }
+                ];
+                let mx = 105;
+                miniKpis.forEach(mk => {
+                    ctx.fillStyle = '#0f172a';
+                    roundRect(ctx, mx, 400, 185, 75, 8);
+                    ctx.fill();
+                    ctx.fillStyle = mk.color;
+                    ctx.font = 'bold 24px "Prompt", sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(mk.val, mx + 92, 435);
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.font = '11px "Prompt", sans-serif';
+                    ctx.fillText(mk.lbl, mx + 92, 460);
+                    mx += 205;
+                });
+
+                // Year Comparison Bar
+                ctx.fillStyle = '#0f172a';
+                roundRect(ctx, 105, 490, 790, 65, 8);
+                ctx.fill();
+                ctx.fillStyle = '#38bdf8';
+                ctx.font = 'bold 13px "Prompt", sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText('📊 เปรียบเทียบ (จำนวน, Media Type) รายปี:', 125, 514);
+
+                ctx.font = '12px "Prompt", sans-serif';
+                ctx.fillStyle = '#e2e8f0';
+                ctx.fillText('• ปี 2024: 23 ป้าย (สำเร็จ 100%)  |  • ปี 2025: 37 ป้าย (สำเร็จ 100%)  |  • ปี 2026: 15 ป้าย (⏳ 24 Pending)', 125, 538);
+
+                // Priority Pending Section highlight
+                ctx.fillStyle = '#0f172a';
+                roundRect(ctx, 105, 570, 790, 95, 8);
+                ctx.fill();
+                ctx.fillStyle = '#fbbf24';
+                ctx.font = 'bold 13px "Prompt", sans-serif';
+                ctx.fillText('🚨 ติดตามป้ายคงค้างเร่งด่วน (Active Pending Stage Focus):', 125, 595);
+                ctx.fillStyle = '#cbd5e1';
+                ctx.font = '11px "Prompt", sans-serif';
+                ctx.fillText('DP1099 (Cookies 2026): 📌 รอหนังสือยินยอมจากผู้ให้เช่า | งบ ฿320,000 | Action Plan เร่งรัดเอกสารสัญญา', 125, 620);
+                ctx.fillText('MTP-C01 (Metro Poster 2026): 📌 รอปรับแบบฐานรากและโครงสร้าง | งบ ฿450,000 | วิศวกรเข้าตรวจหน้างาน', 125, 645);
+
+                // Buttons bar
+                ctx.fillStyle = '#9333ea';
+                roundRect(ctx, 105, 685, 230, 48, 10);
+                ctx.fill();
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 15px "Prompt", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('🚀 ส่งอีเมล (4 ท่าน)', 220, 715);
+
+                ctx.fillStyle = '#1e293b';
+                roundRect(ctx, 355, 685, 240, 48, 10);
+                ctx.fill();
+                ctx.fillStyle = '#cbd5e1';
+                ctx.fillText('💾 บันทึกรายชื่อไว้ก่อน', 475, 715);
+
+                // Right Panel: Automated Weekly Ecosystem & Enterprise Governance
+                ctx.fillStyle = '#0f172a';
+                roundRect(ctx, 980, 90, 890, 800, 16);
+                ctx.fill();
+                ctx.strokeStyle = '#0284c7';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.fillStyle = '#38bdf8';
+                ctx.font = 'bold 22px "Prompt", sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText('⚡ สถาปัตยกรรมส่งรายงานอัตโนมัติ (Automated Workflow)', 1015, 140);
+
+                const autoWorkflowCards = [
+                    {
+                        title: '⏰ Weekly Time-Driven Trigger (Google Cloud)',
+                        desc: 'ระบบตั้งเวลาอัตโนมัติผ่าน Google Apps Script ทำงานทุกเช้าวันจันทร์ เวลา 08:00 น. โดยไม่ต้องใช้แรงงานคน (Zero Human Effort)',
+                        badge: 'Mondays 08:00 AM',
+                        color: '#0284c7'
+                    },
+                    {
+                        title: '🛡️ Individual Privacy Dispatch (Enterprise Security)',
+                        desc: 'กระจายส่งอีเมลแยกกล่องข้อความรายบุคคล ผู้บริหารแต่ละท่านจะไม่เห็นอีเมลของผู้อื่น ป้องกันข้อมูลรั่วไหลและอีเมลตกหล่น 100%',
+                        badge: 'Individual Delivery',
+                        color: '#10b981'
+                    },
+                    {
+                        title: '💾 Dynamic Recipient Management & Cloud Persistence',
+                        desc: 'อัปเดตรายชื่อผู้รับผ่านหน้าเว็บได้อิสระ ไม่ต้องแก้โค้ด ระบบซิงค์ข้อมูลขึ้น Cloud Properties อัตโนมัติสำหรับรอบถัดไป',
+                        badge: 'No-Code Management',
+                        color: '#9333ea'
+                    },
+                    {
+                        title: '🧪 Isolated Sandbox Testing Mode',
+                        desc: 'มีฟังก์ชัน testSendEmailDigest ล็อกส่งตรงหา wasu.sa@planbmedia.co.th ท่านเดียว เพื่อทดสอบโดยไม่รบกวนผู้บริหารท่านอื่น',
+                        badge: 'Safe Sandbox',
+                        color: '#f59e0b'
+                    }
+                ];
+
+                let ay = 175;
+                autoWorkflowCards.forEach(aw => {
+                    ctx.fillStyle = '#1e293b';
+                    roundRect(ctx, 1015, ay, 820, 135, 10);
+                    ctx.fill();
+
+                    ctx.fillStyle = aw.color;
+                    roundRect(ctx, 1035, ay + 15, 185, 26, 4);
+                    ctx.fill();
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 11px "Prompt", sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(aw.badge, 1035 + 92, ay + 32);
+
+                    ctx.fillStyle = '#f8fafc';
+                    ctx.font = 'bold 16px "Prompt", sans-serif';
+                    ctx.textAlign = 'left';
+                    ctx.fillText(aw.title, 1235, ay + 33);
+
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.font = '13px "Prompt", sans-serif';
+                    ctx.fillText(aw.desc, 1035, ay + 75);
+
+                    ay += 150;
+                });
+
             } else if (scene.id === 'SCENE_6') {
                 // SCENE 6: Executive Summary & Business Impact
                 drawAppHeader(1);
@@ -792,8 +1029,8 @@
                 const summaryKpis = [
                     { num: '98%', title: 'ประหยัดเวลาทำงาน (Time Reduction)', desc: 'ลดเวลาเปิดเคสและคีย์ข้อมูลจาก 15-20 นาที เหลือเพียง 5 วินาทีต่อเคส', color: '#00a8e8' },
                     { num: '100%', title: 'ความถูกต้องแม่นยำ (Zero Error)', desc: 'ควบคุมด้วย Code Guardrail 4 ชั้น ขจัด AI Hallucination และข้อมูลตกหล่น', color: '#10b981' },
-                    { num: '฿120.77M', title: 'ควบคุมงบประมาณรวม (Financial Control)', desc: 'บริหารจัดการ 84 โครงการ 8 ประเภทสื่อ ติดตามป้ายค้าง 24 รายการโปร่งใส', color: '#f59e0b' },
-                    { num: '24/7', title: 'ความพร้อมใช้งานผู้บริหาร (Live Governance)', desc: 'ติดตามผลได้ทันทีผ่าน Web & Mobile พร้อม Audit Trail ย้อนหลังทุกเคส', color: '#8b5cf6' }
+                    { num: '฿7.0M', title: 'ควบคุมต้นทุนทางตรง (Direct Cost Control)', desc: 'บริหารจัดการ 75 ป้าย (งบตรง ฿7.0M, ผลกระทบ ฿9.6M) ติดตามป้ายค้าง 24 รายการ', color: '#f59e0b' },
+                    { num: 'Weekly', title: 'ส่งสรุปอัตโนมัติระดับผู้บริหาร (L4/L5)', desc: 'Executive Email Digest ทุกเช้าวันจันทร์ 08:00 น. พร้อมระบบจัดการผู้รับ No-Code', color: '#8b5cf6' }
                 ];
 
                 let sy = 180;
@@ -826,7 +1063,7 @@
             document.getElementById('timeSlider').value = currentTime;
             const mins = String(Math.floor(currentTime / 60)).padStart(2, '0');
             const secs = String(Math.floor(currentTime % 60)).padStart(2, '0');
-            document.getElementById('timeDisplay').innerText = `${mins}:${secs} / 00:50`;
+            document.getElementById('timeDisplay').innerText = `${mins}:${secs} / 01:00`;
 
             // Update scene pills
             document.querySelectorAll('.scene-pill').forEach((pill, idx) => {
