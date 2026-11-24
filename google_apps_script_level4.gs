@@ -332,33 +332,87 @@ function sendExecutiveEmailReport(targetEmails) {
   let totalImpact = 0;
   let pendingItems = [];
 
+  // สรุปสถิติเปรียบเทียบรายปี แยกตามประเภทสื่อ (Year x Media Type Breakdown)
+  const yearBreakdown = {};
+
   if (dataRows.length > 1) {
     const rows = dataRows.slice(1);
     totalSigns = rows.length;
     rows.forEach(r => {
+      const mediaId = String(r[1] || '-').trim();
+      const mediaType = String(r[2] || 'Cookies').trim();
       const status = String(r[16] || '').trim();
+      const pendingStage = String(r[17] || '-').trim();
       const directCost = Number(r[13]) || 0;
       const impact = Number(r[15]) || 0;
+
+      // สกัดหาปี: จากคอลัมน์ Year (index 18) หรือจากวันที่รื้อถอน (index 8) หรือจากรหัส ID (index 0 เช่น REL-2024-xxx)
+      let year = '2026';
+      if (r[18] && String(r[18]).trim()) {
+        year = String(r[18]).trim();
+      } else if (r[8] && String(r[8]).length >= 4) {
+        year = String(r[8]).substring(0, 4);
+      } else if (r[0] && String(r[0]).includes('-202')) {
+        const match = String(r[0]).match(/202[0-9]/);
+        if (match) year = match[0];
+      }
+
       totalDirectCost += directCost;
       totalImpact += impact;
 
-      if (status === 'ติดตั้งสำเร็จ' || status === 'Completed') {
+      const isCompleted = (status === 'ติดตั้งสำเร็จ' || status === 'Completed');
+      if (isCompleted) {
         completedSigns++;
       } else {
         pendingSigns++;
         pendingItems.push({
-          mediaId: String(r[1] || '-'),
-          mediaType: String(r[2] || '-'),
+          mediaId: mediaId,
+          mediaType: mediaType,
+          year: year,
           location: String(r[4] || '') + ' (' + String(r[5] || '') + ')',
           dest: String(r[6] || '') + ' (' + String(r[7] || '') + ')',
           status: status || 'Pending',
+          pendingStage: pendingStage !== '-' ? pendingStage : String(r[12] || r[11] || 'อยู่ระหว่างประสานงาน'),
           cost: directCost,
           impact: impact,
           cause: String(r[12] || r[11] || '-')
         });
       }
+
+      // สะสมสถิติลงตารางเปรียบเทียบรายปี แยกประเภทสื่อ
+      if (!yearBreakdown[year]) {
+        yearBreakdown[year] = {
+          year: year,
+          total: 0,
+          completed: 0,
+          pending: 0,
+          cost: 0,
+          types: {}
+        };
+      }
+      yearBreakdown[year].total++;
+      yearBreakdown[year].cost += directCost;
+      if (isCompleted) {
+        yearBreakdown[year].completed++;
+      } else {
+        yearBreakdown[year].pending++;
+      }
+
+      if (!yearBreakdown[year].types[mediaType]) {
+        yearBreakdown[year].types[mediaType] = { total: 0, completed: 0, pending: 0, cost: 0 };
+      }
+      yearBreakdown[year].types[mediaType].total++;
+      yearBreakdown[year].types[mediaType].cost += directCost;
+      if (isCompleted) {
+        yearBreakdown[year].types[mediaType].completed++;
+      } else {
+        yearBreakdown[year].types[mediaType].pending++;
+      }
     });
   }
+
+  // จัดเรียงปีจากอดีตถึงปัจจุบัน (เช่น 2024, 2025, 2026)
+  const sortedYears = Object.keys(yearBreakdown).sort();
 
   // เรียงลำดับป้ายค้างตามมูลค่างบประมาณทางตรงสูงสุด 5 รายการ
   pendingItems.sort((a, b) => b.cost - a.cost);
@@ -452,26 +506,106 @@ function sendExecutiveEmailReport(targetEmails) {
             </div>
           </div>
 
-          <!-- Priority Pending Action Items -->
-          <div class="section-title">🚨 รายการป้ายค้างดำเนินการเร่งด่วน (Top Priority Pending)</div>
+          <!-- Year-over-Year Media Type Breakdown Table (แยกจำนวน, Media Type รายปีเพื่อเปรียบเทียบ) -->
+          <div class="section-title">📊 สรุปเปรียบเทียบรายปี แยกตามประเภทสื่อ (Year-over-Year Media Breakdown)</div>
+          <div style="font-size: 11px; color: #94a3b8; margin-bottom: 12px;">
+            เปรียบเทียบสัดส่วนประเภทสื่อ สถานะเสร็จสิ้น และจำนวนป้ายที่ยังค้างดำเนินการ (Pending) ในแต่ละปี
+          </div>
+
+          <!-- Mini KPI Cards by Year -->
+          <table style="width: 100%; border-collapse: collapse; margin-bottom: 14px; table-layout: fixed;">
+            <tr>
+              ${sortedYears.map(y => {
+                const yd = yearBreakdown[y];
+                return `
+                  <td style="padding: 3px; vertical-align: top;">
+                    <div style="background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 10px 6px; text-align: center;">
+                      <div style="font-size: 12px; font-weight: bold; color: #38bdf8;">ปี ${y}</div>
+                      <div style="font-size: 16px; font-weight: 800; color: #ffffff; margin: 2px 0;">${yd.total} <span style="font-size: 10px; font-weight: normal; color: #94a3b8;">ป้าย</span></div>
+                      <div style="font-size: 10.5px; margin-top: 3px;">
+                        <span style="color: #10b981;">✓ ${yd.completed}</span> &nbsp;|&nbsp; 
+                        <span style="color: ${yd.pending > 0 ? '#f59e0b' : '#94a3b8'}; font-weight: ${yd.pending > 0 ? 'bold' : 'normal'};">⏳ ${yd.pending} ค้าง</span>
+                      </div>
+                    </div>
+                  </td>
+                `;
+              }).join('')}
+            </tr>
+          </table>
+
+          <!-- Matrix Table: Year x Media Type -->
           <table class="table-wrap">
             <thead>
               <tr>
-                <th>รหัสป้าย / สื่อ</th>
+                <th style="width: 15%;">ปี</th>
+                <th style="width: 32%;">ประเภทสื่อ (Media Type)</th>
+                <th style="width: 13%; text-align: center;">ทั้งหมด</th>
+                <th style="width: 13%; text-align: center;">สำเร็จ</th>
+                <th style="width: 13%; text-align: center;">ค้าง (Pending)</th>
+                <th style="width: 14%; text-align: right;">งบทางตรง</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${sortedYears.map(y => {
+                const yd = yearBreakdown[y];
+                const typesList = Object.keys(yd.types).sort((a,b) => yd.types[b].total - yd.types[a].total);
+                return typesList.map((mt, idx) => {
+                  const item = yd.types[mt];
+                  const isFirst = (idx === 0);
+                  const isLast = (idx === typesList.length - 1);
+                  return `
+                    <tr style="${isFirst ? 'border-top: 2px solid #0284c7;' : ''} ${isLast ? 'border-bottom: 2px solid #334155;' : ''}">
+                      ${isFirst ? `<td rowspan="${typesList.length}" style="font-weight: 800; color: #38bdf8; vertical-align: top; background: rgba(15,23,42,0.7); padding: 8px 6px;">
+                        ปี ${y}<br>
+                        <span style="font-size:10px; color:#94a3b8; font-weight: normal;">(${yd.total} ป้าย)</span>
+                      </td>` : ''}
+                      <td style="color: #f1f5f9; padding: 7px 6px;">
+                        <strong>${mt}</strong>
+                      </td>
+                      <td style="text-align: center; color: #cbd5e1; font-weight: 600; padding: 7px 4px;">${item.total}</td>
+                      <td style="text-align: center; color: #10b981; font-weight: 600; padding: 7px 4px;">${item.completed}</td>
+                      <td style="text-align: center; padding: 7px 4px;">
+                        ${item.pending > 0 
+                          ? `<span style="display:inline-block; padding: 1px 6px; border-radius: 4px; background: rgba(245,158,11,0.2); color: #fbbf24; border: 1px solid #f59e0b; font-weight: bold; font-size: 10.5px;">⏳ ${item.pending}</span>` 
+                          : `<span style="color: #64748b; font-size: 11px;">-</span>`
+                        }
+                      </td>
+                      <td style="text-align: right; color: #94a3b8; font-family: monospace; font-size: 11px; padding: 7px 6px;">฿${(item.cost / 1000).toFixed(0)}k</td>
+                    </tr>
+                  `;
+                }).join('');
+              }).join('')}
+            </tbody>
+          </table>
+
+          <!-- Priority Pending Action Items (ติดตามสถานะป้ายค้างดำเนินการ) -->
+          <div class="section-title">🚨 รายการป้ายค้างดำเนินการเร่งด่วน (Top Priority Pending Status)</div>
+          <div style="font-size: 11.5px; color: #fbbf24; margin-bottom: 8px;">
+            ⚠️ พบป้ายคงค้างในระบบทั้งหมด <strong>${pendingSigns} ป้าย</strong> (ปี 2026: ${yearBreakdown['2026'] ? yearBreakdown['2026'].pending : 0} ป้าย, ปีก่อนหน้า: ${pendingSigns - (yearBreakdown['2026'] ? yearBreakdown['2026'].pending : 0)} ป้าย)
+          </div>
+          <table class="table-wrap">
+            <thead>
+              <tr>
+                <th>รหัสป้าย / สื่อ / ปี</th>
                 <th>สถานที่ / ปลายทาง</th>
-                <th>งบประมาณ</th>
-                <th>สถานะ / สาเหตุ</th>
+                <th>งบทางตรง</th>
+                <th>สถานะ / ขั้นตอนคงค้าง</th>
               </tr>
             </thead>
             <tbody>
               ${topPending.map(item => `
                 <tr>
-                  <td><strong>${item.mediaId}</strong><br><span style="font-size:11px;color:#94a3b8;">${item.mediaType}</span></td>
+                  <td>
+                    <strong>${item.mediaId}</strong> <span style="font-size:10px; color:#38bdf8; background: rgba(56,189,248,0.15); padding: 1px 4px; border-radius: 3px;">${item.year}</span><br>
+                    <span style="font-size:11px; color:#94a3b8;">${item.mediaType}</span>
+                  </td>
                   <td>${item.location}<br><span style="font-size:11px;color:#94a3b8;">➔ ${item.dest}</span></td>
-                  <td style="color:#f59e0b;font-weight:bold;">฿${Number(item.cost).toLocaleString()}</td>
+                  <td style="color:#f59e0b; font-weight:bold; font-family: monospace;">฿${Number(item.cost).toLocaleString()}</td>
                   <td>
                     <span class="risk-pill ${item.cost >= 300000 ? 'risk-high' : 'risk-med'}">${item.status}</span>
-                    <div style="font-size:11px;color:#94a3b8;margin-top:2px;">${item.cause}</div>
+                    <div style="font-size:11px; color:#e2e8f0; margin-top:2px; font-weight: 500;">
+                      <span style="color:#f59e0b;">📌</span> ${item.pendingStage || item.cause}
+                    </div>
                   </td>
                 </tr>
               `).join('')}
