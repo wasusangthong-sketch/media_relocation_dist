@@ -265,8 +265,8 @@ function doPost(e) {
  * รองรับทั้งการเรียกผ่าน Webhook API จากหน้าเว็บ และการตั้งเวลาส่งอัตโนมัติ (Time-Driven Trigger)
  */
 
-// ⚙️ กำหนดอีเมลผู้รับเริ่มต้น (สามารถใส่หลายอีเมลคั่นด้วยเครื่องหมายจุลภาค , ได้)
-const DEFAULT_RECIPIENT_EMAILS = 'wasu.sa@planbmedia.co.th, anucha@planbmedia.co.th';
+// ⚙️ กำหนดอีเมลผู้รับเริ่มต้น (4 รายชื่อผู้บริหารและทีมงานล่าสุด คั่นด้วยเครื่องหมายจุลภาค)
+const DEFAULT_RECIPIENT_EMAILS = 'anucha@planbmedia.co.th, ornrudee.kr@planbmedia.co.th, wasu.sa@planbmedia.co.th, napat@planbmedia.co.th';
 
 function sendExecutiveEmailReport(targetEmails) {
   const { dataSheet, logSheet } = ensureSheetsExist();
@@ -280,7 +280,8 @@ function sendExecutiveEmailReport(targetEmails) {
   }
 
   if (emailList.length === 0) {
-    const fallback = DEFAULT_RECIPIENT_EMAILS || Session.getActiveUser().getEmail();
+    const savedInProps = PropertiesService.getScriptProperties().getProperty('RECIPIENT_EMAILS');
+    const fallback = savedInProps || DEFAULT_RECIPIENT_EMAILS || Session.getActiveUser().getEmail();
     if (fallback) {
       emailList = fallback.split(',').map(e => e.trim()).filter(e => e.length > 0 && e.includes('@'));
     }
@@ -291,6 +292,13 @@ function sendExecutiveEmailReport(targetEmails) {
 
   if (emailList.length === 0) {
     return { status: 'error', message: 'ไม่พบที่อยู่อีเมลผู้รับ กรุณาระบุอีเมล' };
+  }
+
+  // บันทึกรายชื่อล่าสุดเก็บไว้ใน Script Properties เพื่อให้ Weekly Trigger ดึงไปใช้ส่งอัตโนมัติได้ตลอดเวลา
+  try {
+    PropertiesService.getScriptProperties().setProperty('RECIPIENT_EMAILS', emailList.join(', '));
+  } catch (errProps) {
+    Logger.log('Could not persist RECIPIENT_EMAILS to properties: ' + errProps.message);
   }
 
   // 1. อ่านและประมวลผลสถิติภาพรวมจาก Media_Data
@@ -536,11 +544,15 @@ function setupWeeklyReportTrigger() {
 }
 
 /**
- * ฟังก์ชัน Wrapper สำหรับ Time-Driven Trigger
+ * ฟังก์ชัน Wrapper สำหรับ Time-Driven Trigger ส่งรายงานรายสัปดาห์อัตโนมัติ
+ * จะดึงรายชื่อผู้รับล่าสุดที่อัปเดตไว้เสมอ
  */
 function sendWeeklyEmailReportAuto() {
-  const targetEmail = DEFAULT_RECIPIENT_EMAILS || Session.getActiveUser().getEmail();
-  sendExecutiveEmailReport(targetEmail);
+  const savedEmails = PropertiesService.getScriptProperties().getProperty('RECIPIENT_EMAILS');
+  const targetEmail = savedEmails || DEFAULT_RECIPIENT_EMAILS || Session.getActiveUser().getEmail();
+  const res = sendExecutiveEmailReport(targetEmail);
+  Logger.log('Auto Weekly Digest Sent: ' + JSON.stringify(res));
+  return res;
 }
 
 /**
