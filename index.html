@@ -7598,10 +7598,24 @@
         }, 2200);
       }
 
+      // บันทึกซิงค์ขึ้น Cloud Google Apps Script อัตโนมัติในเบื้องหลัง เพื่อให้รอบ Weekly Trigger ดึงไปส่งได้ทันที
+      const url = getGasWebhookUrl();
+      if (url && currentRecipientEmails.length > 0) {
+        fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'save_recipients',
+            emails: currentRecipientEmails,
+            actor: 'Executive_User'
+          })
+        }).catch(err => console.log('Cloud sync saved recipients background:', err));
+      }
+
       // แสดง Floating Toast Notification ที่มุมขวาล่าง
       const toast = document.createElement('div');
       toast.className = 'fixed bottom-6 right-6 bg-slate-900 border border-emerald-500/60 shadow-2xl rounded-2xl p-3.5 z-[80] text-white text-xs flex items-center gap-2.5 animate-bounce';
-      toast.innerHTML = `<span class="text-base">💾</span> <span>บันทึกรายชื่อผู้รับ <strong>${currentRecipientEmails.length} ท่าน</strong> ในระบบเรียบร้อย (ยังไม่ได้ส่งอีเมล)</span>`;
+      toast.innerHTML = `<span class="text-base">💾</span> <span>บันทึกรายชื่อผู้รับ <strong>${currentRecipientEmails.length} ท่าน</strong> ซิงค์ขึ้นระบบคลาวด์เรียบร้อย (รอบอัตโนมัติจะใช้อีเมลชุดนี้)</span>`;
       document.body.appendChild(toast);
       setTimeout(() => {
         if (document.body.contains(toast)) document.body.removeChild(toast);

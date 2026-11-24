@@ -142,6 +142,28 @@ function doPost(e) {
         .setMimeType(ContentService.MimeType.JSON);
     }
 
+    // ตรวจสอบ Action พิเศษ: บันทึกรายชื่อผู้รับโดยยังไม่ส่งอีเมล (Save Recipient List for Weekly Triggers)
+    if (payload.action === 'save_recipients' || payload.actionType === 'SAVE_RECIPIENTS') {
+      const targetEmails = payload.emails || payload.email || payload.targetEmail || '';
+      let emailList = [];
+      if (Array.isArray(targetEmails)) {
+        emailList = targetEmails.map(e => String(e).trim()).filter(e => e.length > 0 && e.includes('@'));
+      } else if (typeof targetEmails === 'string') {
+        emailList = targetEmails.split(',').map(e => e.trim()).filter(e => e.length > 0 && e.includes('@'));
+      }
+      emailList = Array.from(new Set(emailList));
+      if (emailList.length > 0) {
+        PropertiesService.getScriptProperties().setProperty('RECIPIENT_EMAILS', emailList.join(', '));
+      }
+      return ContentService
+        .createTextOutput(JSON.stringify({
+          status: 'ok',
+          message: `บันทึกรายชื่อผู้รับ ${emailList.length} ท่านลงระบบคลาวด์เรียบร้อย (รอบ Weekly จะใช้อีเมลชุดนี้)`,
+          savedRecipients: emailList
+        }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
     const timestamp = new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' });
     const actionType = payload.actionType || 'SYNC_DATA';
     const actor = payload.actor || 'WebApp_User';
