@@ -4664,7 +4664,7 @@
     // ----------------------------------------------------
     // LOCALSTORAGE PERSISTENCE SYSTEM (จัดเก็บข้อมูลถาวรในเครื่อง)
     // ----------------------------------------------------
-    const STORAGE_KEY = 'static_media_relocation_master_data_v6';
+    const STORAGE_KEY = 'static_media_relocation_master_data_v7';
 
     function loadMasterData() {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -4674,7 +4674,7 @@
           if (Array.isArray(parsed)) {
             // Auto-merge any new default records like DS 211
             DEFAULT_MASTER_DATA.forEach(def => {
-              if (!parsed.some(p => p.id === def.id || (p.mediaId && p.mediaId === def.mediaId))) {
+              if (!parsed.some(p => p.id === def.id)) {
                 parsed.push(JSON.parse(JSON.stringify(def)));
               }
             });
