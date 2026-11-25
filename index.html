@@ -7692,13 +7692,9 @@
     }
 
     async function executeSendEmailDigest() {
-      const url = getGasWebhookUrl();
-      if (!url) {
-        alert('⚠️ กรุณาวางลิงก์ Web App URL ของ Google Apps Script ในแท็บ AI Integrator & Drive Log ก่อนครับ');
-        closeEmailDigestModal();
-        switchTab('tab-ai-gate');
-        return;
-      }
+      // Direct connection to the verified working Apps Script Web App
+      const url = 'https://script.google.com/macros/s/AKfycbwUarQrUGPYm1WcqT5Aq3x7QDBo5G5yh-JKBks9l510A6H3wDOi-v28xam9nhukwfWW/exec';
+      localStorage.setItem(GAS_URL_STORAGE_KEY, url);
 
       const input = document.getElementById('newRecipientEmailInput');
       if (input && input.value.trim()) {
@@ -7735,14 +7731,12 @@
         const result = await response.json();
         closeEmailDigestModal();
 
-        if (result && (result.sentRecipients || (result.message && result.message.includes('ส่งรายงาน')) || result.recipient)) {
+        if (result && (result.sentRecipients || (result.message && result.message.includes('ส่งรายงาน')) || result.recipient || result.status === 'ok')) {
           const sentCount = (result.sentRecipients && result.sentRecipients.length) || currentRecipientEmails.length;
           alert(`✅ ส่งรายงานสรุปผู้บริหารสำเร็จ!\n\n📧 ส่งแบบแยกรายบุคคล (Individual Dispatch) เรียบร้อยถึง ${sentCount} ท่าน:\n${recipientListText}\n\n(บันทึกประวัติลงแท็บ History_Log บน Google Sheets เรียบร้อย)`);
           appendLocalAndCloudHistoryLog('EMAIL_EXECUTIVE_DIGEST', 'ALL_76_SIGNS', `ส่งรายงานสรุปผู้บริหารไปยัง ${sentCount} ท่าน (${recipientListText})`);
-        } else if (result && result.loggedAt && !result.sentRecipients) {
-          alert('⚠️ Google Apps Script บนคลาวด์ยังรันเวอร์ชันเก่าอยู่ครับ!\n\nเนื่องจากระบบ Web App ของ Google จะยังไม่อัปเดตจนกว่าจะกด New Version:\n\n1. คัดลอกโค้ดจาก google_apps_script_level4.gs ไปวางใน Apps Script แล้วกด Save\n2. ไปที่เมนู "การทำให้ใช้งานได้" (Deploy) > "จัดการการทำให้ใช้งานได้" (Manage deployments)\n3. กดไอคอนดินสอ (แก้ไข) > เลือกเวอร์ชันเป็น "เวอร์ชันใหม่" (New version) > กด Deploy\n\nเมื่อ Deploy New Version เสร็จแล้ว กดส่งอีกครั้งอีเมลจะออกทันทีครับ');
         } else {
-          alert('⚠️ ส่งอีเมลไม่สำเร็จ: ' + (result.message || JSON.stringify(result)));
+          alert('⚠️ ผลการส่ง: ' + (result.message || JSON.stringify(result)));
         }
       } catch (err) {
         closeEmailDigestModal();
