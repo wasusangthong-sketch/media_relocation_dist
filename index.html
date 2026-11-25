@@ -7296,12 +7296,12 @@
     // AI LITERACY GATE L2–L4 ENGINE & GOOGLE DRIVE APPS SCRIPT SYNC
     // ----------------------------------------------------
     const GAS_URL_STORAGE_KEY = 'media_relocation_gas_webhook_url_v1';
-    const DEFAULT_GAS_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwudG7atsOfUhYX2zC3obQPVEeiosYwjphr5WdrBTRdmF0yW0bRX7tpQPAhCa6s2YxC/exec';
+    const DEFAULT_GAS_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwUarQrUGPYm1WcqT5Aq3x7QDBo5G5yh-JKBks9l510A6H3wDOi-v28xam9nhukwfWW/exec';
     const LOCAL_HISTORY_LOGS_KEY = 'media_relocation_history_logs_v1';
 
     function getGasWebhookUrl() {
       const stored = (localStorage.getItem(GAS_URL_STORAGE_KEY) || '').trim();
-      if (!stored || stored.includes('AKfycby1OdXGGLp7ms15oC0qPS4BhI3MEqY8CzLdf45z')) {
+      if (!stored || stored.includes('AKfycby1OdXGGLp7ms15oC0qPS4BhI3MEqY8CzLdf45z') || stored.includes('AKfycbwudG7atsOfUhYX2zC3obQPVEeiosYwjphr5WdrBTRdmF0yW0bRX7tpQPAhCa6s2YxC')) {
         localStorage.setItem(GAS_URL_STORAGE_KEY, DEFAULT_GAS_WEBHOOK_URL);
         return DEFAULT_GAS_WEBHOOK_URL;
       }
