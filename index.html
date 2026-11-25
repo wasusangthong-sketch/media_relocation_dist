@@ -7617,11 +7617,9 @@
             addRecipientFromInput();
           } else if (e.key === 'Backspace' && input.value === '' && currentRecipientEmails.length > 0) {
             removeRecipientEmail(currentRecipientEmails.length - 1);
-          }
-        });
-        input.addEventListener('blur', () => {
-          if (input.value.trim()) {
-            addRecipientFromInput();
+          } else if (e.key === 'Escape') {
+            const dropdown = document.getElementById('emailAutocompleteDropdown');
+            if (dropdown) dropdown.classList.add('hidden');
           }
         });
       }
