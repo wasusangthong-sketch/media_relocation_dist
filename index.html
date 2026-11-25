@@ -2,7 +2,10 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">`r`n  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">`r`n  <meta http-equiv="Pragma" content="no-cache">`r`n  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>ระบบบันทึกประวัติการย้ายจุดติดตั้งสื่อ (Static Media Relocation & Impact Tracker)</title>
   <!-- Tailwind CSS & Google Fonts -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -2181,30 +2184,57 @@
       <!-- Gmail Compose Body -->
       <div class="p-4 sm:p-5 space-y-3.5 text-xs">
         
-        <!-- Recipient Row ("ถึง / To:") -->
-        <div class="border border-slate-800 focus-within:border-purple-500/80 rounded-xl bg-slate-950/70 p-2.5 transition">
+        <!-- Recipient Row ("ถึง / To:") with Smart Email Guideline & Autocomplete -->
+        <div class="border border-slate-800 focus-within:border-purple-500/80 rounded-xl bg-slate-950/70 p-3 transition relative">
           <div class="flex items-start gap-2.5">
             <span class="text-slate-400 font-semibold text-xs pt-1.5 select-none w-8 shrink-0">ถึง:</span>
             
             <!-- Chips Container + Inline Input (Gmail Tag System) -->
-            <div id="emailRecipientChipsContainer" class="flex flex-wrap items-center gap-1.5 flex-1 min-h-[34px]" onclick="focusRecipientInput()">
+            <div id="emailRecipientChipsContainer" class="flex flex-wrap items-center gap-1.5 flex-1 min-h-[36px] relative" onclick="focusRecipientInput()">
               <!-- Dynamic chips will be rendered here by renderRecipientChips() -->
-              <input type="text" id="newRecipientEmailInput" placeholder="พิมพ์อีเมลผู้รับ แล้วกด Enter หรือ จุลภาค (,)..." class="bg-transparent text-white placeholder-slate-500 text-xs focus:outline-none flex-1 min-w-[200px] py-1 px-1">
+              <input type="text" id="newRecipientEmailInput" placeholder="พิมพ์ชื่อหรืออีเมล เช่น wasu, anucha หรือกดปุ่มด่วนด้านล่าง..." class="bg-transparent text-white placeholder-slate-500 text-xs focus:outline-none flex-1 min-w-[220px] py-1 px-1">
             </div>
             
-            <button type="button" onclick="addRecipientFromInput()" class="px-2.5 py-1 rounded-lg bg-purple-600/30 hover:bg-purple-600 text-purple-200 text-xs font-semibold border border-purple-500/40 hover:border-purple-500 transition shrink-0 self-center">
-              + เพิ่ม
+            <button type="button" onclick="addRecipientFromInput()" class="px-3 py-1.5 rounded-lg bg-purple-600/30 hover:bg-purple-600 text-purple-200 text-xs font-semibold border border-purple-500/40 hover:border-purple-500 transition shrink-0 self-center flex items-center gap-1 shadow-sm">
+              <span>+ เพิ่ม</span>
             </button>
           </div>
-          
-          <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-800/80 text-[11px] text-slate-400 px-1">
+
+          <!-- Autocomplete Dropdown Menu -->
+          <div id="emailAutocompleteDropdown" class="hidden absolute left-12 right-4 top-[54px] z-50 bg-slate-900 border border-purple-500/50 rounded-xl shadow-2xl overflow-hidden backdrop-blur-xl">
+            <div id="emailAutocompleteList" class="max-h-56 overflow-y-auto divide-y divide-slate-800/60 text-xs">
+              <!-- Autocomplete suggestions injected here -->
+            </div>
+          </div>
+
+          <!-- Inline Warning Alert (Non-blocking) -->
+          <div id="emailInputErrorNotice" class="hidden mt-2 text-rose-400 text-[11px] flex items-center gap-1.5 bg-rose-500/10 border border-rose-500/20 px-2.5 py-1 rounded-lg">
+            <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            <span id="emailInputErrorText">รูปแบบอีเมลไม่ถูกต้อง กรุณาระบุ เช่น user@planbmedia.co.th</span>
+          </div>
+
+          <!-- Quick Guideline Pills Bar (รายชื่อแนะนำที่พบบ่อย) -->
+          <div class="mt-2.5 pt-2.5 border-t border-slate-800/80">
+            <div class="flex items-center justify-between text-[11px] mb-1.5">
+              <span class="text-slate-400 flex items-center gap-1 font-medium">
+                <span>💡 รายชื่อแนะนำคลิกเลือกทันที (Quick Add):</span>
+              </span>
+              <button type="button" onclick="resetDefaultRecipientsPrompt()" class="text-slate-400 hover:text-amber-300 underline text-[10px]">
+                🔄 คืนค่าเริ่มต้น (Plan B)
+              </button>
+            </div>
+            <div id="quickRecipientPillsContainer" class="flex flex-wrap items-center gap-1.5">
+              <!-- Rendered dynamically by renderQuickRecipientPills() -->
+            </div>
+          </div>
+
+          <!-- Footer Status -->
+          <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-800/50 text-[11px] text-slate-400 px-0.5">
             <span class="flex items-center gap-1.5">
-              <span>💾 บันทึกรายชื่ออัตโนมัติในเครื่อง (Persistent)</span>
-              <span id="recipientCountBadge" class="px-2 py-0.5 rounded-full bg-slate-800 text-purple-300 font-semibold border border-slate-700">0 รายการ</span>
+              <span>💾 จดจำรายชื่อในเครื่องอัตโนมัติ (Persistent)</span>
+              <span id="recipientCountBadge" class="px-2 py-0.5 rounded-full bg-slate-800 text-purple-300 font-semibold border border-slate-700">0 ท่าน</span>
             </span>
-            <button type="button" onclick="resetDefaultRecipientsPrompt()" class="text-slate-400 hover:text-amber-300 underline text-[10px]">
-              🔄 คืนค่าเริ่มต้น (Plan B)
-            </button>
+            <span class="text-[10px] text-slate-500">กด Enter หรือเครื่องหมายจุลภาค (,) เพื่อเพิ่ม</span>
           </div>
         </div>
 
@@ -7468,8 +7498,23 @@
     // ====================================================
     // GMAIL-STYLE EXECUTIVE EMAIL DIGEST COMPOSER SYSTEM
     // ====================================================
-    const RECIPIENT_STORAGE_KEY = 'STATIC_MEDIA_RECIPIENT_EMAILS_LIST';
-    const DEFAULT_RECIPIENTS = ['wasu.sa@planbmedia.co.th', 'anucha@planbmedia.co.th'];
+    const RECIPIENT_STORAGE_KEY = 'STATIC_MEDIA_RECIPIENT_EMAILS_LIST_V2';
+    
+    // ไกด์ไลน์รายชื่อผู้บริหารและผู้รับหลัก (Address Book)
+    const KNOWN_CONTACTS = [
+      { name: 'คุณวสุ (Wasu)', email: 'wasu.sa@planbmedia.co.th', role: 'Project Lead', initial: 'W', color: 'bg-purple-600/30 text-purple-300 border-purple-500/40' },
+      { name: 'คุณอนุชา (Anucha)', email: 'anucha@planbmedia.co.th', role: 'Executive', initial: 'A', color: 'bg-blue-600/30 text-blue-300 border-blue-500/40' },
+      { name: 'คุณอรฤดี (Ornrudee)', email: 'ornrudee.kr@planbmedia.co.th', role: 'Executive', initial: 'O', color: 'bg-emerald-600/30 text-emerald-300 border-emerald-500/40' },
+      { name: 'คุณณภัทร (Napat)', email: 'napat@planbmedia.co.th', role: 'Management', initial: 'N', color: 'bg-amber-600/30 text-amber-300 border-amber-500/40' }
+    ];
+
+    const DEFAULT_RECIPIENTS = [
+      'wasu.sa@planbmedia.co.th',
+      'anucha@planbmedia.co.th',
+      'ornrudee.kr@planbmedia.co.th',
+      'napat@planbmedia.co.th'
+    ];
+
     let currentRecipientEmails = [];
 
     function loadSavedRecipientEmails() {
@@ -7478,13 +7523,20 @@
         if (raw) {
           const parsed = JSON.parse(raw);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            return parsed.map(e => String(e).trim()).filter(e => e.length > 0 && e.includes('@'));
+            return parsed.map(e => String(e).trim().toLowerCase()).filter(e => e.length > 0 && e.includes('@'));
           }
         }
-        // Fallback to legacy single email
+        // Fallback to legacy single or v1
+        const legacyList = localStorage.getItem('STATIC_MEDIA_RECIPIENT_EMAILS_LIST');
+        if (legacyList) {
+          const parsed = JSON.parse(legacyList);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed.map(e => String(e).trim().toLowerCase()).filter(e => e.includes('@'));
+          }
+        }
         const legacy = localStorage.getItem('STATIC_MEDIA_EXECUTIVE_EMAIL');
         if (legacy && legacy.trim() && legacy.includes('@')) {
-          return [legacy.trim()];
+          return [legacy.trim().toLowerCase()];
         }
       } catch (e) {
         console.warn('Error reading stored recipient emails:', e);
@@ -7495,12 +7547,54 @@
     function saveRecipientEmailsToStorage(emails) {
       try {
         localStorage.setItem(RECIPIENT_STORAGE_KEY, JSON.stringify(emails));
+        localStorage.setItem('STATIC_MEDIA_RECIPIENT_EMAILS_LIST', JSON.stringify(emails));
         if (emails.length > 0) {
           localStorage.setItem('STATIC_MEDIA_EXECUTIVE_EMAIL', emails[0]);
         }
       } catch (e) {
         console.warn('Error saving recipient emails:', e);
       }
+    }
+
+    // แสดงปุ่มลัดรายชื่อผู้บริหารแนะนำ (Quick Guideline Pills)
+    function renderQuickRecipientPills() {
+      const container = document.getElementById('quickRecipientPillsContainer');
+      if (!container) return;
+
+      container.innerHTML = KNOWN_CONTACTS.map(contact => {
+        const isSelected = currentRecipientEmails.includes(contact.email.toLowerCase());
+        const shortName = contact.email.split('@')[0];
+        if (isSelected) {
+          return `
+            <button type="button" onclick="toggleRecipientEmail('${contact.email}')" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-purple-900/40 text-purple-200 border border-purple-500/60 shadow-sm hover:bg-purple-800/50 transition">
+              <span class="w-4 h-4 rounded-full bg-purple-500 text-white flex items-center justify-center text-[10px] font-bold">✓</span>
+              <span>${contact.name}</span>
+              <span class="text-purple-400 text-[10px]">(${shortName})</span>
+            </button>
+          `;
+        } else {
+          return `
+            <button type="button" onclick="toggleRecipientEmail('${contact.email}')" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-900/90 text-slate-300 border border-slate-700/80 hover:border-purple-400 hover:text-white hover:bg-slate-800 transition">
+              <span class="w-4 h-4 rounded-full bg-slate-800 border border-slate-600 text-slate-300 flex items-center justify-center text-[10px] font-bold group-hover:bg-purple-500 group-hover:text-white">+</span>
+              <span>${contact.name}</span>
+              <span class="text-slate-400 text-[10px]">(${shortName})</span>
+            </button>
+          `;
+        }
+      }).join('');
+    }
+
+    function toggleRecipientEmail(email) {
+      const clean = email.trim().toLowerCase();
+      const idx = currentRecipientEmails.indexOf(clean);
+      if (idx >= 0) {
+        currentRecipientEmails.splice(idx, 1);
+      } else {
+        currentRecipientEmails.push(clean);
+      }
+      saveRecipientEmailsToStorage(currentRecipientEmails);
+      renderRecipientChips();
+      hideEmailErrorNotice();
     }
 
     function renderRecipientChips() {
@@ -7511,13 +7605,16 @@
       if (!container || !input) return;
 
       const chipsHtml = currentRecipientEmails.map((email, idx) => {
-        const initial = (email.charAt(0) || 'U').toUpperCase();
+        const found = KNOWN_CONTACTS.find(c => c.email.toLowerCase() === email.toLowerCase());
+        const initial = found ? found.initial : (email.charAt(0) || 'U').toUpperCase();
+        const displayName = found ? found.name : email;
+
         return `
           <span class="inline-flex items-center gap-1.5 pl-1.5 pr-1 py-0.5 rounded-full bg-slate-800 border border-slate-700 hover:border-purple-500/60 text-white text-xs shadow-sm transition group">
             <span class="w-5 h-5 rounded-full bg-purple-600/30 border border-purple-500/40 text-purple-300 flex items-center justify-center font-bold text-[10px] select-none">
               ${initial}
             </span>
-            <span class="text-slate-200 text-[11px] font-medium select-all">${email}</span>
+            <span class="text-slate-200 text-[11px] font-medium select-all" title="${email}">${displayName}</span>
             <button type="button" onclick="removeRecipientEmail(${idx})" class="w-4 h-4 rounded-full flex items-center justify-center text-slate-400 hover:text-rose-400 hover:bg-slate-700/80 transition" title="ลบอีเมลนี้">
               <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
@@ -7536,6 +7633,8 @@
           ? `ส่งอีเมล (${currentRecipientEmails.length} ท่าน)` 
           : 'ส่งอีเมล (Send)';
       }
+
+      renderQuickRecipientPills();
     }
 
     function focusRecipientInput() {
@@ -7543,23 +7642,52 @@
       if (input) input.focus();
     }
 
+    function showEmailErrorNotice(msg) {
+      const notice = document.getElementById('emailInputErrorNotice');
+      const text = document.getElementById('emailInputErrorText');
+      if (notice && text) {
+        text.innerText = msg || 'รูปแบบอีเมลไม่ถูกต้อง กรุณาระบุ เช่น user@planbmedia.co.th';
+        notice.classList.remove('hidden');
+      }
+    }
+
+    function hideEmailErrorNotice() {
+      const notice = document.getElementById('emailInputErrorNotice');
+      if (notice) notice.classList.add('hidden');
+    }
+
     function addRecipientFromInput() {
       const input = document.getElementById('newRecipientEmailInput');
       if (!input) return;
-      const val = input.value.trim();
-      if (!val) return;
+      let rawVal = input.value.trim();
+      if (!rawVal) return;
 
-      // Support comma, semicolon, space separated multiple emails
-      const potentialEmails = val.split(/[,;\s]+/).map(s => s.trim()).filter(Boolean);
+      // ปิดกล่อง Autocomplete
+      closeEmailAutocompleteDropdown();
+
+      // ถ้าระบุชื่อย่อมา เช่น wasu หรือ anucha ให้ต่อท้ายโดเมน @planbmedia.co.th ให้อัตโนมัติทันที
+      if (!rawVal.includes('@') && /^[a-zA-Z0-9._-]+$/.test(rawVal)) {
+        rawVal = rawVal + '@planbmedia.co.th';
+      }
+
+      // รองรับการคั่นด้วยเครื่องหมายจุลภาค คอมม่า หรือเว้นวรรค
+      const potentialEmails = rawVal.split(/[,;\s]+/).map(s => s.trim()).filter(Boolean);
       let addedCount = 0;
+      let invalidEmails = [];
 
       potentialEmails.forEach(email => {
-        const cleanEmail = email.toLowerCase();
-        if (cleanEmail.includes('@') && cleanEmail.includes('.') && cleanEmail.length >= 5) {
+        let cleanEmail = email.toLowerCase();
+        if (!cleanEmail.includes('@') && /^[a-zA-Z0-9._-]+$/.test(cleanEmail)) {
+          cleanEmail = cleanEmail + '@planbmedia.co.th';
+        }
+
+        if (cleanEmail.includes('@') && cleanEmail.includes('.') && cleanEmail.length >= 6) {
           if (!currentRecipientEmails.includes(cleanEmail)) {
             currentRecipientEmails.push(cleanEmail);
             addedCount++;
           }
+        } else {
+          invalidEmails.push(email);
         }
       });
 
@@ -7567,8 +7695,11 @@
         saveRecipientEmailsToStorage(currentRecipientEmails);
         renderRecipientChips();
         input.value = '';
-      } else if (!val.includes('@')) {
-        alert('⚠️ รูปแบบอีเมลไม่ถูกต้อง กรุณาระบุ เช่น user@planbmedia.co.th');
+        hideEmailErrorNotice();
+      }
+
+      if (invalidEmails.length > 0) {
+        showEmailErrorNotice(`⚠️ อีเมลไม่ถูกต้อง: "${invalidEmails.join(', ')}" (เช่น user@planbmedia.co.th)`);
       } else {
         input.value = '';
       }
@@ -7580,15 +7711,106 @@
         currentRecipientEmails.splice(index, 1);
         saveRecipientEmailsToStorage(currentRecipientEmails);
         renderRecipientChips();
+        hideEmailErrorNotice();
       }
     }
 
     function resetDefaultRecipientsPrompt() {
-      if (confirm('ต้องการคืนค่ารายชื่อผู้รับเริ่มต้น (Plan B Media) หรือไม่?')) {
+      if (confirm('ต้องการคืนค่ารายชื่อผู้รับเริ่มต้น (4 ท่านหลัก Plan B Media) หรือไม่?')) {
         currentRecipientEmails = [...DEFAULT_RECIPIENTS];
         saveRecipientEmailsToStorage(currentRecipientEmails);
         renderRecipientChips();
+        hideEmailErrorNotice();
       }
+    }
+
+    // ==========================================
+    // AUTOCOMPLETE DROPDOWN ENGINE (ขณะพิมพ์)
+    // ==========================================
+    function handleRecipientInputTyping(e) {
+      hideEmailErrorNotice();
+      const input = e.target;
+      const query = input.value.trim().toLowerCase();
+      const dropdown = document.getElementById('emailAutocompleteDropdown');
+      const list = document.getElementById('emailAutocompleteList');
+      if (!dropdown || !list) return;
+
+      if (!query) {
+        dropdown.classList.add('hidden');
+        return;
+      }
+
+      // กรองจาก KNOWN_CONTACTS
+      const matches = KNOWN_CONTACTS.filter(c => 
+        c.email.toLowerCase().includes(query) || 
+        c.name.toLowerCase().includes(query)
+      );
+
+      let html = '';
+
+      // แนะนำการเติมโดเมนอัตโนมัติหากยังไม่มี @
+      if (!query.includes('@')) {
+        const autoDomain = `${query}@planbmedia.co.th`;
+        html += `
+          <div onclick="selectAutocompleteEmail('${autoDomain}')" class="px-3.5 py-2 hover:bg-purple-600/20 cursor-pointer flex items-center justify-between transition group bg-slate-900/80">
+            <div class="flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/40 flex items-center justify-center text-[10px] font-bold">✨</span>
+              <span class="text-purple-300 font-medium">เติมโดเมน: <strong>${autoDomain}</strong></span>
+            </div>
+            <span class="text-[10px] text-slate-400 group-hover:text-purple-300">คลิกหรือกด Enter</span>
+          </div>
+        `;
+      }
+
+      // แสดงรายชื่อใน Contact Book
+      matches.forEach(c => {
+        const isAdded = currentRecipientEmails.includes(c.email.toLowerCase());
+        html += `
+          <div onclick="selectAutocompleteEmail('${c.email}')" class="px-3.5 py-2 hover:bg-slate-800 cursor-pointer flex items-center justify-between transition group ${isAdded ? 'opacity-60 bg-slate-950/40' : ''}">
+            <div class="flex items-center gap-2.5">
+              <span class="w-6 h-6 rounded-full ${c.color} flex items-center justify-center text-[10px] font-bold border">
+                ${c.initial}
+              </span>
+              <div>
+                <div class="text-white font-medium text-xs flex items-center gap-1.5">
+                  <span>${c.name}</span>
+                  <span class="text-[10px] text-purple-400 font-normal">(${c.role})</span>
+                </div>
+                <div class="text-slate-400 text-[11px] font-mono">${c.email}</div>
+              </div>
+            </div>
+            <div>
+              ${isAdded ? '<span class="text-[10px] text-emerald-400 font-medium">✓ เพิ่มแล้ว</span>' : '<span class="text-[10px] text-purple-400 font-semibold group-hover:underline">+ เลือก</span>'}
+            </div>
+          </div>
+        `;
+      });
+
+      if (html) {
+        list.innerHTML = html;
+        dropdown.classList.remove('hidden');
+      } else {
+        dropdown.classList.add('hidden');
+      }
+    }
+
+    function selectAutocompleteEmail(email) {
+      const input = document.getElementById('newRecipientEmailInput');
+      const clean = email.trim().toLowerCase();
+      if (!currentRecipientEmails.includes(clean)) {
+        currentRecipientEmails.push(clean);
+        saveRecipientEmailsToStorage(currentRecipientEmails);
+        renderRecipientChips();
+      }
+      if (input) input.value = '';
+      closeEmailAutocompleteDropdown();
+      hideEmailErrorNotice();
+      if (input) input.focus();
+    }
+
+    function closeEmailAutocompleteDropdown() {
+      const dropdown = document.getElementById('emailAutocompleteDropdown');
+      if (dropdown) dropdown.classList.add('hidden');
     }
 
     function openEmailDigestModal() {
@@ -7601,6 +7823,8 @@
 
       currentRecipientEmails = loadSavedRecipientEmails();
       renderRecipientChips();
+      hideEmailErrorNotice();
+      closeEmailAutocompleteDropdown();
 
       const modal = document.getElementById('emailDigestModal');
       if (modal) {
@@ -7611,6 +7835,7 @@
       const input = document.getElementById('newRecipientEmailInput');
       if (input && !input.dataset.listenerAttached) {
         input.dataset.listenerAttached = 'true';
+        input.addEventListener('input', handleRecipientInputTyping);
         input.addEventListener('keydown', (e) => {
           if (e.key === 'Enter' || e.key === ',') {
             e.preventDefault();
@@ -7618,8 +7843,15 @@
           } else if (e.key === 'Backspace' && input.value === '' && currentRecipientEmails.length > 0) {
             removeRecipientEmail(currentRecipientEmails.length - 1);
           } else if (e.key === 'Escape') {
-            const dropdown = document.getElementById('emailAutocompleteDropdown');
-            if (dropdown) dropdown.classList.add('hidden');
+            closeEmailAutocompleteDropdown();
+          }
+        });
+
+        document.addEventListener('click', (e) => {
+          const dropdown = document.getElementById('emailAutocompleteDropdown');
+          const inputEl = document.getElementById('newRecipientEmailInput');
+          if (dropdown && !dropdown.contains(e.target) && e.target !== inputEl) {
+            dropdown.classList.add('hidden');
           }
         });
       }
@@ -7700,7 +7932,7 @@
       }
 
       if (currentRecipientEmails.length === 0) {
-        alert('⚠️ กรุณาระบุอีเมลผู้รับอย่างน้อย 1 ท่านครับ');
+        showEmailErrorNotice('⚠️ กรุณาระบุอีเมลผู้รับอย่างน้อย 1 ท่านครับ');
         focusRecipientInput();
         return;
       }
