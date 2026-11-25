@@ -7300,8 +7300,9 @@
     const LOCAL_HISTORY_LOGS_KEY = 'media_relocation_history_logs_v1';
 
     function getGasWebhookUrl() {
+      // Force always to the official working Version 7 URL
       const stored = (localStorage.getItem(GAS_URL_STORAGE_KEY) || '').trim();
-      if (!stored || stored.includes('AKfycby1OdXGGLp7ms15oC0qPS4BhI3MEqY8CzLdf45z') || stored.includes('AKfycbwudG7atsOfUhYX2zC3obQPVEeiosYwjphr5WdrBTRdmF0yW0bRX7tpQPAhCa6s2YxC')) {
+      if (!stored || !stored.includes('AKfycbwUarQr')) {
         localStorage.setItem(GAS_URL_STORAGE_KEY, DEFAULT_GAS_WEBHOOK_URL);
         return DEFAULT_GAS_WEBHOOK_URL;
       }
