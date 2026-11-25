@@ -604,7 +604,7 @@ function sendExecutiveEmailReport(targetEmails, isTest = false) {
           </table>
 
           <!-- Action Button -->
-          <a href="https://media-relocation-tracker.netlify.app" class="btn-cta">
+          <a href="https://wasusangthong-sketch.github.io/media_relocation_dist/" class="btn-cta">
             🌐 เข้าสู่ระบบ Live Executive Dashboard
           </a>
         </div>
@@ -644,7 +644,7 @@ function sendExecutiveEmailReport(targetEmails, isTest = false) {
     timestamp,
     'EMAIL_EXECUTIVE_DIGEST',
     'Auto_Reporter (L4/L5)',
-    'ALL_75_SIGNS',
+    'ALL_76_SIGNS',
     `ส่งรายงานสรุปผู้บริหารแบบแยกรายบุคคล (Individual Dispatch) ถึง ${sentRecipients.length} ท่าน (${recipientSummary}) สำเร็จ`,
     totalSigns,
     JSON.stringify({ sentRecipients, failedRecipients, pendingCount: pendingSigns, totalCost: totalDirectCost })

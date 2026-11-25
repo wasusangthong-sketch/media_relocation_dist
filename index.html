@@ -2235,7 +2235,7 @@
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 py-1">
             <div class="bg-slate-900/90 border border-slate-800/80 rounded-lg p-2 text-center">
               <span class="text-[10px] text-slate-400 block">ป้ายทั้งหมด</span>
-              <strong class="text-sm font-bold text-white">75</strong>
+              <strong class="text-sm font-bold text-white">76</strong>
             </div>
             <div class="bg-slate-900/90 border border-slate-800/80 rounded-lg p-2 text-center">
               <span class="text-[10px] text-slate-400 block">รื้อย้ายแล้ว</span>
@@ -7741,7 +7741,7 @@
         if (result && (result.sentRecipients || (result.message && result.message.includes('ส่งรายงาน')) || result.recipient)) {
           const sentCount = (result.sentRecipients && result.sentRecipients.length) || currentRecipientEmails.length;
           alert(`✅ ส่งรายงานสรุปผู้บริหารสำเร็จ!\n\n📧 ส่งแบบแยกรายบุคคล (Individual Dispatch) เรียบร้อยถึง ${sentCount} ท่าน:\n${recipientListText}\n\n(บันทึกประวัติลงแท็บ History_Log บน Google Sheets เรียบร้อย)`);
-          appendLocalAndCloudHistoryLog('EMAIL_EXECUTIVE_DIGEST', 'ALL_75_SIGNS', `ส่งรายงานสรุปผู้บริหารไปยัง ${sentCount} ท่าน (${recipientListText})`);
+          appendLocalAndCloudHistoryLog('EMAIL_EXECUTIVE_DIGEST', 'ALL_76_SIGNS', `ส่งรายงานสรุปผู้บริหารไปยัง ${sentCount} ท่าน (${recipientListText})`);
         } else if (result && result.loggedAt && !result.sentRecipients) {
           alert('⚠️ Google Apps Script บนคลาวด์ยังรันเวอร์ชันเก่าอยู่ครับ!\n\nเนื่องจากระบบ Web App ของ Google จะยังไม่อัปเดตจนกว่าจะกด New Version:\n\n1. คัดลอกโค้ดจาก google_apps_script_level4.gs ไปวางใน Apps Script แล้วกด Save\n2. ไปที่เมนู "การทำให้ใช้งานได้" (Deploy) > "จัดการการทำให้ใช้งานได้" (Manage deployments)\n3. กดไอคอนดินสอ (แก้ไข) > เลือกเวอร์ชันเป็น "เวอร์ชันใหม่" (New version) > กด Deploy\n\nเมื่อ Deploy New Version เสร็จแล้ว กดส่งอีกครั้งอีเมลจะออกทันทีครับ');
         } else {
